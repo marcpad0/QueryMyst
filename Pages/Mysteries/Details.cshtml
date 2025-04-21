@@ -1,0 +1,210 @@
+@page "{id:int}"
+@model QueryMyst.Pages.Mysteries.DetailsModel
+@{
+    ViewData["Title"] = $"Mystery: {Model.Mystery?.Title}";
+}
+
+<div class="container mt-4">
+    @if (Model.Mystery != null && Model.Mystery.Details != null)
+    {
+        <div class="row">
+            <!-- Left Column: Mystery Info -->
+            <div class="col-lg-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <h4 class="mb-0"><i class="bi bi-book-half me-2"></i> Case File: @Model.Mystery.Title</h4>
+                    </div>
+                    <div class="card-body">
+                        <span class="badge @Model.Mystery.DifficultyClass mb-2">@Model.Mystery.Difficulty</span>
+                        <span class="badge bg-secondary mb-2">@Model.Mystery.Category</span>
+
+                        <h5 class="mt-3">Description</h5>
+                        <p>@Model.Mystery.Details.FullDescription</p>
+
+                        <h5 class="mt-3">Database Schema</h5>
+                        <pre><code class="sql">@Model.Mystery.Details.DatabaseSchema</code></pre>
+
+                        <h5 class="mt-3">Sample Data</h5>
+                        <pre><code class="sql">@Model.Mystery.Details.SampleData</code></pre>
+
+                        <h5 class="mt-3">Required Skills</h5>
+                        <div>
+                            @if (Model.Mystery.RequiredSkills != null)
+                            {
+                                @foreach (var skill in Model.Mystery.RequiredSkills)
+                                {
+                                    <span class="skill-tag">@skill</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">No specific skills listed.</span>
+                            }
+                        </div>
+
+                        <div class="accordion mt-4" id="hintsAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="hintsHeading">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHints" aria-expanded="false" aria-controls="collapseHints">
+                                        <i class="bi bi-lightbulb me-2"></i> Need a Hint?
+                                    </button>
+                                </h2>
+                                <div id="collapseHints" class="accordion-collapse collapse" aria-labelledby="hintsHeading" data-bs-parent="#hintsAccordion">
+                                    <div class="accordion-body">
+                                        @if (!string.IsNullOrWhiteSpace(Model.Mystery.Details.HintText))
+                                        {
+                                            @Model.Mystery.Details.HintText
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted">No hints available for this mystery.</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="cluesHeading">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClues" aria-expanded="false" aria-controls="collapseClues">
+                                        <i class="bi bi-signpost-split me-2"></i> False Clues
+                                    </button>
+                                </h2>
+                                <div id="collapseClues" class="accordion-collapse collapse" aria-labelledby="cluesHeading" data-bs-parent="#hintsAccordion">
+                                    <div class="accordion-body">
+                                         @if (!string.IsNullOrWhiteSpace(Model.Mystery.Details.FalseClues))
+                                        {
+                                            @Model.Mystery.Details.FalseClues
+                                        }
+                                        else
+                                        {
+                                            <p class="text-muted">No false clues listed for this mystery.</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: SQL Editor & Results -->
+            <div class="col-lg-7">
+                <div class="card shadow-sm mb-4">
+                     <div class="card-header bg-gradient-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-terminal me-2"></i> SQL Query Editor</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                            <div class="mb-3">
+                                <label for="sqlQueryArea" class="form-label">Enter your SQL query:</label>
+                                <textarea asp-for="UserQuery" class="form-control" id="sqlQueryArea" rows="10" placeholder="SELECT column FROM table WHERE condition;"></textarea>
+                                <span asp-validation-for="UserQuery" class="text-danger"></span>
+                            </div>
+                            <button type="submit" class="btn btn-success"><i class="bi bi-play-fill me-1"></i> Run Query</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Area -->
+                @if (Model.IsPost) // Only show results section after a POST request
+                {
+                    <div class="card shadow-sm">
+                         <div class="card-header @(Model.IsCorrectSolution ? "bg-gradient-success" : (string.IsNullOrEmpty(Model.ErrorMessage) ? "bg-gradient-info" : "bg-gradient-danger")) text-white">
+                            <h5 class="mb-0">
+                                @if (Model.IsCorrectSolution)
+                                {
+                                    <i class="bi bi-check-circle-fill me-2"></i> <span>Correct Solution!</span>
+                                }
+                                else if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                                {
+                                     <i class="bi bi-exclamation-triangle-fill me-2"></i> <span>Error</span>
+                                }
+                                else
+                                {
+                                     <i class="bi bi-search me-2"></i> <span>Query Results</span>
+                                }
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.IsCorrectSolution)
+                            {
+                                <div class="alert alert-success" role="alert">
+                                    <strong>Congratulations!</strong> You found the correct solution.
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.QueryResult))
+                            {
+                                <div>
+                                    <strong>Your Query Returned:</strong>
+                                    <pre><code class="result">@Model.QueryResult</code></pre>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                            {
+                                 <div class="alert alert-danger" role="alert">
+                                    <strong>Error:</strong>
+                                    <pre><code class="error">@Model.ErrorMessage</code></pre>
+                                </div>
+                            }
+                            @if (!Model.IsCorrectSolution && string.IsNullOrEmpty(Model.QueryResult) && string.IsNullOrEmpty(Model.ErrorMessage))
+                            {
+                                 <p class="text-muted">Your query executed but returned no results or an unknown status.</p>
+                            }
+                        </div>
+                    </div>
+                }
+            </div> <!-- End Right Column -->
+        </div> <!-- End Row -->
+    }
+    else
+    {
+        <div class="alert alert-danger" role="alert">
+            Mystery not found or details are missing. Please go back to the <a href="/Mysteries">Mysteries list</a>.
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <style>
+        /* Basic styling for code blocks */
+        pre code {
+            display: block;
+            padding: 1em;
+            background-color: #f8f9fa; /* Light background */
+            border: 1px solid #dee2e6; /* Subtle border */
+            border-radius: 0.25rem;
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap; /* Wrap long lines */
+            word-break: break-all;
+        }
+        pre code.sql { /* Specific style for SQL schema/data */
+             background-color: #eef;
+        }
+         pre code.result, pre code.error { /* Specific style for results/errors */
+             background-color: #f1f1f1;
+             max-height: 300px; /* Limit result height */
+             overflow-y: auto; /* Add scroll if needed */
+        }
+        .skill-tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.25em 0.6em;
+            margin-right: 0.5em;
+            margin-bottom: 0.5em;
+            border-radius: 0.25rem;
+            font-size: 0.85em;
+        }
+        /* Style for accordion buttons */
+        .accordion-button:not(.collapsed) {
+            color: var(--bs-primary);
+            background-color: var(--bs-primary-bg-subtle);
+        }
+    </style>
+    <!-- Optional: Add syntax highlighting library like highlight.js -->
+    @* <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css"> *@
+    @* <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script> *@
+    @* <script>hljs.highlightAll();</script> *@
+}

@@ -1,0 +1,137 @@
+﻿@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Your Dashboard";
+}
+
+<div class="hero-section dashboard-hero">
+    <div class="hero-content">
+        <h1 class="display-5 fw-bold">Welcome, @User.Identity?.Name!</h1>
+        <p class="lead">Ready to solve some SQL mysteries?</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-lightning-charge-fill me-2"></i> Your Progress</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row stats-row text-center">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="stat-item">
+                                <div class="stat-number">3</div>
+                                <div class="stat-label">Mysteries Solved</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="stat-item">
+                                <div class="stat-number">42</div>
+                                <div class="stat-label">SQL Queries Written</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-item">
+                                <div class="stat-number">4</div>
+                                <div class="stat-label">Badges Earned</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-section mt-4">
+                        <label class="form-label d-flex justify-content-between">
+                            <span>Overall Progress</span>
+                            <span>30%</span>
+                        </label>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-trophy-fill me-2"></i> Recent Achievements</h5>
+                </div>
+                <div class="card-body">
+                    <div class="achievement-list">
+                        <div class="achievement-item">
+                            <div class="achievement-icon">🔎</div>
+                            <div class="achievement-content">
+                                <h5 class="achievement-title">First Mystery Solved</h5>
+                                <p class="achievement-desc">You solved your first SQL mystery!</p>
+                            </div>
+                            <div class="achievement-date">3 days ago</div>
+                        </div>
+
+                        <div class="achievement-item">
+                            <div class="achievement-icon">💡</div>
+                            <div class="achievement-content">
+                                <h5 class="achievement-title">Query Master</h5>
+                                <p class="achievement-desc">Wrote 10 successful SQL queries</p>
+                            </div>
+                            <div class="achievement-date">1 week ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-star-fill me-2"></i> Featured Mystery</h5>
+                </div>
+                <div class="card-body">
+                    <div class="featured-mystery">
+                        <div class="mystery-difficulty">
+                            <span class="badge bg-warning">Intermediate</span>
+                        </div>
+                        <h4 class="mystery-title">The Vanishing Inventory</h4>
+                        <p class="mystery-desc">Products are disappearing from a warehouse database. Can you find the pattern and identify the culprit?</p>
+                        <div class="d-grid">
+                            <a href="/mysteries/vanishing-inventory" class="btn btn-primary">Solve This Mystery</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i> Leaderboard</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="rank me-3">1</div>
+                                <div>SQLWizard</div>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">1240</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="rank me-3">2</div>
+                                <div>DataDetective</div>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">980</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center active">
+                            <div class="d-flex align-items-center">
+                                <div class="rank me-3">15</div>
+                                <div>You</div>
+                            </div>
+                            <span class="badge bg-white text-primary rounded-pill">340</span>
+                        </li>
+                    </ul>
+                    <div class="card-footer text-center">
+                        <a href="/leaderboard" class="text-decoration-none">View full leaderboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,125 @@
+﻿@page
+@model QueryMyst.Pages.MysteriesModel
+@{
+    ViewData["Title"] = "Mysteries - QueryMyst";
+}
+
+<div class="hero-section mystery-hero">
+    <div class="hero-content">
+        <div class="logo-container">
+            <span class="logo-icon">🔎</span>
+            <h1 class="page-title">SQL Mysteries</h1>
+        </div>
+        <p class="tagline">Challenging enigmas awaiting your SQL expertise</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card main-card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Available Mysteries</h2>
+                    <p class="text-center lead mb-5">Select a mystery to begin your investigation. Each case has its unique database schema and requires specific SQL skills to solve.</p>
+
+                    <div class="mystery-filters mb-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select class="form-select" aria-label="Difficulty filter">
+                                    <option selected>All Difficulties</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                    <option value="expert">Expert</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" aria-label="Category filter">
+                                    <option selected>All Categories</option>
+                                    <option value="crime">Crime Scene</option>
+                                    <option value="business">Business Analytics</option>
+                                    <option value="historical">Historical Mystery</option>
+                                    <option value="scientific">Scientific Puzzle</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Search mysteries..." aria-label="Search mysteries">
+                                    <button class="btn btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mystery-grid">
+                        @foreach (var mystery in Model.Mysteries)
+                        {
+                            <div class="mystery-card">
+                                <div class="difficulty-badge @mystery.DifficultyClass">@mystery.Difficulty</div>
+                                <div class="mystery-icon">@Html.Raw(mystery.Icon)</div>
+                                <h3 class="mystery-title">@mystery.Title</h3>
+                                <p class="mystery-description">@mystery.Description</p>
+                                <div class="mystery-meta">
+                                    <span class="badge bg-secondary">@mystery.Category</span>
+                                    <span class="solved-count"><i class="bi bi-people-fill"></i> @Model.MysterySolvedCounts[mystery.Id] solved</span>
+                                </div>
+                                <div class="skills-required">
+                                    @foreach (var skill in mystery.RequiredSkills)
+                                    {
+                                        <span class="skill-tag">@skill</span>
+                                    }
+                                </div>
+                                <a href="/Mysteries/Details/@mystery.Id" class="btn btn-primary btn-block mt-3">Begin Investigation</a>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="pagination-container mt-4">
+                        <nav aria-label="Mystery pagination">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                                </li>
+                                <li class="page-item active" aria-current="page">
+                                    <a class="page-link" href="#">1</a>
+                                </li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-10">
+            <div class="card main-card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Mystery Ranking System</h2>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="ranking-card">
+                                <h4><i class="bi bi-trophy-fill"></i> Global Leaderboard</h4>
+                                <p>Compete with SQL detectives worldwide and see who can solve mysteries the fastest with the most efficient queries.</p>
+                                <a href="/Leaderboard" class="btn btn-outline-primary">View Leaderboard</a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ranking-card">
+                                <h4><i class="bi bi-award-fill"></i> Achievement Badges</h4>
+                                <p>Earn special badges for solving complex mysteries, using advanced SQL techniques, or completing challenge series.</p>
+                                <a href="/Achievements" class="btn btn-outline-primary">View Badges</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

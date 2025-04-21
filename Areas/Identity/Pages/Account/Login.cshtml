@@ -1,0 +1,69 @@
+﻿@page
+@model QueryMyst.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign in to QueryMyst";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow auth-card">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <span class="auth-icon">🔍</span>
+                        <h1 class="h3">Welcome back!</h1>
+                        <p class="text-muted">Sign in to continue solving SQL mysteries</p>
+                    </div>
+
+                    <form id="account" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-center" role="alert"></div>
+
+                        <!-- Email Input -->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control rounded-pill" autocomplete="username" placeholder="name@example.com" />
+                            <label asp-for="Input.Email">Email</label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- Password Input -->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Password" class="form-control rounded-pill" autocomplete="current-password" placeholder="password" />
+                            <label asp-for="Input.Password">Password</label>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+
+                        <!-- Remember Me Checkbox -->
+                        <div class="checkbox mb-3">
+                            <label asp-for="Input.RememberMe" class="form-label">
+                                <input class="form-check-input" asp-for="Input.RememberMe" />
+                                Remember me
+                            </label>
+                        </div>
+
+                        <!-- Hidden ReturnUrl Field -->
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 mb-3">
+                            <button id="login-submit" type="submit" class="btn btn-primary btn-lg rounded-pill">Sign in</button>
+                        </div>
+
+                        <!-- Links -->
+                        <div class="text-center">
+                            <p>
+                                <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                            </p>
+                            <p>
+                                Don't have an account? <a asp-page="./Register">Sign up</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
