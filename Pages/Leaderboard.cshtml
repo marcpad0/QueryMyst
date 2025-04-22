@@ -1,0 +1,76 @@
+@page
+@model QueryMyst.Pages.LeaderboardModel
+@{
+    ViewData["Title"] = "Leaderboard";
+}
+
+<div class="hero-section dashboard-hero">
+    <div class="hero-content">
+        <h1 class="display-5 fw-bold"><i class="bi bi-trophy-fill me-2"></i> Leaderboard</h1>
+        <p class="lead">See how you rank against other SQL detectives!</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">Top Solvers</h5>
+                </div>
+                @if (Model.Leaderboard.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="text-center">Rank</th>
+                                    <th scope="col">User</th>
+                                    <th scope="col" class="text-center">Mysteries Solved</th>
+                                    @* Add more columns later if needed (e.g., Avg Attempts) *@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var entry in Model.Leaderboard)
+                                {
+                                    <tr class="@(entry.UserName == User.Identity.Name ? "table-info" : "")">
+                                        <td class="text-center fw-bold">@entry.Rank</td>
+                                        <td>
+                                            <i class="bi bi-person-circle me-2"></i>
+                                            @entry.UserName
+                                            @if (entry.UserName == User.Identity.Name)
+                                            {
+                                                <span class="badge bg-success ms-2">You</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">@entry.SolvedCount</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-body text-center">
+                        <p class="text-muted">The leaderboard is currently empty. Be the first to solve a mystery!</p>
+                        <a asp-page="/Mysteries" class="btn btn-primary">View Mysteries</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .table-info { /* Custom highlight for the current user */
+            --bs-table-bg: #cfe2ff;
+            --bs-table-striped-bg: #c5d7f2;
+            font-weight: bold;
+        }
+        .table th {
+             white-space: nowrap;
+        }
+    </style>
+}
