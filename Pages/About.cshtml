@@ -1,0 +1,61 @@
+@page
+@model QueryMyst.Pages.AboutModel
+@{
+    ViewData["Title"] = "About QueryMyst";
+}
+
+<div class="hero-section about-hero">
+    <div class="hero-content">
+        <h1 class="display-5 fw-bold"><i class="bi bi-info-circle-fill me-2"></i> About QueryMyst</h1>
+        <p class="lead">Learn more about the SQL puzzle adventure.</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3">What is QueryMyst?</h2>
+                    <p>QueryMyst is an interactive platform designed to help you practice and improve your SQL skills in a fun and engaging way. Instead of dry exercises, you'll solve intriguing mysteries by querying unique databases tailored to each challenge.</p>
+                    <p>Each mystery presents a scenario and a database. Your mission, should you choose to accept it, is to write the correct SQL query to uncover the solution hidden within the data.</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                 <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3">How It Works</h2>
+                    <ol class="list-group list-group-numbered">
+                        <li class="list-group-item border-0 ps-0"><strong>Browse Mysteries:</strong> Explore a collection of unique challenges with varying difficulties and topics.</li>
+                        <li class="list-group-item border-0 ps-0"><strong>Examine the Case:</strong> Read the mystery description, understand the database schema, and look at sample data.</li>
+                        <li class="list-group-item border-0 ps-0"><strong>Write Your Query:</strong> Use the provided SQL editor to craft your query based on the clues.</li>
+                        <li class="list-group-item border-0 ps-0"><strong>Submit & Solve:</strong> Run your query against the mystery's database. If your results match the expected solution, you've cracked the case!</li>
+                        <li class="list-group-item border-0 ps-0"><strong>Climb the Ranks:</strong> Solve more mysteries to improve your standing on the leaderboard.</li>
+                    </ol>
+                 </div>
+            </div>
+
+             <div class="card shadow-sm">
+                 <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3">Our Goal</h2>
+                    <p>We aim to make learning SQL less intimidating and more enjoyable. Whether you're a student just starting, a developer brushing up on database skills, or just someone who loves puzzles, QueryMyst offers a unique way to test your logical thinking and SQL prowess.</p>
+                    <p>Happy Querying!</p>
+                 </div>
+             </div>
+        </div>
+    </div>
+</div>
+
+@* Optional: Add specific styles if needed *@
+@* @section Styles {
+    <style>
+        .about-hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/images/about-background.jpg'); /* Add a relevant background image */
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 4rem 0;
+        }
+    </style>
+} *@
