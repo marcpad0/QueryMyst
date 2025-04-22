@@ -181,7 +181,7 @@ namespace QueryMyst.Pages.Mysteries
                 TempData["SuccessMessage"] = $"Mystery '{mystery.Title}' created successfully!";
 
                 // Redirect to the list page after successful creation
-                return RedirectToPage("./Index");
+                return RedirectToPage("/Mysteries"); // Corrected path: Use absolute path from Pages root
             }
             catch (DbUpdateException dbEx) // Catch specific DB errors
             {
