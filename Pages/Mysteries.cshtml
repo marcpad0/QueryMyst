@@ -22,58 +22,69 @@
                     <h2 class="text-center mb-4">Available Mysteries</h2>
                     <p class="text-center lead mb-5">Select a mystery to begin your investigation. Each case has its unique database schema and requires specific SQL skills to solve.</p>
 
-                    <div class="mystery-filters mb-4">
-                        <div class="row">
+                    <!-- Wrap filters in a form -->
+                    <form method="get" class="mystery-filters mb-4">
+                        <div class="row g-3">
                             <div class="col-md-4">
-                                <select class="form-select" aria-label="Difficulty filter">
-                                    <option selected>All Difficulties</option>
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="advanced">Advanced</option>
-                                    <option value="expert">Expert</option>
+                                <!-- Add name attribute and populate options -->
+                                <select name="SelectedDifficulty" class="form-select" aria-label="Difficulty filter" asp-for="SelectedDifficulty" asp-items="@(new SelectList(Model.AvailableDifficulties))">
+                                    <option value="">All Difficulties</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <select class="form-select" aria-label="Category filter">
-                                    <option selected>All Categories</option>
-                                    <option value="crime">Crime Scene</option>
-                                    <option value="business">Business Analytics</option>
-                                    <option value="historical">Historical Mystery</option>
-                                    <option value="scientific">Scientific Puzzle</option>
+                                <!-- Add name attribute and populate options -->
+                                <select name="SelectedCategory" class="form-select" aria-label="Category filter" asp-for="SelectedCategory" asp-items="@(new SelectList(Model.AvailableCategories))">
+                                    <option value="">All Categories</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Search mysteries..." aria-label="Search mysteries">
-                                    <button class="btn btn-outline-secondary" type="button"><i class="bi bi-search"></i></button>
+                                    <!-- Add name attribute and bind value -->
+                                    <input type="text" name="SearchTerm" class="form-control" placeholder="Search mysteries..." aria-label="Search mysteries" asp-for="SearchTerm">
+                                    <!-- Change button type to submit -->
+                                    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-search"></i></button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </form>
 
                     <div class="mystery-grid">
-                        @foreach (var mystery in Model.Mysteries)
+                        @if (Model.Mysteries.Any())
                         {
-                            <div class="mystery-card">
-                                <div class="difficulty-badge @mystery.DifficultyClass">@mystery.Difficulty</div>
-                                <div class="mystery-icon">@Html.Raw(mystery.Icon)</div>
-                                <h3 class="mystery-title">@mystery.Title</h3>
-                                <p class="mystery-description">@mystery.Description</p>
-                                <div class="mystery-meta">
-                                    <span class="badge bg-secondary">@mystery.Category</span>
-                                    <span class="solved-count"><i class="bi bi-people-fill"></i> @Model.MysterySolvedCounts[mystery.Id] solved</span>
+                            @foreach (var mystery in Model.Mysteries)
+                            {
+                                <div class="mystery-card">
+                                    <div class="difficulty-badge @mystery.DifficultyClass">@mystery.Difficulty</div>
+                                    <div class="mystery-icon">@Html.Raw(mystery.Icon)</div>
+                                    <h3 class="mystery-title">@mystery.Title</h3>
+                                    <p class="mystery-description">@mystery.Description</p>
+                                    <div class="mystery-meta">
+                                        <span class="badge bg-secondary">@mystery.Category</span>
+                                        @* Ensure MysterySolvedCounts contains the key before accessing *@
+                                        <span class="solved-count"><i class="bi bi-people-fill"></i> @(Model.MysterySolvedCounts.ContainsKey(mystery.Id) ? Model.MysterySolvedCounts[mystery.Id] : 0) solved</span>
+                                    </div>
+                                    <div class="skills-required">
+                                        @if (mystery.RequiredSkills != null)
+                                        {
+                                            @foreach (var skill in mystery.RequiredSkills)
+                                            {
+                                                <span class="skill-tag">@skill</span>
+                                            }
+                                        }
+                                    </div>
+                                    <a href="/Mysteries/Details/@mystery.Id" class="btn btn-primary btn-block mt-3">Begin Investigation</a>
                                 </div>
-                                <div class="skills-required">
-                                    @foreach (var skill in mystery.RequiredSkills)
-                                    {
-                                        <span class="skill-tag">@skill</span>
-                                    }
-                                </div>
-                                <a href="/Mysteries/Details/@mystery.Id" class="btn btn-primary btn-block mt-3">Begin Investigation</a>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12 text-center text-muted mt-4">
+                                <p>No mysteries found matching your criteria.</p>
                             </div>
                         }
                     </div>
 
+                    @* Keep pagination static for now, implementing dynamic pagination requires more effort *@
                     <div class="pagination-container mt-4">
                         <nav aria-label="Mystery pagination">
                             <ul class="pagination justify-content-center">
