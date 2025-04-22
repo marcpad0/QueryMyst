@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace QueryMyst.Migrations
 {
+    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -46,25 +48,6 @@ namespace QueryMyst.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Mysteries",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Title = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    Difficulty = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
-                    DifficultyClass = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Category = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Icon = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    RequiredSkills = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Mysteries", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -174,6 +157,32 @@ namespace QueryMyst.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Mysteries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
+                    Difficulty = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    DifficultyClass = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Category = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Icon = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    CreatorId = table.Column<string>(type: "TEXT", nullable: false),
+                    RequiredSkills = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Mysteries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Mysteries_AspNetUsers_CreatorId",
+                        column: x => x.CreatorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MysteryDetails",
                 columns: table => new
                 {
@@ -267,6 +276,11 @@ namespace QueryMyst.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Mysteries_CreatorId",
+                table: "Mysteries",
+                column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MysteryDetails_MysteryId",
                 table: "MysteryDetails",
                 column: "MysteryId",
@@ -283,6 +297,7 @@ namespace QueryMyst.Migrations
                 column: "UserId");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
@@ -310,10 +325,10 @@ namespace QueryMyst.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Mysteries");
 
             migrationBuilder.DropTable(
-                name: "Mysteries");
+                name: "AspNetUsers");
         }
     }
 }

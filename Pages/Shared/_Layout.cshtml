@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -27,12 +31,24 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Index"><i class="bi bi-house-door me-1"></i> Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Mysteries"><i class="bi bi-puzzle me-1"></i> Mysteries</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Leaderboard"><i class="bi bi-trophy me-1"></i> Leaderboard</a>
-                        </li>
+                        @if (SignInManager.IsSignedIn(User)) // Check if user is logged in
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Mysteries"><i class="bi bi-puzzle me-1"></i> Mysteries</a>
+                            </li>
+                        }
+                        @if (SignInManager.IsSignedIn(User)) // Check if user is logged in
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Mysteries/Create"><i class="bi bi-plus-square me-1"></i> Create Mystery</a>
+                            </li>
+                        }
+                        @if (SignInManager.IsSignedIn(User)) // Check if user is logged in
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Leaderboard"><i class="bi bi-trophy me-1"></i> Leaderboard</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/About"><i class="bi bi-info-circle me-1"></i> About</a>
                         </li>
@@ -44,6 +60,16 @@
     </header>
 
     <main role="main">
+        @* Add TempData display for success messages *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
         @RenderBody()
     </main>
 
@@ -54,11 +80,11 @@
             </div>
             <p>Solve enigmas with SQL queries and become a database detective</p>
             <div class="mb-2">
-                <a href="#" class="text-decoration-none me-3">Privacy</a>
+                <a asp-page="/Privacy" class="text-decoration-none me-3">Privacy</a> @* Link to actual Privacy page *@
                 <a href="#" class="text-decoration-none me-3">Terms</a>
                 <a href="#" class="text-decoration-none">Contact</a>
             </div>
-            <p>&copy; 2025 - QueryMyst - All rights reserved</p>
+            <p>&copy; @DateTime.Now.Year - QueryMyst - All rights reserved</p> @* Use dynamic year *@
         </div>
     </footer>
 

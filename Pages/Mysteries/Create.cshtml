@@ -1,0 +1,167 @@
+@page
+@model QueryMyst.Pages.Mysteries.CreateModel
+@{
+    ViewData["Title"] = "Create New Mystery";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <h1 class="mb-4 text-center"><i class="bi bi-plus-square-dotted me-2"></i> Create New Mystery</h1>
+
+            <div class="card shadow-lg border-light">
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" id="createMysteryForm" novalidate>
+                        @* Display model-level errors (e.g., database save errors) *@
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        @* Section 1: Mystery Overview *@
+                        <fieldset class="mb-4">
+                            <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-card-heading me-2"></i>Mystery Overview</legend>
+                            <div class="mb-3">
+                                <label asp-for="Input.Title" class="form-label fw-bold"></label>
+                                <input asp-for="Input.Title" class="form-control" placeholder="e.g., The Case of the Duplicate Orders" required />
+                                <span asp-validation-for="Input.Title" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Input.Description" class="form-label fw-bold"></label>
+                                <textarea asp-for="Input.Description" class="form-control" rows="3" placeholder="A brief summary of the mystery for the listing page..."></textarea>
+                                <span asp-validation-for="Input.Description" class="text-danger small"></span>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Input.Difficulty" class="form-label fw-bold"></label>
+                                    <select asp-for="Input.Difficulty" asp-items="@(new SelectList(Model.DifficultyOptions))" class="form-select" required></select>
+                                    <span asp-validation-for="Input.Difficulty" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="Input.Category" class="form-label fw-bold"></label>
+                                    <select asp-for="Input.Category" asp-items="@(new SelectList(Model.CategoryOptions))" class="form-select" required>
+                                        <option value="">-- Select Category --</option>
+                                    </select>
+                                    <span asp-validation-for="Input.Category" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Input.RequiredSkillsInput" class="form-label fw-bold"></label>
+                                    <input asp-for="Input.RequiredSkillsInput" class="form-control" placeholder="e.g., SELECT, JOIN, WHERE, GROUP BY" />
+                                    <div class="form-text">Enter skills separated by commas.</div>
+                                    <span asp-validation-for="Input.RequiredSkillsInput" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="Input.Icon" class="form-label fw-bold"></label>
+                                    <input asp-for="Input.Icon" class="form-control" placeholder="<i class='bi bi-search'></i>" />
+                                    <div class="form-text">Paste HTML for an icon (e.g., from Bootstrap Icons).</div>
+                                    <span asp-validation-for="Input.Icon" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        @* Section 2: Mystery Details & SQL *@
+                        <fieldset class="mb-4">
+                            <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-file-earmark-text me-2"></i>Mystery Details</legend>
+                            <div class="mb-3">
+                                <label asp-for="Input.FullDescription" class="form-label fw-bold"></label>
+                                <textarea asp-for="Input.FullDescription" class="form-control" rows="5" placeholder="Provide the full background story, context, and the specific question the user needs to answer..." required></textarea>
+                                <span asp-validation-for="Input.FullDescription" class="text-danger small"></span>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                             <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-database me-2"></i>Database & Solution</legend>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label asp-for="Input.DatabaseSchema" class="form-label fw-bold"></label>
+                                    <textarea asp-for="Input.DatabaseSchema" class="form-control font-monospace code-editor" rows="10" placeholder="CREATE TABLE TableName (...);&#10;CREATE TABLE AnotherTable (...);" required></textarea>
+                                    <span asp-validation-for="Input.DatabaseSchema" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="Input.SampleData" class="form-label fw-bold"></label>
+                                    <textarea asp-for="Input.SampleData" class="form-control font-monospace code-editor" rows="10" placeholder="INSERT INTO TableName (...) VALUES (...);&#10;INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
+                                    <span asp-validation-for="Input.SampleData" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Input.SolutionQuery" class="form-label fw-bold"></label>
+                                <textarea asp-for="Input.SolutionQuery" class="form-control font-monospace code-editor" rows="5" placeholder="SELECT column FROM Table WHERE condition;" required></textarea>
+                                <span asp-validation-for="Input.SolutionQuery" class="text-danger small"></span>
+                            </div>
+                        </fieldset>
+
+                        @* Section 3: Hints & Distractors (Optional) *@
+                        <fieldset class="mt-4">
+                             <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-lightbulb me-2"></i>Hints & Distractors (Optional)</legend>
+                             <div class="mb-3">
+                                <label asp-for="Input.HintText" class="form-label fw-bold"></label>
+                                <textarea asp-for="Input.HintText" class="form-control" rows="3" placeholder="Provide a subtle hint if users get stuck..."></textarea>
+                                <span asp-validation-for="Input.HintText" class="text-danger small"></span>
+                            </div>
+                             <div class="mb-3">
+                                <label asp-for="Input.FalseClues" class="form-label fw-bold"></label>
+                                <textarea asp-for="Input.FalseClues" class="form-control" rows="3" placeholder="Add misleading information or common pitfalls to watch out for..."></textarea>
+                                <span asp-validation-for="Input.FalseClues" class="text-danger small"></span>
+                            </div>
+                        </fieldset>
+
+                        @* Submit Button *@
+                        <div class="mt-4 pt-3 border-top text-end">
+                            <a asp-page="./Index" class="btn btn-secondary me-2"><i class="bi bi-x-lg me-1"></i> Cancel</a>
+                            <button type="submit" class="btn btn-success"><i class="bi bi-check-lg me-1"></i> Create Mystery</button>
+                        </div>
+                    </form>
+                </div> @* End card-body *@
+            </div> @* End card *@
+        </div> @* End col *@
+    </div> @* End row *@
+</div> @* End container *@
+
+@section Scripts {
+    @{
+        // Include client-side validation scripts
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <style>
+        /* Ensure textareas for code use a monospace font and have basic styling */
+        .code-editor {
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.9em;
+            background-color: #f8f9fa; /* Light background for code */
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+        /* Improve focus state for code editors */
+        .code-editor:focus {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        /* Make labels bold */
+        .form-label.fw-bold {
+            font-weight: 600 !important;
+        }
+        /* Add a little space below legends */
+        legend {
+            margin-bottom: 1rem !important;
+        }
+    </style>
+    <script>
+        // Optional: Add any client-side JavaScript enhancements here if needed
+        // Example: Basic check to prevent double-submission
+        (function () {
+            'use strict';
+            var form = document.getElementById('createMysteryForm');
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    var submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton) {
+                        // Disable button after click to prevent double submission
+                        setTimeout(function () { submitButton.disabled = true; }, 0);
+                        // Optional: Change button text
+                        // submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+                    }
+                }, false);
+            }
+        })();
+    </script>
+}
