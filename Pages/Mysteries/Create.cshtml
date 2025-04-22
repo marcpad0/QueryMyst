@@ -1,8 +1,12 @@
 @page
 @model QueryMyst.Pages.Mysteries.CreateModel
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 @{
     ViewData["Title"] = "Create New Mystery";
 }
+
+@* Add Antiforgery Token for AJAX *@
+@Html.AntiForgeryToken()
 
 <div class="container mt-4 mb-5">
     <div class="row justify-content-center">
@@ -72,20 +76,39 @@
                              <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-database me-2"></i>Database & Solution</legend>
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
-                                    <label asp-for="Input.DatabaseSchema" class="form-label fw-bold"></label>
-                                    <textarea asp-for="Input.DatabaseSchema" class="form-control font-monospace code-editor" rows="10" placeholder="CREATE TABLE TableName (...);&#10;CREATE TABLE AnotherTable (...);" required></textarea>
+                                    <label asp-for="Input.DatabaseSchema" class="form-label fw-bold d-flex justify-content-between align-items-center">
+                                        <span>Database Schema (SQL)</span>
+                                        <span id="schemaValidationStatus" class="validation-status ms-2"></span>
+                                    </label>
+                                    <textarea id="databaseSchemaInput" asp-for="Input.DatabaseSchema" class="form-control font-monospace code-editor" rows="10" placeholder="CREATE TABLE TableName (...);&#10;CREATE TABLE AnotherTable (...);" required></textarea>
                                     <span asp-validation-for="Input.DatabaseSchema" class="text-danger small"></span>
+                                    <div id="schemaValidationError" class="text-danger small mt-1"></div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label asp-for="Input.SampleData" class="form-label fw-bold"></label>
-                                    <textarea asp-for="Input.SampleData" class="form-control font-monospace code-editor" rows="10" placeholder="INSERT INTO TableName (...) VALUES (...);&#10;INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
+                                     <label asp-for="Input.SampleData" class="form-label fw-bold d-flex justify-content-between align-items-center">
+                                        <span>Sample Data (SQL)</span>
+                                        <span id="dataValidationStatus" class="validation-status ms-2"></span>
+                                    </label>
+                                    <textarea id="sampleDataInput" asp-for="Input.SampleData" class="form-control font-monospace code-editor" rows="10" placeholder="INSERT INTO TableName (...) VALUES (...);&#10;INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                                     <span asp-validation-for="Input.SampleData" class="text-danger small"></span>
+                                    <div id="dataValidationError" class="text-danger small mt-1"></div>
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label asp-for="Input.SolutionQuery" class="form-label fw-bold"></label>
-                                <textarea asp-for="Input.SolutionQuery" class="form-control font-monospace code-editor" rows="5" placeholder="SELECT column FROM Table WHERE condition;" required></textarea>
+                                <label asp-for="Input.SolutionQuery" class="form-label fw-bold d-flex justify-content-between align-items-center">
+                                    <span>Solution Query (SQL)</span>
+                                    <span id="queryValidationStatus" class="validation-status ms-2"></span>
+                                </label>
+                                <textarea id="solutionQueryInput" asp-for="Input.SolutionQuery" class="form-control font-monospace code-editor" rows="5" placeholder="SELECT column FROM Table WHERE condition;" required></textarea>
                                 <span asp-validation-for="Input.SolutionQuery" class="text-danger small"></span>
+                                <div id="queryValidationError" class="text-danger small mt-1"></div>
+                            </div>
+                             @* Area to display query results preview *@
+                             <div id="queryResultPreviewContainer" class="mt-3" style="display: none;">
+                                <h6><i class="bi bi-table me-1"></i> Solution Query Result Preview:</h6>
+                                <div id="queryResultPreview" class="border p-2 rounded bg-light small" style="max-height: 200px; overflow-y: auto;">
+                                    @* Results will be injected here by JavaScript *@
+                                </div>
                             </div>
                         </fieldset>
 
@@ -118,7 +141,6 @@
 
 @section Scripts {
     @{
-        // Include client-side validation scripts
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <style>
@@ -144,24 +166,242 @@
         legend {
             margin-bottom: 1rem !important;
         }
+        .validation-status .spinner-border-sm { width: 1em; height: 1em; border-width: .15em; }
+        .validation-status .bi-check-circle-fill { color: var(--bs-success); }
+        .validation-status .bi-x-circle-fill { color: var(--bs-danger); }
+        #queryResultPreview table { margin-bottom: 0; } /* Remove extra margin in preview */
+        #queryResultPreviewContainer { background-color: #f8f9fa; padding: 1rem; border-radius: 0.25rem;}
     </style>
     <script>
-        // Optional: Add any client-side JavaScript enhancements here if needed
-        // Example: Basic check to prevent double-submission
         (function () {
             'use strict';
-            var form = document.getElementById('createMysteryForm');
+
+            // --- Get Antiforgery Token ---
+            // The token is rendered by @Html.AntiForgeryToken()
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : null;
+
+            if (!token) {
+                console.error("Antiforgery token not found. AJAX validation will fail.");
+                // Optionally disable validation or show an error to the user
+            }
+
+            // --- Element References ---
+            const schemaInput = document.getElementById('databaseSchemaInput');
+            const dataInput = document.getElementById('sampleDataInput');
+            const queryInput = document.getElementById('solutionQueryInput');
+
+            const schemaStatus = document.getElementById('schemaValidationStatus');
+            const dataStatus = document.getElementById('dataValidationStatus');
+            const queryStatus = document.getElementById('queryValidationStatus');
+
+            const schemaError = document.getElementById('schemaValidationError');
+            const dataError = document.getElementById('dataValidationError');
+            const queryError = document.getElementById('queryValidationError');
+
+            const queryResultContainer = document.getElementById('queryResultPreviewContainer');
+            const queryResultPreview = document.getElementById('queryResultPreview');
+
+            // --- Icons ---
+            const loadingIcon = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+            const successIcon = '<i class="bi bi-check-circle-fill fs-5"></i>';
+            const errorIcon = '<i class="bi bi-x-circle-fill fs-5"></i>';
+
+            // --- Debounce Function ---
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            // --- Update Status Function ---
+            function updateStatus(statusEl, errorEl, result) {
+                statusEl.innerHTML = result.success ? successIcon : errorIcon;
+                errorEl.textContent = result.success ? '' : result.message;
+                errorEl.style.display = result.success ? 'none' : 'block';
+            }
+
+            // --- Clear Dependent Statuses ---
+            function clearDataStatus() {
+                dataStatus.innerHTML = '';
+                dataError.textContent = '';
+                dataError.style.display = 'none';
+                clearQueryStatus(); // Also clear query status if schema/data changes
+            }
+            function clearQueryStatus() {
+                queryStatus.innerHTML = '';
+                queryError.textContent = '';
+                queryError.style.display = 'none';
+                queryResultContainer.style.display = 'none';
+                queryResultPreview.innerHTML = '';
+            }
+
+
+            // --- Validation Logic ---
+            const validateSchema = debounce(async () => {
+                clearDataStatus(); // Clear downstream validation
+                const schemaSql = schemaInput.value.trim();
+                if (!schemaSql) {
+                    schemaStatus.innerHTML = ''; // Clear status if empty
+                    schemaError.textContent = '';
+                    schemaError.style.display = 'none';
+                    return;
+                }
+
+                schemaStatus.innerHTML = loadingIcon;
+                schemaError.textContent = '';
+                schemaError.style.display = 'none';
+
+                try {
+                    const response = await fetch('?handler=ValidateSchema', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token // Send token in header
+                        },
+                        body: JSON.stringify({ schemaSql: schemaSql })
+                    });
+
+                    if (!response.ok) {
+                         throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    updateStatus(schemaStatus, schemaError, result);
+
+                } catch (error) {
+                    console.error('Schema validation fetch error:', error);
+                    schemaStatus.innerHTML = errorIcon;
+                    schemaError.textContent = 'Client-side error validating schema. See console.';
+                    schemaError.style.display = 'block';
+                }
+            }, 750); // Wait 750ms after user stops typing
+
+            const validateData = debounce(async () => {
+                clearQueryStatus(); // Clear downstream validation
+                const schemaSql = schemaInput.value.trim();
+                const dataSql = dataInput.value.trim();
+
+                if (!dataSql || !schemaSql) { // Need both schema and data
+                    dataStatus.innerHTML = '';
+                    dataError.textContent = '';
+                    dataError.style.display = 'none';
+                    return;
+                }
+
+                dataStatus.innerHTML = loadingIcon;
+                dataError.textContent = '';
+                dataError.style.display = 'none';
+
+                try {
+                    const response = await fetch('?handler=ValidateData', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ schemaSql: schemaSql, dataSql: dataSql })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    updateStatus(dataStatus, dataError, result);
+
+                } catch (error) {
+                    console.error('Data validation fetch error:', error);
+                    dataStatus.innerHTML = errorIcon;
+                    dataError.textContent = 'Client-side error validating data. See console.';
+                    dataError.style.display = 'block';
+                }
+            }, 750);
+
+            const validateQuery = debounce(async () => {
+                const schemaSql = schemaInput.value.trim();
+                const dataSql = dataInput.value.trim();
+                const querySql = queryInput.value.trim();
+
+                if (!querySql || !dataSql || !schemaSql) { // Need all three
+                    queryStatus.innerHTML = '';
+                    queryError.textContent = '';
+                    queryError.style.display = 'none';
+                    queryResultContainer.style.display = 'none';
+                    queryResultPreview.innerHTML = '';
+                    return;
+                }
+
+                queryStatus.innerHTML = loadingIcon;
+                queryError.textContent = '';
+                queryError.style.display = 'none';
+                queryResultContainer.style.display = 'none'; // Hide preview initially
+                queryResultPreview.innerHTML = '';
+
+                try {
+                    const response = await fetch('?handler=ValidateQuery', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ schemaSql: schemaSql, dataSql: dataSql, querySql: querySql })
+                    });
+
+                     if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    updateStatus(queryStatus, queryError, result);
+
+                    if (result.success && result.results) {
+                        queryResultPreview.innerHTML = result.results; // Inject HTML table
+                        queryResultContainer.style.display = 'block'; // Show preview container
+                    } else {
+                        queryResultContainer.style.display = 'none';
+                    }
+
+                } catch (error) {
+                    console.error('Query validation fetch error:', error);
+                    queryStatus.innerHTML = errorIcon;
+                    queryError.textContent = 'Client-side error validating query. See console.';
+                    queryError.style.display = 'block';
+                    queryResultContainer.style.display = 'none';
+                }
+            }, 750);
+
+            // --- Attach Event Listeners ---
+            // Using 'input' with debounce for real-time feedback
+            if (schemaInput) schemaInput.addEventListener('input', validateSchema);
+            if (dataInput) dataInput.addEventListener('input', validateData);
+            if (queryInput) queryInput.addEventListener('input', validateQuery);
+
+            // Also trigger validation on blur for final check if needed, or if input event fails
+            // if (schemaInput) schemaInput.addEventListener('blur', validateSchema);
+            // if (dataInput) dataInput.addEventListener('blur', validateData);
+            // if (queryInput) queryInput.addEventListener('blur', validateQuery);
+
+
+            // --- Prevent Double Submission (Keep existing logic) ---
+             var form = document.getElementById('createMysteryForm');
             if (form) {
                 form.addEventListener('submit', function (event) {
+                    // Optionally re-validate everything synchonously before submit? (more complex)
                     var submitButton = form.querySelector('button[type="submit"]');
                     if (submitButton) {
-                        // Disable button after click to prevent double submission
                         setTimeout(function () { submitButton.disabled = true; }, 0);
-                        // Optional: Change button text
-                        // submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+                        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
                     }
                 }, false);
             }
+
         })();
     </script>
 }

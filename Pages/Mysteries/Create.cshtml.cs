@@ -13,10 +13,14 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite; // <-- Add this for SQLite in-memory validation
 using System.Text.Json; // <-- Add this (might be needed by helpers)
+using Microsoft.AspNetCore.Mvc.Filters; // Needed for AntiForgeryToken validation
+using System.Data.Common; // Needed for DbDataReader
+using System.Text; // Needed for StringBuilder
 
 namespace QueryMyst.Pages.Mysteries
 {
     [Authorize]
+    [ValidateAntiForgeryToken] // Add this attribute to automatically validate antiforgery tokens on POST handlers
     public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _context;
@@ -106,13 +110,12 @@ namespace QueryMyst.Pages.Mysteries
                 return Page();
             }
 
-            // --- Start SQL Syntax Validation ---
+            // --- Start SQL Syntax Validation (Keep as final check) ---
             bool sqlValid = await ValidateSqlAsync();
             if (!sqlValid)
             {
-                 _logger.LogWarning("SQL validation failed for mystery creation attempt by user: {User}", User.Identity?.Name);
-                 // Errors are added to ModelState within ValidateSqlAsync
-                 return Page(); // Return page with SQL validation errors displayed
+                _logger.LogWarning("SQL validation failed during final submission by user: {User}", User.Identity?.Name);
+                return Page();
             }
             // --- End SQL Syntax Validation ---
 
@@ -165,10 +168,10 @@ namespace QueryMyst.Pages.Mysteries
             }
             catch (DbUpdateException dbEx)
             {
-                 _logger.LogError(dbEx, "Database error saving new mystery '{MysteryTitle}' created by user {UserId}. Inner Exception: {InnerException}",
-                     Input.Title, currentUser.Id, dbEx.InnerException?.Message);
-                 ModelState.AddModelError(string.Empty, $"A database error occurred: {dbEx.InnerException?.Message ?? dbEx.Message}. Please check the data and try again.");
-                 return Page();
+                _logger.LogError(dbEx, "Database error saving new mystery '{MysteryTitle}' created by user {UserId}. Inner Exception: {InnerException}",
+                    Input.Title, currentUser.Id, dbEx.InnerException?.Message);
+                ModelState.AddModelError(string.Empty, $"A database error occurred: {dbEx.InnerException?.Message ?? dbEx.Message}. Please check the data and try again.");
+                return Page();
             }
             catch (Exception ex)
             {
@@ -176,6 +179,111 @@ namespace QueryMyst.Pages.Mysteries
                 ModelState.AddModelError(string.Empty, "An unexpected error occurred while saving the mystery. Please try again later.");
                 return Page();
             }
+        }
+
+        // --- Handler for Schema Validation ---
+        public async Task<JsonResult> OnPostValidateSchemaAsync([FromBody] SqlValidationRequest data)
+        {
+            if (string.IsNullOrWhiteSpace(data?.SchemaSql))
+            {
+                return new JsonResult(new { success = false, message = "Schema SQL cannot be empty." });
+            }
+
+            using (var connection = new SqliteConnection("DataSource=:memory:"))
+            {
+                try
+                {
+                    await connection.OpenAsync();
+                    await ExecuteNonQuerySqlAsync(connection, data.SchemaSql);
+                    await connection.CloseAsync();
+                    return new JsonResult(new { success = true, message = "Schema syntax appears valid." });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "AJAX Schema validation failed.");
+                    await connection.CloseAsync(); // Ensure closed on error
+                    return new JsonResult(new { success = false, message = $"Schema Error: {ex.Message}" });
+                }
+            }
+        }
+
+        // --- Handler for Sample Data Validation ---
+        public async Task<JsonResult> OnPostValidateDataAsync([FromBody] SqlValidationRequest data)
+        {
+            if (string.IsNullOrWhiteSpace(data?.SchemaSql) || string.IsNullOrWhiteSpace(data?.DataSql))
+            {
+                return new JsonResult(new { success = false, message = "Schema and Sample Data SQL cannot be empty." });
+            }
+
+            using (var connection = new SqliteConnection("DataSource=:memory:"))
+            {
+                try
+                {
+                    await connection.OpenAsync();
+                    // Must execute schema first
+                    await ExecuteNonQuerySqlAsync(connection, data.SchemaSql);
+                    // Then execute data
+                    await ExecuteNonQuerySqlAsync(connection, data.DataSql);
+                    await connection.CloseAsync();
+                    return new JsonResult(new { success = true, message = "Sample Data syntax appears valid and compatible with schema." });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "AJAX Data validation failed.");
+                    await connection.CloseAsync(); // Ensure closed on error
+                    return new JsonResult(new { success = false, message = $"Data Error: {ex.Message}" });
+                }
+            }
+        }
+
+        // --- Handler for Solution Query Validation & Preview ---
+        public async Task<JsonResult> OnPostValidateQueryAsync([FromBody] SqlValidationRequest data)
+        {
+            if (string.IsNullOrWhiteSpace(data?.SchemaSql) || string.IsNullOrWhiteSpace(data?.DataSql) || string.IsNullOrWhiteSpace(data?.QuerySql))
+            {
+                return new JsonResult(new { success = false, message = "Schema, Sample Data, and Solution Query SQL cannot be empty." });
+            }
+
+            using (var connection = new SqliteConnection("DataSource=:memory:"))
+            {
+                try
+                {
+                    await connection.OpenAsync();
+                    // Execute schema and data
+                    await ExecuteNonQuerySqlAsync(connection, data.SchemaSql);
+                    await ExecuteNonQuerySqlAsync(connection, data.DataSql);
+
+                    // Execute the query and get results
+                    var (resultJson, error) = await ExecuteQueryAndGetJsonAsync(connection, data.QuerySql); // Use the JSON helper
+
+                    await connection.CloseAsync();
+
+                    if (error != null)
+                    {
+                        return new JsonResult(new { success = false, message = $"Query Error: {error}" });
+                    }
+                    else
+                    {
+                        // Format result for preview (optional, can be done client-side too)
+                        string formattedResult = FormatResultFromJson(resultJson);
+                        return new JsonResult(new { success = true, message = "Query executed successfully.", results = formattedResult }); // Send formatted result
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "AJAX Query validation failed.");
+                    await connection.CloseAsync(); // Ensure closed on error
+                    return new JsonResult(new { success = false, message = $"Query Execution Error: {ex.Message}" });
+                }
+            }
+        }
+
+        // --- Model for AJAX Requests ---
+        public class SqlValidationRequest
+        {
+            public string SchemaSql { get; set; }
+            public string DataSql { get; set; }
+            public string QuerySql { get; set; }
         }
 
         // --- Helper Methods ---
@@ -207,7 +315,6 @@ namespace QueryMyst.Pages.Mysteries
         private async Task<bool> ValidateSqlAsync()
         {
             bool isValid = true;
-            // Use a unique in-memory database for each validation check
             using (var connection = new SqliteConnection("DataSource=:memory:"))
             {
                 try
@@ -217,13 +324,11 @@ namespace QueryMyst.Pages.Mysteries
                     // 1. Validate Schema
                     try
                     {
-                        // Use helper that handles multi-statement SQL
                         await ExecuteNonQuerySqlAsync(connection, Input.DatabaseSchema);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogWarning(ex, "SQL Schema validation failed.");
-                        // Add error to the specific field in the model state
                         ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.DatabaseSchema)}", $"Schema Error: {ex.Message}");
                         isValid = false;
                     }
@@ -244,39 +349,33 @@ namespace QueryMyst.Pages.Mysteries
                     }
 
                     // 3. Validate Solution Query (only if schema and data were valid)
-                    //    We just check if it executes without error.
                     if (isValid)
                     {
                         try
                         {
-                            // Use helper that executes a query and checks for errors
                             var (_, error) = await ExecuteQueryAndCheckErrorAsync(connection, Input.SolutionQuery);
                             if (error != null)
                             {
-                                // Error occurred during execution
                                 ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.SolutionQuery)}", $"Solution Query Error: {error}");
                                 isValid = false;
                             }
-                            // We don't need the actual result for validation here
                         }
-                        catch (Exception ex) // Catch broader exceptions from the helper itself
+                        catch (Exception ex)
                         {
-                             _logger.LogWarning(ex, "SQL Solution Query validation failed unexpectedly.");
-                             ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.SolutionQuery)}", $"Solution Query Error: {ex.Message}");
-                             isValid = false;
+                            _logger.LogWarning(ex, "SQL Solution Query validation failed unexpectedly.");
+                            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.SolutionQuery)}", $"Solution Query Error: {ex.Message}");
+                            isValid = false;
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Catch potential errors opening the connection itself
                     _logger.LogError(ex, "Failed to open in-memory database for SQL validation.");
                     ModelState.AddModelError(string.Empty, "Could not initialize SQL validation environment.");
                     isValid = false;
                 }
                 finally
                 {
-                    // Ensure connection is closed even if errors occurred
                     if (connection.State == System.Data.ConnectionState.Open)
                     {
                         await connection.CloseAsync();
@@ -286,13 +385,10 @@ namespace QueryMyst.Pages.Mysteries
             return isValid;
         }
 
-        // Helper to execute potentially multi-statement non-query SQL (Schema, Inserts)
         private async Task ExecuteNonQuerySqlAsync(SqliteConnection connection, string sql)
         {
             if (string.IsNullOrWhiteSpace(sql)) return;
 
-            // Simple split by semicolon; might need refinement for complex SQL with semicolons in strings/comments
-            // Consider using a more robust SQL parser library for production if needed.
             var commands = sql.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var commandText in commands)
@@ -303,40 +399,119 @@ namespace QueryMyst.Pages.Mysteries
                     using (var command = connection.CreateCommand())
                     {
                         command.CommandText = trimmedCommand;
-                        // This will throw SqliteException on syntax error or constraint violation etc.
                         await command.ExecuteNonQueryAsync();
                     }
                 }
             }
         }
 
-        // Helper to execute a query and return only an error message if it fails
         private async Task<(string resultJson, string error)> ExecuteQueryAndCheckErrorAsync(SqliteConnection connection, string sql)
         {
-             if (string.IsNullOrWhiteSpace(sql))
-             {
-                 return (null, "Query cannot be empty.");
-             }
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                return (null, "Query cannot be empty.");
+            }
             try
             {
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = sql;
-                    // Execute reader to ensure the query syntax is valid and runs against the schema/data
                     using (var reader = await command.ExecuteReaderAsync())
                     {
-                        // We don't need to read the data for basic validation, just ensure no exception occurs
-                        while (await reader.ReadAsync()) { /* Consume results */ }
+                        while (await reader.ReadAsync()) { }
                     }
                 }
-                // If execution reached here without exception, the syntax is likely valid
-                return ( "{}", null); // Return dummy JSON and no error
+                return ("{}", null);
             }
-            catch (Exception ex) // Catch specific SqliteException or broader Exception
+            catch (Exception ex)
             {
                 _logger.LogWarning(ex, "SQL Execution failed during validation for query: {Query}", sql);
-                // Return null result and the specific error message
                 return (null, ex.Message);
+            }
+        }
+
+        private async Task<(string resultJson, string error)> ExecuteQueryAndGetJsonAsync(SqliteConnection connection, string sql)
+        {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                return (null, "Query cannot be empty.");
+            }
+            var results = new List<Dictionary<string, object>>();
+            try
+            {
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = sql;
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (!reader.HasRows) return ("[]", null);
+
+                        var columns = Enumerable.Range(0, reader.FieldCount).Select(reader.GetName).ToList();
+                        while (await reader.ReadAsync())
+                        {
+                            var row = new Dictionary<string, object>();
+                            for (int i = 0; i < reader.FieldCount; i++)
+                            {
+                                row[columns[i]] = reader.IsDBNull(i) ? null : reader.GetValue(i);
+                            }
+                            results.Add(row);
+                        }
+                    }
+                }
+                var options = new JsonSerializerOptions { WriteIndented = false };
+                return (JsonSerializer.Serialize(results, options), null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "SQL Execution failed for query: {Query}", sql);
+                return (null, ex.Message);
+            }
+        }
+
+        private string FormatResultFromJson(string json)
+        {
+            if (string.IsNullOrEmpty(json) || json == "[]") return "<p><i>Query executed successfully, but returned no results.</i></p>";
+
+            try
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var results = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json, options);
+
+                if (results == null || results.Count == 0) return "<p><i>Query executed successfully, but returned no results.</i></p>";
+
+                var sb = new StringBuilder();
+                sb.Append("<table class='table table-sm table-bordered table-striped small'>");
+                sb.Append("<thead><tr>");
+
+                foreach (var key in results[0].Keys)
+                {
+                    sb.Append($"<th>{System.Web.HttpUtility.HtmlEncode(key)}</th>");
+                }
+                sb.Append("</tr></thead>");
+                sb.Append("<tbody>");
+
+                foreach (var row in results)
+                {
+                    sb.Append("<tr>");
+                    foreach (var value in row.Values)
+                    {
+                        sb.Append($"<td>{System.Web.HttpUtility.HtmlEncode(value?.ToString() ?? "NULL")}</td>");
+                    }
+                    sb.Append("</tr>");
+                }
+
+                sb.Append("</tbody></table>");
+                return sb.ToString();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Error formatting JSON result: {Json}", json);
+                return "<p class='text-danger'>Error displaying results.</p>";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error formatting result JSON: {Json}", json);
+                return "<p class='text-danger'>Unexpected error displaying results.</p>";
             }
         }
     }
