@@ -12,8 +12,8 @@
     <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
             <h1 class="mb-4 text-center"><i class="bi bi-plus-square-dotted me-2"></i> Create New Mystery</h1>
-            
-            <!-- Mystery Creation Guide -->
+
+            <!-- Mystery Creation Guide (Collapsible) -->
             <div class="card shadow-sm mb-4 border-primary">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
@@ -29,61 +29,58 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <h5><i class="bi bi-card-heading text-primary me-2"></i>Title & Description</h5>
-                                    <ul class="small">
-                                        <li>Create an <strong>intriguing title</strong> that hints at the mystery without giving away the solution</li>
-                                        <li>Write a <strong>concise description</strong> that draws users in</li>
-                                        <li>Set the proper <strong>difficulty level</strong> based on SQL complexity</li>
+                                    <h6 class="fw-bold text-primary"><i class="bi bi-card-heading me-1"></i>Title & Description</h6>
+                                    <ul class="small text-muted ps-3">
+                                        <li>Create an <strong>intriguing title</strong>.</li>
+                                        <li>Write a <strong>concise description</strong>.</li>
+                                        <li>Set the proper <strong>difficulty</strong>.</li>
                                     </ul>
                                 </div>
-                                
                                 <div class="mb-3">
-                                    <h5><i class="bi bi-database text-primary me-2"></i>Database Schema</h5>
-                                    <ul class="small">
-                                        <li>Design tables with <strong>logical relationships</strong></li>
-                                        <li>Use <strong>meaningful column names</strong> and appropriate data types</li>
-                                        <li>Include <strong>foreign keys</strong> where relationships exist</li>
-                                        <li>Keep the schema just complex enough for the challenge</li>
+                                     <h6 class="fw-bold text-primary"><i class="bi bi-database me-1"></i>Database Schema</h6>
+                                    <ul class="small text-muted ps-3">
+                                        <li>Design <strong>logical tables</strong>.</li>
+                                        <li>Use <strong>meaningful names</strong> & types.</li>
+                                        <li>Include <strong>foreign keys</strong>.</li>
+                                        <li>Keep schema complexity appropriate.</li>
                                     </ul>
                                 </div>
                             </div>
-                            
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <h5><i class="bi bi-table text-primary me-2"></i>Sample Data</h5>
-                                    <ul class="small">
-                                        <li>Include <strong>enough data</strong> to make the problem interesting</li>
-                                        <li>Create data that <strong>tells a story</strong> relevant to the mystery</li>
-                                        <li>Add some <strong>red herrings</strong> for more advanced mysteries</li>
-                                        <li>Ensure the solution is <strong>findable</strong> with the data provided</li>
+                                 <div class="mb-3">
+                                     <h6 class="fw-bold text-primary"><i class="bi bi-table me-1"></i>Sample Data</h6>
+                                     <ul class="small text-muted ps-3">
+                                        <li>Include <strong>sufficient data</strong>.</li>
+                                        <li>Data should <strong>tell a story</strong>.</li>
+                                        <li>Add <strong>red herrings</strong> (optional).</li>
+                                        <li>Ensure solution is <strong>findable</strong>.</li>
                                     </ul>
                                 </div>
-                                
                                 <div class="mb-3">
-                                    <h5><i class="bi bi-check-circle text-primary me-2"></i>Solution Query</h5>
-                                    <ul class="small">
-                                        <li>Make the solution <strong>unambiguous</strong> - there should be one clear answer</li>
-                                        <li>Match the <strong>difficulty level</strong> with appropriate SQL techniques</li>
-                                        <li>Test your solution <strong>before</strong> publishing</li>
-                                        <li>Consider different approaches users might take</li>
+                                     <h6 class="fw-bold text-primary"><i class="bi bi-check-circle me-1"></i>Solution Query</h6>
+                                     <ul class="small text-muted ps-3">
+                                        <li>Ensure an <strong>unambiguous</strong> result.</li>
+                                        <li>Match <strong>difficulty</strong> with SQL techniques.</li>
+                                        <li><strong>Test</strong> your solution thoroughly.</li>
+                                        <li>Consider alternative user approaches.</li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="alert alert-info">
+                        <div class="alert alert-info mt-3 small py-2">
                             <i class="bi bi-info-circle-fill me-2"></i>
-                            <strong>Pro Tip:</strong> Use the validation tools to test your schema, data and query before submitting your mystery!
+                            <strong>Pro Tip:</strong> Use the <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i></span> / <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i></span> indicators and result preview below to test your SQL before submitting!
                         </div>
                     </div>
                 </div>
             </div>
             <!-- End Guide -->
 
+
             <div class="card shadow-lg border-light">
                 <div class="card-body p-4 p-md-5">
                     <form method="post" id="createMysteryForm" novalidate>
-                        @* Display model-level errors (e.g., database save errors) *@
+                        @* Display model-level errors (e.g., database save errors, final validation) *@
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                         @* Section 1: Mystery Overview *@
@@ -91,7 +88,7 @@
                             <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-card-heading me-2"></i>Mystery Overview</legend>
                             <div class="mb-3">
                                 <label asp-for="Input.Title" class="form-label fw-bold"></label>
-                                <input asp-for="Input.Title" class="form-control" placeholder="e.g., The Case of the Duplicate Orders" required />
+                                <input asp-for="Input.Title" class="form-control" placeholder="e.g., The Case of the Missing Inventory" required />
                                 <span asp-validation-for="Input.Title" class="text-danger small"></span>
                             </div>
                             <div class="mb-3">
@@ -117,13 +114,13 @@
                                 <div class="col-md-6">
                                     <label asp-for="Input.RequiredSkillsInput" class="form-label fw-bold"></label>
                                     <input asp-for="Input.RequiredSkillsInput" class="form-control" placeholder="e.g., SELECT, JOIN, WHERE, GROUP BY" />
-                                    <div class="form-text">Enter skills separated by commas.</div>
+                                    <div class="form-text small">Enter skills separated by commas.</div>
                                     <span asp-validation-for="Input.RequiredSkillsInput" class="text-danger small"></span>
                                 </div>
                                 <div class="col-md-6">
                                     <label asp-for="Input.Icon" class="form-label fw-bold"></label>
                                     <input asp-for="Input.Icon" class="form-control" placeholder="<i class='bi bi-search'></i>" />
-                                    <div class="form-text">Paste HTML for an icon (e.g., from Bootstrap Icons).</div>
+                                    <div class="form-text small">Paste HTML for an icon (e.g., from Bootstrap Icons).</div>
                                     <span asp-validation-for="Input.Icon" class="text-danger small"></span>
                                 </div>
                             </div>
@@ -142,28 +139,33 @@
                         <fieldset>
                              <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-database me-2"></i>Database & Solution</legend>
                             <div class="row g-3 mb-3">
+                                <!-- Database Schema -->
                                 <div class="col-md-6">
                                     <label asp-for="Input.DatabaseSchema" class="form-label fw-bold d-flex justify-content-between align-items-center">
                                         <span>Database Schema (SQL)</span>
                                         <span id="schemaValidationStatus" class="validation-status ms-2"></span>
                                     </label>
-                                    <div class="position-relative">
-                                        <textarea id="databaseSchemaInput" asp-for="Input.DatabaseSchema" class="form-control font-monospace code-editor fixed-height" rows="10" placeholder="CREATE TABLE TableName (...);&#10;CREATE TABLE AnotherTable (...);" required></textarea>
-                                        <button type="button" id="expandSchemaBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1" data-bs-toggle="tooltip" title="Expand editor">
+                                    <div class="position-relative editor-wrapper">
+                                        @* Textarea will be hidden and replaced by CodeMirror, but asp-for binds the model *@
+                                        <textarea id="databaseSchemaInput" asp-for="Input.DatabaseSchema" placeholder="CREATE TABLE TableName (...);
+CREATE TABLE AnotherTable (...);" required></textarea>
+                                         <button type="button" id="expandSchemaBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1 expand-btn" data-bs-toggle="tooltip" title="Expand editor">
                                             <i class="bi bi-arrows-fullscreen"></i>
                                         </button>
                                     </div>
                                     <span asp-validation-for="Input.DatabaseSchema" class="text-danger small"></span>
                                     <div id="schemaValidationError" class="text-danger small mt-1"></div>
                                 </div>
+                                <!-- Sample Data -->
                                 <div class="col-md-6">
                                      <label asp-for="Input.SampleData" class="form-label fw-bold d-flex justify-content-between align-items-center">
                                         <span>Sample Data (SQL)</span>
                                         <span id="dataValidationStatus" class="validation-status ms-2"></span>
                                     </label>
-                                    <div class="position-relative">
-                                        <textarea id="sampleDataInput" asp-for="Input.SampleData" class="form-control font-monospace code-editor fixed-height" rows="10" placeholder="INSERT INTO TableName (...) VALUES (...);&#10;INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
-                                        <button type="button" id="expandDataBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1" data-bs-toggle="tooltip" title="Expand editor">
+                                    <div class="position-relative editor-wrapper">
+                                        <textarea id="sampleDataInput" asp-for="Input.SampleData" placeholder="INSERT INTO TableName (...) VALUES (...);
+INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
+                                         <button type="button" id="expandDataBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1 expand-btn" data-bs-toggle="tooltip" title="Expand editor">
                                             <i class="bi bi-arrows-fullscreen"></i>
                                         </button>
                                     </div>
@@ -171,24 +173,26 @@
                                     <div id="dataValidationError" class="text-danger small mt-1"></div>
                                 </div>
                             </div>
+                             <!-- Solution Query -->
                             <div class="mb-3">
                                 <label asp-for="Input.SolutionQuery" class="form-label fw-bold d-flex justify-content-between align-items-center">
                                     <span>Solution Query (SQL)</span>
                                     <span id="queryValidationStatus" class="validation-status ms-2"></span>
                                 </label>
-                                <div class="position-relative">
-                                    <textarea id="solutionQueryInput" asp-for="Input.SolutionQuery" class="form-control font-monospace code-editor auto-expand" rows="7" placeholder="SELECT column FROM Table WHERE condition;" required></textarea>
-                                    <button type="button" id="expandQueryBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1" data-bs-toggle="tooltip" title="Expand editor">
+                                <div class="position-relative editor-wrapper">
+                                     @* This textarea is for binding, CodeMirror replaces it visually *@
+                                    <textarea id="solutionQueryInput" asp-for="Input.SolutionQuery" placeholder="SELECT column FROM Table WHERE condition;" required></textarea>
+                                     <button type="button" id="expandQueryBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1 expand-btn" data-bs-toggle="tooltip" title="Expand editor">
                                         <i class="bi bi-arrows-fullscreen"></i>
                                     </button>
                                 </div>
                                 <span asp-validation-for="Input.SolutionQuery" class="text-danger small"></span>
                                 <div id="queryValidationError" class="text-danger small mt-1"></div>
                             </div>
-                             @* Area to display query results preview *@
-                             <div id="queryResultPreviewContainer" class="mt-3" style="display: none;">
-                                <h6><i class="bi bi-table me-1"></i> Solution Query Result Preview:</h6>
-                                <div id="queryResultPreview" class="border p-2 rounded bg-light small" style="max-height: 200px; overflow-y: auto;">
+                             <!-- Query Results Preview Area -->
+                             <div id="queryResultPreviewContainer" class="mt-3 rounded border bg-light" style="display: none;">
+                                <h6 class="px-3 pt-3 pb-2 border-bottom bg-white rounded-top mb-0"><i class="bi bi-table me-1"></i> Solution Query Result Preview:</h6>
+                                <div id="queryResultPreview" class="p-3" style="max-height: 250px; overflow: auto;">
                                     @* Results will be injected here by JavaScript *@
                                 </div>
                             </div>
@@ -211,8 +215,8 @@
 
                         @* Submit Button *@
                         <div class="mt-4 pt-3 border-top text-end">
-                            <a asp-page="./Index" class="btn btn-secondary me-2"><i class="bi bi-x-lg me-1"></i> Cancel</a>
-                            <button type="submit" class="btn btn-success"><i class="bi bi-check-lg me-1"></i> Create Mystery</button>
+                            <a asp-page="./Index" class="btn btn-outline-secondary me-2"><i class="bi bi-x-lg me-1"></i> Cancel</a>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Create Mystery</button>
                         </div>
                     </form>
                 </div> @* End card-body *@
@@ -229,8 +233,9 @@
         <h5 class="modal-title" id="fullscreenEditorModalLabel"><i class="bi bi-code-square me-2"></i><span id="editorTitle">SQL Editor</span></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <textarea id="fullscreenEditor" class="form-control font-monospace code-editor" rows="15"></textarea>
+      <div class="modal-body p-0"> @* Remove padding for CodeMirror full fit *@
+         @* This textarea will be replaced by CodeMirror when the modal opens *@
+        <textarea id="fullscreenEditor"></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -241,199 +246,225 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    @* --- CodeMirror CDN --- *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/material-palenight.min.css"> @* Example theme *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/matchbrackets.min.js"></script>
+    @* No specific auto-height addon needed, we'll do it manually for the query field *@
+
+
     <style>
-        /* Ensure textareas for code use a monospace font and have basic styling */
-        .code-editor {
-            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 0.9em;
-            background-color: #f8f9fa; /* Light background for code */
+        /* CodeMirror Base Styling */
+        .CodeMirror {
             border: 1px solid #ced4da;
             border-radius: 0.25rem;
-            tab-size: 4; /* Set tab size */
+            height: 200px; /* Default height for schema/data */
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
         }
-        
-        /* Fixed height for schema and sample data */
-        .code-editor.fixed-height {
-            line-height: 1.2;
-            white-space: pre;
-            overflow-x: auto;
-            overflow-y: auto;
-            resize: vertical;
-        }
-        
-        /* Auto-expanding for solution query */
-        .code-editor.auto-expand {
-            line-height: 1.5;
+        /* Height specific styling for the AUTO-EXPANDING solution query editor */
+        #solutionQueryInput + .CodeMirror {
+            height: auto; /* Let content determine height */
             min-height: 120px; /* Minimum height */
-            resize: vertical;
         }
-        
-        /* Improve focus state for code editors */
-        .code-editor:focus {
+        /* The internal scroller needs adjusting too for auto-height */
+        #solutionQueryInput + .CodeMirror .CodeMirror-scroll {
+            min-height: 110px; /* Should be slightly less than .CodeMirror min-height */
+            height: auto;
+            overflow-y: hidden; /* Hide vertical scrollbar for auto-height */
+            overflow-x: auto; /* Allow horizontal scroll */
+        }
+
+
+        /* Focused CodeMirror editor */
+        .CodeMirror-focused {
             border-color: #86b7fe;
             outline: 0;
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         }
-        /* Make labels bold */
-        .form-label.fw-bold {
-            font-weight: 600 !important;
-        }
-        /* Add a little space below legends */
-        legend {
-            margin-bottom: 1rem !important;
-        }
-        .validation-status .spinner-border-sm { width: 1em; height: 1em; border-width: .15em; }
-        .validation-status .bi-check-circle-fill { color: var(--bs-success); }
-        .validation-status .bi-x-circle-fill { color: var(--bs-danger); }
-        #queryResultPreview table { margin-bottom: 0; } /* Remove extra margin in preview */
-        #queryResultPreviewContainer { background-color: #f8f9fa; padding: 1rem; border-radius: 0.25rem;}
 
-        /* Mystery Guide Styling */
-        #mysteryGuide h5 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+        /* Styling for the modal's CodeMirror instance */
+        #fullscreenEditorModal .modal-body .CodeMirror {
+           height: calc(100vh - 180px); /* Adjust based on header/footer height */
+           border: none;
+           border-radius: 0;
         }
-        #mysteryGuide ul {
-            padding-left: 1.5rem;
+        /* Adjust height for non-fullscreen modal */
+        @@media (min-width: 992px) { /* lg breakpoint */
+             #fullscreenEditorModal.modal-fullscreen-lg-down .modal-body .CodeMirror {
+                  height: 65vh; /* Or another suitable height */
+             }
         }
-        #mysteryGuide .card-header {
-            background: linear-gradient(135deg, #4e73df, #224abe);
+
+
+        /* Hide original textareas used for binding */
+        #databaseSchemaInput, #sampleDataInput, #solutionQueryInput, #fullscreenEditor {
+            display: none;
         }
-        #mysteryGuide .alert-info {
-            background-color: #e7f1ff;
-            border-color: #b9d9ff;
-            color: #0c63e4;
-        }
-        /* Expand button styling */
-        .position-relative .btn-sm {
+
+        /* Validation status icons */
+        .validation-status .spinner-border-sm { width: 1em; height: 1em; border-width: .15em; vertical-align: text-bottom;}
+        .validation-status .bi-check-circle-fill { color: var(--bs-success); font-size: 1.2em; vertical-align: middle; }
+        .validation-status .bi-x-circle-fill { color: var(--bs-danger); font-size: 1.2em; vertical-align: middle; }
+
+        /* Adjust expand button style */
+        .editor-wrapper .expand-btn {
             opacity: 0.6;
-            z-index: 10;
+            z-index: 10; /* Ensure it's above CodeMirror */
+            transition: opacity 0.2s ease-in-out;
         }
-        .position-relative .btn-sm:hover {
+        .editor-wrapper:hover .expand-btn {
             opacity: 1;
         }
+
+        /* Improve result preview container */
+        #queryResultPreviewContainer { background-color: #f8f9fa; }
+        #queryResultPreview table { margin-bottom: 0; } /* Remove extra margin in preview */
+
+        /* Make labels bold */
+        .form-label.fw-bold { font-weight: 600 !important; }
+        /* Add a little space below legends */
+        legend { margin-bottom: 1rem !important; }
+
+        /* Mystery Guide Styling */
+        #mysteryGuide h6 { margin-bottom: 0.3rem; }
+        #mysteryGuide ul { padding-left: 1.2rem; margin-bottom: 1rem;}
+        #mysteryGuide .card-header { background: linear-gradient(135deg, #4e73df, #224abe); }
+        #mysteryGuide .alert-info { background-color: #e7f1ff; border-color: #b9d9ff; color: #0c63e4; }
+        #mysteryGuide .badge { vertical-align: middle; }
+
     </style>
+
     <script>
         (function () {
             'use strict';
 
-            // --- Get Antiforgery Token ---
+            // --- Antiforgery Token ---
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
             const token = tokenInput ? tokenInput.value : null;
-
             if (!token) {
                 console.error("Antiforgery token not found. AJAX validation will fail.");
             }
 
-            // --- Element References ---
-            const schemaInput = document.getElementById('databaseSchemaInput');
-            const dataInput = document.getElementById('sampleDataInput');
-            const queryInput = document.getElementById('solutionQueryInput');
-            
-            const expandSchemaBtn = document.getElementById('expandSchemaBtn');
-            const expandDataBtn = document.getElementById('expandDataBtn');
-            const expandQueryBtn = document.getElementById('expandQueryBtn');
-            
-            const fullscreenEditor = document.getElementById('fullscreenEditor');
-            const saveEditorBtn = document.getElementById('saveEditorBtn');
-            const editorModal = new bootstrap.Modal(document.getElementById('fullscreenEditorModal'));
-            const editorTitle = document.getElementById('editorTitle');
+            // --- Element References (Original Textareas) ---
+            const schemaTextarea = document.getElementById('databaseSchemaInput');
+            const dataTextarea = document.getElementById('sampleDataInput');
+            const queryTextarea = document.getElementById('solutionQueryInput');
+            const fullscreenTextarea = document.getElementById('fullscreenEditor'); // Textarea in the modal
 
+            // --- Status & Error Display Elements ---
             const schemaStatus = document.getElementById('schemaValidationStatus');
             const dataStatus = document.getElementById('dataValidationStatus');
             const queryStatus = document.getElementById('queryValidationStatus');
-
             const schemaError = document.getElementById('schemaValidationError');
             const dataError = document.getElementById('dataValidationError');
             const queryError = document.getElementById('queryValidationError');
 
+            // --- Query Preview Elements ---
             const queryResultContainer = document.getElementById('queryResultPreviewContainer');
             const queryResultPreview = document.getElementById('queryResultPreview');
 
-            // --- Initialize Tooltips ---
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+            // --- Modal Elements ---
+            const editorModalElement = document.getElementById('fullscreenEditorModal');
+            const editorModal = new bootstrap.Modal(editorModalElement);
+            const editorTitle = document.getElementById('editorTitle');
+            const saveEditorBtn = document.getElementById('saveEditorBtn');
+            const expandSchemaBtn = document.getElementById('expandSchemaBtn');
+            const expandDataBtn = document.getElementById('expandDataBtn');
+            const expandQueryBtn = document.getElementById('expandQueryBtn');
 
-            // --- Track active editor for fullscreen modal ---
-            let activeEditorSource = null;
+            // --- CodeMirror Instances Store ---
+            let codeMirrorInstances = {};
+            let fullscreenCmInstance = null;
+            let activeSourceCmInstance = null;
 
             // --- Icons ---
             const loadingIcon = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
-            const successIcon = '<i class="bi bi-check-circle-fill fs-5"></i>';
-            const errorIcon = '<i class="bi bi-x-circle-fill fs-5"></i>';
-            
-            // --- Auto-resize for Solution Query only ---
-            function autoResizeQueryArea() {
-                // Only apply auto-resize to the Solution Query
-                if (queryInput) {
-                    queryInput.style.height = 'auto';
-                    queryInput.style.height = (queryInput.scrollHeight) + 'px';
-                }
-            }
-            
-            // Add event listener to auto-resize the Solution Query textarea
-            if (queryInput) {
-                queryInput.addEventListener('input', autoResizeQueryArea);
-                
-                // Initial resize after page load
-                setTimeout(() => {
-                    autoResizeQueryArea();
-                }, 100);
+            const successIcon = '<i class="bi bi-check-circle-fill"></i>';
+            const errorIcon = '<i class="bi bi-x-circle-fill"></i>';
+
+            // --- CodeMirror Configuration ---
+            const cmOptions = {
+                mode: 'text/x-sql',
+                theme: 'material-palenight', // Choose your theme
+                lineNumbers: true,
+                matchBrackets: true,
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false,
+                lineWrapping: true,
+                // We handle height dynamically for the query editor, so viewportMargin: Infinity is less critical here
+            };
+
+            // --- Auto-Height Adjustment for Query Editor ---
+            function adjustQueryEditorHeight(cmInstance) {
+                if (!cmInstance) return;
+                // Get the scroller element within CodeMirror
+                const scrollElement = cmInstance.getScrollInfo();
+                // Calculate the total height needed for the content
+                const contentHeight = scrollElement.height;
+                 // Get the outer CodeMirror wrapper element
+                const wrapperElement = cmInstance.getWrapperElement();
+                // Get the minimum height from CSS (if set, otherwise fallback)
+                const minHeightStyle = window.getComputedStyle(wrapperElement).minHeight;
+                const minHeight = minHeightStyle ? parseInt(minHeightStyle, 10) : 120; // Fallback to 120px
+
+                // Set the wrapper's height, respecting the minimum height
+                wrapperElement.style.height = `${Math.max(minHeight, contentHeight)}px`;
+
+                // Refresh CodeMirror to apply the height change correctly
+                cmInstance.refresh();
             }
 
-            // --- Expand Editor Functionality ---
-            function setupExpandButtons() {
-                if (expandSchemaBtn) {
-                    expandSchemaBtn.addEventListener('click', function() {
-                        activeEditorSource = schemaInput;
-                        fullscreenEditor.value = schemaInput.value;
-                        editorTitle.textContent = "Database Schema Editor";
-                        editorModal.show();
-                    });
-                }
-                
-                if (expandDataBtn) {
-                    expandDataBtn.addEventListener('click', function() {
-                        activeEditorSource = dataInput;
-                        fullscreenEditor.value = dataInput.value;
-                        editorTitle.textContent = "Sample Data Editor";
-                        editorModal.show();
-                    });
-                }
-                
-                if (expandQueryBtn) {
-                    expandQueryBtn.addEventListener('click', function() {
-                        activeEditorSource = queryInput;
-                        fullscreenEditor.value = queryInput.value;
-                        editorTitle.textContent = "Solution Query Editor";
-                        editorModal.show();
-                    });
-                }
-            }
 
-            // --- Save from fullscreen editor back to main form ---
-            if (saveEditorBtn) {
-                saveEditorBtn.addEventListener('click', function() {
-                    if (!activeEditorSource) return;
-                    
-                    activeEditorSource.value = fullscreenEditor.value;
-                    editorModal.hide();
-                    
-                    // Trigger validation based on which editor we were using
-                    if (activeEditorSource === schemaInput) validateSchema();
-                    else if (activeEditorSource === dataInput) validateData();
-                    else if (activeEditorSource === queryInput) {
-                        validateQuery();
-                        // If it's the query editor, we also need to resize it
-                        autoResizeQueryArea();
+            // --- Initialize CodeMirror Editor ---
+            function initializeCodeMirror(textareaElement) {
+                if (!textareaElement) return null;
+                const isQueryEditor = textareaElement.id === 'solutionQueryInput';
+                const currentCmOptions = {...cmOptions}; // Clone options
+
+                // If it's the query editor, don't set fixed height initially (handled by auto-height)
+                if (isQueryEditor) {
+                    // The height is controlled by CSS/JS, not fixed here
+                }
+
+                const cm = CodeMirror.fromTextArea(textareaElement, currentCmOptions);
+
+                 // Sync CodeMirror content back to the original textarea on change
+                 // Also trigger validation and height adjustment after a delay
+                 cm.on('change', debounce(async (instance) => {
+                    instance.save(); // Updates the original textarea's value
+
+                    // Adjust height *only* for the query editor
+                    if (isQueryEditor) {
+                         adjustQueryEditorHeight(instance);
                     }
-                    
-                    activeEditorSource = null;
-                });
+
+                    // Trigger the appropriate validation based on the textarea ID
+                    if (textareaElement.id === 'databaseSchemaInput') await validateSchema();
+                    else if (textareaElement.id === 'sampleDataInput') await validateData();
+                    else if (textareaElement.id === 'solutionQueryInput') await validateQuery();
+                }, 500));
+
+                // Perform initial height adjustment for the query editor after initialization
+                if (isQueryEditor) {
+                     // Use setTimeout to ensure the editor is fully rendered
+                    setTimeout(() => adjustQueryEditorHeight(cm), 50);
+                }
+
+                return cm;
             }
+
+            // --- Initialize Main Editors ---
+            if (schemaTextarea) codeMirrorInstances.schema = initializeCodeMirror(schemaTextarea);
+            if (dataTextarea) codeMirrorInstances.data = initializeCodeMirror(dataTextarea);
+            if (queryTextarea) codeMirrorInstances.query = initializeCodeMirror(queryTextarea);
+
 
             // --- Debounce Function ---
             function debounce(func, wait) {
@@ -457,172 +488,152 @@
 
             // --- Clear Dependent Statuses ---
             function clearDataStatus() {
-                dataStatus.innerHTML = '';
-                dataError.textContent = '';
-                dataError.style.display = 'none';
-                clearQueryStatus(); // Also clear query status if schema/data changes
+                dataStatus.innerHTML = ''; dataError.textContent = ''; dataError.style.display = 'none';
+                clearQueryStatus();
             }
             function clearQueryStatus() {
-                queryStatus.innerHTML = '';
-                queryError.textContent = '';
-                queryError.style.display = 'none';
-                queryResultContainer.style.display = 'none';
-                queryResultPreview.innerHTML = '';
+                queryStatus.innerHTML = ''; queryError.textContent = ''; queryError.style.display = 'none';
+                queryResultContainer.style.display = 'none'; queryResultPreview.innerHTML = '';
             }
 
+            // --- AJAX Validation Functions (Identical to previous version) ---
 
-            // --- Validation Logic ---
-            const validateSchema = debounce(async () => {
-                clearDataStatus(); // Clear downstream validation
-                const schemaSql = schemaInput.value.trim();
+            async function validateSchema() {
+                clearDataStatus();
+                const schemaSql = codeMirrorInstances.schema?.getValue().trim();
                 if (!schemaSql) {
-                    schemaStatus.innerHTML = ''; // Clear status if empty
-                    schemaError.textContent = '';
-                    schemaError.style.display = 'none';
+                    schemaStatus.innerHTML = ''; schemaError.textContent = ''; schemaError.style.display = 'none';
                     return;
                 }
-
-                schemaStatus.innerHTML = loadingIcon;
-                schemaError.textContent = '';
-                schemaError.style.display = 'none';
-
+                schemaStatus.innerHTML = loadingIcon; schemaError.textContent = ''; schemaError.style.display = 'none';
                 try {
-                    const response = await fetch('?handler=ValidateSchema', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': token // Send token in header
-                        },
-                        body: JSON.stringify({ schemaSql: schemaSql })
-                    });
-
-                    if (!response.ok) {
-                         throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
+                    const response = await fetch('?handler=ValidateSchema', { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token }, body: JSON.stringify({ schemaSql: schemaSql }) });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     const result = await response.json();
                     updateStatus(schemaStatus, schemaError, result);
-
+                    if (!result.success) clearDataStatus();
                 } catch (error) {
                     console.error('Schema validation fetch error:', error);
-                    schemaStatus.innerHTML = errorIcon;
-                    schemaError.textContent = 'Client-side error validating schema. See console.';
-                    schemaError.style.display = 'block';
+                    updateStatus(schemaStatus, schemaError, { success: false, message: 'Client-side error during validation.' });
+                    clearDataStatus();
                 }
-            }, 750); // Wait 750ms after user stops typing
+            }
 
-            const validateData = debounce(async () => {
-                clearQueryStatus(); // Clear downstream validation
-                const schemaSql = schemaInput.value.trim();
-                const dataSql = dataInput.value.trim();
-
-                if (!dataSql || !schemaSql) { // Need both schema and data
-                    dataStatus.innerHTML = '';
-                    dataError.textContent = '';
-                    dataError.style.display = 'none';
+            async function validateData() {
+                clearQueryStatus();
+                const schemaSql = codeMirrorInstances.schema?.getValue().trim();
+                const dataSql = codeMirrorInstances.data?.getValue().trim();
+                if (!dataSql || !schemaSql || schemaStatus.innerHTML !== successIcon) {
+                    dataStatus.innerHTML = ''; dataError.textContent = ''; dataError.style.display = 'none';
+                    if (schemaStatus.innerHTML !== successIcon && dataSql) { dataError.textContent = 'Schema must be valid first.'; dataError.style.display = 'block'; }
                     return;
                 }
-
-                dataStatus.innerHTML = loadingIcon;
-                dataError.textContent = '';
-                dataError.style.display = 'none';
-
+                dataStatus.innerHTML = loadingIcon; dataError.textContent = ''; dataError.style.display = 'none';
                 try {
-                    const response = await fetch('?handler=ValidateData', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': token
-                        },
-                        body: JSON.stringify({ schemaSql: schemaSql, dataSql: dataSql })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
+                    const response = await fetch('?handler=ValidateData', { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token }, body: JSON.stringify({ schemaSql: schemaSql, dataSql: dataSql }) });
+                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     const result = await response.json();
                     updateStatus(dataStatus, dataError, result);
-
+                     if (!result.success) clearQueryStatus();
                 } catch (error) {
                     console.error('Data validation fetch error:', error);
-                    dataStatus.innerHTML = errorIcon;
-                    dataError.textContent = 'Client-side error validating data. See console.';
-                    dataError.style.display = 'block';
+                    updateStatus(dataStatus, dataError, { success: false, message: 'Client-side error during validation.' });
+                    clearQueryStatus();
                 }
-            }, 750);
+            }
 
-            const validateQuery = debounce(async () => {
-                const schemaSql = schemaInput.value.trim();
-                const dataSql = dataInput.value.trim();
-                const querySql = queryInput.value.trim();
-
-                if (!querySql || !dataSql || !schemaSql) { // Need all three
-                    queryStatus.innerHTML = '';
-                    queryError.textContent = '';
-                    queryError.style.display = 'none';
-                    queryResultContainer.style.display = 'none';
-                    queryResultPreview.innerHTML = '';
+            async function validateQuery() {
+                const schemaSql = codeMirrorInstances.schema?.getValue().trim();
+                const dataSql = codeMirrorInstances.data?.getValue().trim();
+                const querySql = codeMirrorInstances.query?.getValue().trim();
+                if (!querySql || !dataSql || !schemaSql || schemaStatus.innerHTML !== successIcon || dataStatus.innerHTML !== successIcon) {
+                    queryStatus.innerHTML = ''; queryError.textContent = ''; queryError.style.display = 'none';
+                    queryResultContainer.style.display = 'none'; queryResultPreview.innerHTML = '';
+                     if (querySql && (schemaStatus.innerHTML !== successIcon || dataStatus.innerHTML !== successIcon)) { queryError.textContent = 'Schema and Sample Data must be valid first.'; queryError.style.display = 'block'; }
                     return;
                 }
-
-                queryStatus.innerHTML = loadingIcon;
-                queryError.textContent = '';
-                queryError.style.display = 'none';
-                queryResultContainer.style.display = 'none'; // Hide preview initially
-                queryResultPreview.innerHTML = '';
-
+                queryStatus.innerHTML = loadingIcon; queryError.textContent = ''; queryError.style.display = 'none';
+                queryResultContainer.style.display = 'none'; queryResultPreview.innerHTML = '';
                 try {
-                    const response = await fetch('?handler=ValidateQuery', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': token
-                        },
-                        body: JSON.stringify({ schemaSql: schemaSql, dataSql: dataSql, querySql: querySql })
-                    });
-
-                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
+                    const response = await fetch('?handler=ValidateQuery', { method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token }, body: JSON.stringify({ schemaSql: schemaSql, dataSql: dataSql, querySql: querySql }) });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                     const result = await response.json();
                     updateStatus(queryStatus, queryError, result);
-
                     if (result.success && result.results) {
-                        queryResultPreview.innerHTML = result.results; // Inject HTML table
-                        queryResultContainer.style.display = 'block'; // Show preview container
+                        queryResultPreview.innerHTML = result.results;
+                        queryResultContainer.style.display = 'block';
                     } else {
                         queryResultContainer.style.display = 'none';
                     }
-
                 } catch (error) {
                     console.error('Query validation fetch error:', error);
-                    queryStatus.innerHTML = errorIcon;
-                    queryError.textContent = 'Client-side error validating query. See console.';
-                    queryError.style.display = 'block';
+                     updateStatus(queryStatus, queryError, { success: false, message: 'Client-side error during validation.' });
                     queryResultContainer.style.display = 'none';
                 }
-            }, 750);
+            }
 
-            // --- Attach Event Listeners ---
-            // Using 'input' with debounce for real-time feedback
-            if (schemaInput) schemaInput.addEventListener('input', validateSchema);
-            if (dataInput) dataInput.addEventListener('input', validateData);
-            if (queryInput) queryInput.addEventListener('input', validateQuery);
 
-            // --- Set up expand buttons ---
-            setupExpandButtons();
+            // --- Fullscreen Editor Logic (Identical to previous version) ---
 
-            // --- Prevent Double Submission (Keep existing logic) ---
-            var form = document.getElementById('createMysteryForm');
+            function openFullscreenEditor(sourceCmInstance, title) {
+                if (!sourceCmInstance) return;
+                activeSourceCmInstance = sourceCmInstance;
+                editorTitle.textContent = title;
+                if (fullscreenCmInstance) { fullscreenCmInstance.toTextArea(); fullscreenCmInstance = null; }
+                // Make sure fullscreen textarea exists before initializing CM on it
+                 if (!fullscreenTextarea) { console.error("Fullscreen textarea not found!"); return;}
+                 fullscreenCmInstance = CodeMirror.fromTextArea(fullscreenTextarea, cmOptions);
+                fullscreenCmInstance.setValue(sourceCmInstance.getValue());
+                editorModal.show();
+                setTimeout(() => { if (fullscreenCmInstance) { fullscreenCmInstance.refresh(); fullscreenCmInstance.focus(); } }, 250);
+            }
+
+            if (expandSchemaBtn && codeMirrorInstances.schema) { expandSchemaBtn.addEventListener('click', () => openFullscreenEditor(codeMirrorInstances.schema, "Database Schema Editor")); }
+            if (expandDataBtn && codeMirrorInstances.data) { expandDataBtn.addEventListener('click', () => openFullscreenEditor(codeMirrorInstances.data, "Sample Data Editor")); }
+            if (expandQueryBtn && codeMirrorInstances.query) { expandQueryBtn.addEventListener('click', () => openFullscreenEditor(codeMirrorInstances.query, "Solution Query Editor")); }
+
+            if (saveEditorBtn) {
+                saveEditorBtn.addEventListener('click', () => {
+                    if (!activeSourceCmInstance || !fullscreenCmInstance) return;
+                    const newValue = fullscreenCmInstance.getValue();
+                    activeSourceCmInstance.setValue(newValue);
+                    activeSourceCmInstance.save();
+                    editorModal.hide(); // Triggers hidden.bs.modal
+
+                    // Manually trigger validation and *height adjustment* if it was the query editor
+                     if (activeSourceCmInstance === codeMirrorInstances.schema) validateSchema();
+                     else if (activeSourceCmInstance === codeMirrorInstances.data) validateData();
+                     else if (activeSourceCmInstance === codeMirrorInstances.query) {
+                         validateQuery();
+                         adjustQueryEditorHeight(activeSourceCmInstance); // Adjust height after applying changes
+                     }
+
+                     // activeSourceCmInstance is cleared in hidden.bs.modal
+                });
+            }
+
+            editorModalElement.addEventListener('hidden.bs.modal', () => {
+                if (fullscreenCmInstance) { fullscreenCmInstance.toTextArea(); fullscreenCmInstance = null; }
+                 activeSourceCmInstance = null; // Clear source reference
+            });
+
+
+             // --- Initialize Tooltips ---
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+
+            // --- Prevent Double Submission ---
+            const form = document.getElementById('createMysteryForm');
             if (form) {
                 form.addEventListener('submit', function (event) {
-                    // Optionally re-validate everything synchonously before submit? (more complex)
-                    var submitButton = form.querySelector('button[type="submit"]');
-                    if (submitButton) {
-                        setTimeout(function () { submitButton.disabled = true; }, 0);
-                        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...';
+                    if (codeMirrorInstances.schema) codeMirrorInstances.schema.save();
+                    if (codeMirrorInstances.data) codeMirrorInstances.data.save();
+                    if (codeMirrorInstances.query) codeMirrorInstances.query.save();
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    if (submitButton && !submitButton.disabled) {
+                         submitButton.disabled = true;
+                        setTimeout(() => { submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...'; }, 10);
                     }
                 }, false);
             }
