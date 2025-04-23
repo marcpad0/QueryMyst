@@ -221,22 +221,30 @@ namespace QueryMyst.Pages.Mysteries
         private async Task<List<string>> ValidateSchemaTypesAsync(SqliteConnection connection)
         {
             var errors = new List<string>();
+            
+            // Expanded list of valid SQLite types and common aliases
             var validTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) 
             { 
-                "INTEGER", "TEXT", "BLOB", "REAL", "NUMERIC", "BOOLEAN", "DATETIME", "DATE", "TIME" 
+                // Core SQLite types
+                "INTEGER", "TEXT", "BLOB", "REAL", "NUMERIC", 
+                "VARCHAR", "CHAR", "NVARCHAR", "NCHAR", "CHARACTER", 
+                "INT", "BIGINT", "SMALLINT", "TINYINT", 
+                "FLOAT", "DOUBLE", "DECIMAL",
+                "BOOLEAN", "BOOL",
+                "DATETIME", "DATE", "TIME", "TIMESTAMP"
             };
             
             using (var command = connection.CreateCommand())
             {
                 // Query the schema information from sqlite_master
-                command.CommandText = "SELECT name, sql FROM sqlite_master WHERE type='table'";
+                command.CommandText = "SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite\\_%' ESCAPE '\\'";
                 using (var reader = await command.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
                     {
                         var tableName = reader.GetString(0);
                         var createSql = reader.GetString(1);
-
+        
                         // Now check column definitions
                         using (var columnsCommand = connection.CreateCommand())
                         {
