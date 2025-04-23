@@ -12,6 +12,73 @@
     <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
             <h1 class="mb-4 text-center"><i class="bi bi-plus-square-dotted me-2"></i> Create New Mystery</h1>
+            
+            <!-- Mystery Creation Guide -->
+            <div class="card shadow-sm mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb-fill me-2"></i>
+                        Guide to Creating Perfect Mysteries
+                        <button class="btn btn-sm btn-outline-light float-end" type="button" data-bs-toggle="collapse" data-bs-target="#mysteryGuide" aria-expanded="false" aria-controls="mysteryGuide">
+                            Show/Hide
+                        </button>
+                    </h5>
+                </div>
+                <div class="collapse" id="mysteryGuide">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h5><i class="bi bi-card-heading text-primary me-2"></i>Title & Description</h5>
+                                    <ul class="small">
+                                        <li>Create an <strong>intriguing title</strong> that hints at the mystery without giving away the solution</li>
+                                        <li>Write a <strong>concise description</strong> that draws users in</li>
+                                        <li>Set the proper <strong>difficulty level</strong> based on SQL complexity</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5><i class="bi bi-database text-primary me-2"></i>Database Schema</h5>
+                                    <ul class="small">
+                                        <li>Design tables with <strong>logical relationships</strong></li>
+                                        <li>Use <strong>meaningful column names</strong> and appropriate data types</li>
+                                        <li>Include <strong>foreign keys</strong> where relationships exist</li>
+                                        <li>Keep the schema just complex enough for the challenge</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h5><i class="bi bi-table text-primary me-2"></i>Sample Data</h5>
+                                    <ul class="small">
+                                        <li>Include <strong>enough data</strong> to make the problem interesting</li>
+                                        <li>Create data that <strong>tells a story</strong> relevant to the mystery</li>
+                                        <li>Add some <strong>red herrings</strong> for more advanced mysteries</li>
+                                        <li>Ensure the solution is <strong>findable</strong> with the data provided</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5><i class="bi bi-check-circle text-primary me-2"></i>Solution Query</h5>
+                                    <ul class="small">
+                                        <li>Make the solution <strong>unambiguous</strong> - there should be one clear answer</li>
+                                        <li>Match the <strong>difficulty level</strong> with appropriate SQL techniques</li>
+                                        <li>Test your solution <strong>before</strong> publishing</li>
+                                        <li>Consider different approaches users might take</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <strong>Pro Tip:</strong> Use the validation tools to test your schema, data and query before submitting your mystery!
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Guide -->
 
             <div class="card shadow-lg border-light">
                 <div class="card-body p-4 p-md-5">
@@ -80,7 +147,12 @@
                                         <span>Database Schema (SQL)</span>
                                         <span id="schemaValidationStatus" class="validation-status ms-2"></span>
                                     </label>
-                                    <textarea id="databaseSchemaInput" asp-for="Input.DatabaseSchema" class="form-control font-monospace code-editor" rows="10" placeholder="CREATE TABLE TableName (...);&#10;CREATE TABLE AnotherTable (...);" required></textarea>
+                                    <div class="position-relative">
+                                        <textarea id="databaseSchemaInput" asp-for="Input.DatabaseSchema" class="form-control font-monospace code-editor fixed-height" rows="10" placeholder="CREATE TABLE TableName (...);&#10;CREATE TABLE AnotherTable (...);" required></textarea>
+                                        <button type="button" id="expandSchemaBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1" data-bs-toggle="tooltip" title="Expand editor">
+                                            <i class="bi bi-arrows-fullscreen"></i>
+                                        </button>
+                                    </div>
                                     <span asp-validation-for="Input.DatabaseSchema" class="text-danger small"></span>
                                     <div id="schemaValidationError" class="text-danger small mt-1"></div>
                                 </div>
@@ -89,7 +161,12 @@
                                         <span>Sample Data (SQL)</span>
                                         <span id="dataValidationStatus" class="validation-status ms-2"></span>
                                     </label>
-                                    <textarea id="sampleDataInput" asp-for="Input.SampleData" class="form-control font-monospace code-editor" rows="10" placeholder="INSERT INTO TableName (...) VALUES (...);&#10;INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
+                                    <div class="position-relative">
+                                        <textarea id="sampleDataInput" asp-for="Input.SampleData" class="form-control font-monospace code-editor fixed-height" rows="10" placeholder="INSERT INTO TableName (...) VALUES (...);&#10;INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
+                                        <button type="button" id="expandDataBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1" data-bs-toggle="tooltip" title="Expand editor">
+                                            <i class="bi bi-arrows-fullscreen"></i>
+                                        </button>
+                                    </div>
                                     <span asp-validation-for="Input.SampleData" class="text-danger small"></span>
                                     <div id="dataValidationError" class="text-danger small mt-1"></div>
                                 </div>
@@ -99,7 +176,12 @@
                                     <span>Solution Query (SQL)</span>
                                     <span id="queryValidationStatus" class="validation-status ms-2"></span>
                                 </label>
-                                <textarea id="solutionQueryInput" asp-for="Input.SolutionQuery" class="form-control font-monospace code-editor" rows="5" placeholder="SELECT column FROM Table WHERE condition;" required></textarea>
+                                <div class="position-relative">
+                                    <textarea id="solutionQueryInput" asp-for="Input.SolutionQuery" class="form-control font-monospace code-editor auto-expand" rows="7" placeholder="SELECT column FROM Table WHERE condition;" required></textarea>
+                                    <button type="button" id="expandQueryBtn" class="btn btn-sm btn-secondary position-absolute top-0 end-0 m-1" data-bs-toggle="tooltip" title="Expand editor">
+                                        <i class="bi bi-arrows-fullscreen"></i>
+                                    </button>
+                                </div>
                                 <span asp-validation-for="Input.SolutionQuery" class="text-danger small"></span>
                                 <div id="queryValidationError" class="text-danger small mt-1"></div>
                             </div>
@@ -139,6 +221,25 @@
     </div> @* End row *@
 </div> @* End container *@
 
+<!-- Fullscreen Editor Modal -->
+<div class="modal fade" id="fullscreenEditorModal" tabindex="-1" aria-labelledby="fullscreenEditorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-fullscreen-lg-down">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="fullscreenEditorModalLabel"><i class="bi bi-code-square me-2"></i><span id="editorTitle">SQL Editor</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea id="fullscreenEditor" class="form-control font-monospace code-editor" rows="15"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveEditorBtn">Apply Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -151,7 +252,25 @@
             background-color: #f8f9fa; /* Light background for code */
             border: 1px solid #ced4da;
             border-radius: 0.25rem;
+            tab-size: 4; /* Set tab size */
         }
+        
+        /* Fixed height for schema and sample data */
+        .code-editor.fixed-height {
+            line-height: 1.2;
+            white-space: pre;
+            overflow-x: auto;
+            overflow-y: auto;
+            resize: vertical;
+        }
+        
+        /* Auto-expanding for solution query */
+        .code-editor.auto-expand {
+            line-height: 1.5;
+            min-height: 120px; /* Minimum height */
+            resize: vertical;
+        }
+        
         /* Improve focus state for code editors */
         .code-editor:focus {
             border-color: #86b7fe;
@@ -171,25 +290,57 @@
         .validation-status .bi-x-circle-fill { color: var(--bs-danger); }
         #queryResultPreview table { margin-bottom: 0; } /* Remove extra margin in preview */
         #queryResultPreviewContainer { background-color: #f8f9fa; padding: 1rem; border-radius: 0.25rem;}
+
+        /* Mystery Guide Styling */
+        #mysteryGuide h5 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        #mysteryGuide ul {
+            padding-left: 1.5rem;
+        }
+        #mysteryGuide .card-header {
+            background: linear-gradient(135deg, #4e73df, #224abe);
+        }
+        #mysteryGuide .alert-info {
+            background-color: #e7f1ff;
+            border-color: #b9d9ff;
+            color: #0c63e4;
+        }
+        /* Expand button styling */
+        .position-relative .btn-sm {
+            opacity: 0.6;
+            z-index: 10;
+        }
+        .position-relative .btn-sm:hover {
+            opacity: 1;
+        }
     </style>
     <script>
         (function () {
             'use strict';
 
             // --- Get Antiforgery Token ---
-            // The token is rendered by @Html.AntiForgeryToken()
             const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
             const token = tokenInput ? tokenInput.value : null;
 
             if (!token) {
                 console.error("Antiforgery token not found. AJAX validation will fail.");
-                // Optionally disable validation or show an error to the user
             }
 
             // --- Element References ---
             const schemaInput = document.getElementById('databaseSchemaInput');
             const dataInput = document.getElementById('sampleDataInput');
             const queryInput = document.getElementById('solutionQueryInput');
+            
+            const expandSchemaBtn = document.getElementById('expandSchemaBtn');
+            const expandDataBtn = document.getElementById('expandDataBtn');
+            const expandQueryBtn = document.getElementById('expandQueryBtn');
+            
+            const fullscreenEditor = document.getElementById('fullscreenEditor');
+            const saveEditorBtn = document.getElementById('saveEditorBtn');
+            const editorModal = new bootstrap.Modal(document.getElementById('fullscreenEditorModal'));
+            const editorTitle = document.getElementById('editorTitle');
 
             const schemaStatus = document.getElementById('schemaValidationStatus');
             const dataStatus = document.getElementById('dataValidationStatus');
@@ -202,10 +353,87 @@
             const queryResultContainer = document.getElementById('queryResultPreviewContainer');
             const queryResultPreview = document.getElementById('queryResultPreview');
 
+            // --- Initialize Tooltips ---
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+            // --- Track active editor for fullscreen modal ---
+            let activeEditorSource = null;
+
             // --- Icons ---
             const loadingIcon = '<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
             const successIcon = '<i class="bi bi-check-circle-fill fs-5"></i>';
             const errorIcon = '<i class="bi bi-x-circle-fill fs-5"></i>';
+            
+            // --- Auto-resize for Solution Query only ---
+            function autoResizeQueryArea() {
+                // Only apply auto-resize to the Solution Query
+                if (queryInput) {
+                    queryInput.style.height = 'auto';
+                    queryInput.style.height = (queryInput.scrollHeight) + 'px';
+                }
+            }
+            
+            // Add event listener to auto-resize the Solution Query textarea
+            if (queryInput) {
+                queryInput.addEventListener('input', autoResizeQueryArea);
+                
+                // Initial resize after page load
+                setTimeout(() => {
+                    autoResizeQueryArea();
+                }, 100);
+            }
+
+            // --- Expand Editor Functionality ---
+            function setupExpandButtons() {
+                if (expandSchemaBtn) {
+                    expandSchemaBtn.addEventListener('click', function() {
+                        activeEditorSource = schemaInput;
+                        fullscreenEditor.value = schemaInput.value;
+                        editorTitle.textContent = "Database Schema Editor";
+                        editorModal.show();
+                    });
+                }
+                
+                if (expandDataBtn) {
+                    expandDataBtn.addEventListener('click', function() {
+                        activeEditorSource = dataInput;
+                        fullscreenEditor.value = dataInput.value;
+                        editorTitle.textContent = "Sample Data Editor";
+                        editorModal.show();
+                    });
+                }
+                
+                if (expandQueryBtn) {
+                    expandQueryBtn.addEventListener('click', function() {
+                        activeEditorSource = queryInput;
+                        fullscreenEditor.value = queryInput.value;
+                        editorTitle.textContent = "Solution Query Editor";
+                        editorModal.show();
+                    });
+                }
+            }
+
+            // --- Save from fullscreen editor back to main form ---
+            if (saveEditorBtn) {
+                saveEditorBtn.addEventListener('click', function() {
+                    if (!activeEditorSource) return;
+                    
+                    activeEditorSource.value = fullscreenEditor.value;
+                    editorModal.hide();
+                    
+                    // Trigger validation based on which editor we were using
+                    if (activeEditorSource === schemaInput) validateSchema();
+                    else if (activeEditorSource === dataInput) validateData();
+                    else if (activeEditorSource === queryInput) {
+                        validateQuery();
+                        // If it's the query editor, we also need to resize it
+                        autoResizeQueryArea();
+                    }
+                    
+                    activeEditorSource = null;
+                });
+            }
 
             // --- Debounce Function ---
             function debounce(func, wait) {
@@ -383,14 +611,11 @@
             if (dataInput) dataInput.addEventListener('input', validateData);
             if (queryInput) queryInput.addEventListener('input', validateQuery);
 
-            // Also trigger validation on blur for final check if needed, or if input event fails
-            // if (schemaInput) schemaInput.addEventListener('blur', validateSchema);
-            // if (dataInput) dataInput.addEventListener('blur', validateData);
-            // if (queryInput) queryInput.addEventListener('blur', validateQuery);
-
+            // --- Set up expand buttons ---
+            setupExpandButtons();
 
             // --- Prevent Double Submission (Keep existing logic) ---
-             var form = document.getElementById('createMysteryForm');
+            var form = document.getElementById('createMysteryForm');
             if (form) {
                 form.addEventListener('submit', function (event) {
                     // Optionally re-validate everything synchonously before submit? (more complex)
