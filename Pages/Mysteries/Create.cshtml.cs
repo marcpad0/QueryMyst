@@ -195,6 +195,17 @@ namespace QueryMyst.Pages.Mysteries
                 {
                     await connection.OpenAsync();
                     await ExecuteNonQuerySqlAsync(connection, data.SchemaSql);
+                    
+                    // Validate column types with sqlite_master
+                    var validationErrors = await ValidateSchemaTypesAsync(connection);
+                    if (validationErrors.Count > 0)
+                    {
+                        return new JsonResult(new { 
+                            success = false, 
+                            message = $"Schema contains invalid data types: {string.Join(", ", validationErrors)}" 
+                        });
+                    }
+                    
                     await connection.CloseAsync();
                     return new JsonResult(new { success = true, message = "Schema syntax appears valid." });
                 }
@@ -205,6 +216,53 @@ namespace QueryMyst.Pages.Mysteries
                     return new JsonResult(new { success = false, message = $"Schema Error: {ex.Message}" });
                 }
             }
+        }
+
+        private async Task<List<string>> ValidateSchemaTypesAsync(SqliteConnection connection)
+        {
+            var errors = new List<string>();
+            var validTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) 
+            { 
+                "INTEGER", "TEXT", "BLOB", "REAL", "NUMERIC", "BOOLEAN", "DATETIME", "DATE", "TIME" 
+            };
+            
+            using (var command = connection.CreateCommand())
+            {
+                // Query the schema information from sqlite_master
+                command.CommandText = "SELECT name, sql FROM sqlite_master WHERE type='table'";
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var tableName = reader.GetString(0);
+                        var createSql = reader.GetString(1);
+
+                        // Now check column definitions
+                        using (var columnsCommand = connection.CreateCommand())
+                        {
+                            columnsCommand.CommandText = $"PRAGMA table_info({tableName})";
+                            using (var columnsReader = await columnsCommand.ExecuteReaderAsync())
+                            {
+                                while (await columnsReader.ReadAsync())
+                                {
+                                    var columnName = columnsReader.GetString(1);
+                                    var typeName = columnsReader.GetString(2);
+                                    
+                                    // Extract base type (remove size or constraints)
+                                    var baseType = typeName.Split('(')[0].Trim().ToUpperInvariant();
+                                    
+                                    if (!validTypes.Contains(baseType))
+                                    {
+                                        errors.Add($"Column '{columnName}' in table '{tableName}' has invalid type '{typeName}' (should be one of: {string.Join(", ", validTypes)})");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return errors;
         }
 
         // --- Handler for Sample Data Validation ---
@@ -220,10 +278,22 @@ namespace QueryMyst.Pages.Mysteries
                 try
                 {
                     await connection.OpenAsync();
-                    // Must execute schema first
+                    // Execute schema first
                     await ExecuteNonQuerySqlAsync(connection, data.SchemaSql);
-                    // Then execute data
+                    
+                    // Execute data
                     await ExecuteNonQuerySqlAsync(connection, data.DataSql);
+                    
+                    // Validate data types match schema expectations
+                    var typeErrors = await ValidateDataTypesAsync(connection);
+                    if (typeErrors.Count > 0)
+                    {
+                        return new JsonResult(new { 
+                            success = false, 
+                            message = $"Data type validation failed: {string.Join("; ", typeErrors)}" 
+                        });
+                    }
+                    
                     await connection.CloseAsync();
                     return new JsonResult(new { success = true, message = "Sample Data syntax appears valid and compatible with schema." });
                 }
@@ -234,6 +304,65 @@ namespace QueryMyst.Pages.Mysteries
                     return new JsonResult(new { success = false, message = $"Data Error: {ex.Message}" });
                 }
             }
+        }
+
+        private async Task<List<string>> ValidateDataTypesAsync(SqliteConnection connection)
+        {
+            var errors = new List<string>();
+            
+            // Get all tables
+            using (var tablesCommand = connection.CreateCommand())
+            {
+                tablesCommand.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'";
+                using (var tablesReader = await tablesCommand.ExecuteReaderAsync())
+                {
+                    while (await tablesReader.ReadAsync())
+                    {
+                        var tableName = tablesReader.GetString(0);
+                        var columnTypes = new Dictionary<string, string>();
+                        
+                        // Get column info for each table
+                        using (var columnsCommand = connection.CreateCommand())
+                        {
+                            columnsCommand.CommandText = $"PRAGMA table_info({tableName})";
+                            using (var columnsReader = await columnsCommand.ExecuteReaderAsync())
+                            {
+                                while (await columnsReader.ReadAsync())
+                                {
+                                    var columnName = columnsReader.GetString(1);
+                                    var typeName = columnsReader.GetString(2).ToUpperInvariant();
+                                    columnTypes[columnName] = typeName;
+                                }
+                            }
+                        }
+                        
+                        // Check each numeric column for non-numeric values
+                        foreach (var column in columnTypes)
+                        {
+                            if (column.Value.Contains("INT") || column.Value.Contains("REAL") || 
+                                column.Value.Contains("NUMERIC") || column.Value.Contains("DECIMAL") ||
+                                column.Value.Contains("FLOAT"))
+                            {
+                                using (var checkCommand = connection.CreateCommand())
+                                {
+                                    // Try to perform a numeric operation - this will fail if data is not numeric
+                                    checkCommand.CommandText = $"SELECT COUNT(*) FROM {tableName} " + 
+                                        $"WHERE typeof({column.Key}) != 'integer' AND typeof({column.Key}) != 'real' " + 
+                                        $"AND {column.Key} IS NOT NULL";
+                                    
+                                    var nonNumericCount = Convert.ToInt32(await checkCommand.ExecuteScalarAsync());
+                                    if (nonNumericCount > 0)
+                                    {
+                                        errors.Add($"Table '{tableName}' column '{column.Key}' contains non-numeric values but has type '{column.Value}'");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return errors;
         }
 
         // --- Handler for Solution Query Validation & Preview ---
