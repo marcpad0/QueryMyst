@@ -4,56 +4,59 @@
     ViewData["Title"] = $"Mystery: {Model.Mystery?.Title}";
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     @if (Model.Mystery != null && Model.Mystery.Details != null)
     {
         <div class="row">
+            <!-- Mystery Header -->
+            <div class="col-12 mb-4">
+                <div class="card shadow border-0 bg-gradient-primary text-white">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="mystery-icon me-3">
+                                @Html.Raw(Model.Mystery.Icon)
+                            </div>
+                            <div>
+                                <h2 class="mb-0">@Model.Mystery.Title</h2>
+                                <div class="mt-2">
+                                    <span class="badge @Model.Mystery.DifficultyClass me-2">@Model.Mystery.Difficulty</span>
+                                    <span class="badge bg-secondary me-2">@Model.Mystery.Category</span>
+                                    @if (Model.Mystery.RequiredSkills != null)
+                                    {
+                                        @foreach (var skill in Model.Mystery.RequiredSkills)
+                                        {
+                                            <span class="badge bg-light text-dark skill-tag me-1">@skill</span>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Left Column: Mystery Info -->
-            <div class="col-lg-5">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-gradient-primary text-white">
-                        <h4 class="mb-0"><i class="bi bi-book-half me-2"></i> Case File: @Model.Mystery.Title</h4>
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 rounded-4 mb-4">
+                    <div class="card-header bg-gradient-primary text-white rounded-top-4">
+                        <h4 class="mb-0"><i class="bi bi-book-half me-2"></i> Case File</h4>
                     </div>
                     <div class="card-body">
-                        <span class="badge @Model.Mystery.DifficultyClass mb-2">@Model.Mystery.Difficulty</span>
-                        <span class="badge bg-secondary mb-2">@Model.Mystery.Category</span>
-
-                        <h5 class="mt-3">Description</h5>
-                        <p>@Model.Mystery.Details.FullDescription</p>
-
-                        <h5 class="mt-3">Database Schema</h5>
-                        <pre><code class="sql">@Model.Mystery.Details.DatabaseSchema</code></pre>
-
-                        <h5 class="mt-3">Sample Data</h5>
-                        <pre><code class="sql">@Model.Mystery.Details.SampleData</code></pre>
-
-                        <h5 class="mt-3">Required Skills</h5>
-                        <div>
-                            @if (Model.Mystery.RequiredSkills != null)
-                            {
-                                @foreach (var skill in Model.Mystery.RequiredSkills)
-                                {
-                                    <span class="skill-tag">@skill</span>
-                                }
-                            }
-                            else
-                            {
-                                <span class="text-muted fst-italic">No specific skills listed.</span>
-                            }
-                        </div>
+                        <h5 class="mt-2 mb-3 text-primary"><i class="bi bi-info-circle me-2"></i>Description</h5>
+                        <p class="lead">@Model.Mystery.Details.FullDescription</p>
 
                         <div class="accordion mt-4" id="hintsAccordion">
-                            <div class="accordion-item">
+                            <div class="accordion-item border-0 shadow-sm mb-3 rounded-3">
                                 <h2 class="accordion-header" id="hintsHeading">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHints" aria-expanded="false" aria-controls="collapseHints">
-                                        <i class="bi bi-lightbulb me-2"></i> Need a Hint?
+                                    <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHints" aria-expanded="false" aria-controls="collapseHints">
+                                        <i class="bi bi-lightbulb-fill me-2 text-warning"></i> Need a Hint?
                                     </button>
                                 </h2>
-                                <div id="collapseHints" class="accordion-collapse collapse" aria-labelledby="hintsHeading" data-bs-parent="#hintsAccordion">
+                                <div id="collapseHints" class="accordion-collapse collapse" aria-labelledby="hintsHeading">
                                     <div class="accordion-body">
                                         @if (!string.IsNullOrWhiteSpace(Model.Mystery.Details.HintText))
                                         {
-                                            @Model.Mystery.Details.HintText
+                                            <p class="hint-text">@Model.Mystery.Details.HintText</p>
                                         }
                                         else
                                         {
@@ -62,17 +65,17 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="accordion-item">
+                            <div class="accordion-item border-0 shadow-sm rounded-3">
                                 <h2 class="accordion-header" id="cluesHeading">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClues" aria-expanded="false" aria-controls="collapseClues">
-                                        <i class="bi bi-signpost-split me-2"></i> False Clues
+                                    <button class="accordion-button collapsed rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseClues" aria-expanded="false" aria-controls="collapseClues">
+                                        <i class="bi bi-signpost-split me-2 text-info"></i> False Clues
                                     </button>
                                 </h2>
-                                <div id="collapseClues" class="accordion-collapse collapse" aria-labelledby="cluesHeading" data-bs-parent="#hintsAccordion">
+                                <div id="collapseClues" class="accordion-collapse collapse" aria-labelledby="cluesHeading">
                                     <div class="accordion-body">
                                          @if (!string.IsNullOrWhiteSpace(Model.Mystery.Details.FalseClues))
                                         {
-                                            @Model.Mystery.Details.FalseClues
+                                            <p class="clue-text">@Model.Mystery.Details.FalseClues</p>
                                         }
                                         else
                                         {
@@ -82,25 +85,92 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Database Schema Visualization -->
+                        <h5 class="mt-4 mb-3 text-primary"><i class="bi bi-database me-2"></i>Database Schema</h5>
+                        <ul class="nav nav-tabs mb-3" id="schemaViews" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="visual-tab" data-bs-toggle="tab" data-bs-target="#visual-schema" type="button" role="tab" aria-selected="true">
+                                    <i class="bi bi-diagram-3 me-1"></i> Visual
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="code-tab" data-bs-toggle="tab" data-bs-target="#code-schema" type="button" role="tab" aria-selected="false">
+                                    <i class="bi bi-code-slash me-1"></i> SQL Code
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="schemaViewsContent">
+                            <div class="tab-pane fade show active" id="visual-schema" role="tabpanel">
+                                <div id="schema-diagram" class="schema-container">
+                                    <!-- Dynamic visualization will be rendered here by JavaScript -->
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="code-schema" role="tabpanel">
+                                <pre><code class="language-sql">@Model.Mystery.Details.DatabaseSchema</code></pre>
+                                <h6 class="mt-4 mb-2">Sample Data:</h6>
+                                <pre><code class="language-sql">@Model.Mystery.Details.SampleData</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Notes Section -->
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="text-primary mb-0"><i class="bi bi-pencil-square me-2"></i>Your Notes</h5>
+                                <span id="notes-saved" class="saved-indicator"><i class="bi bi-check-circle"></i> Saved</span>
+                            </div>
+                            <div class="form-floating mt-2">
+                                <textarea class="form-control" id="userNotes" style="height: 150px" placeholder="Your notes about this mystery"></textarea>
+                                <label for="userNotes">Take notes about your approach, findings, or ideas</label>
+                            </div>
+                            <div class="d-flex justify-content-end mt-2">
+                                <button id="clearNotes" class="btn btn-outline-secondary btn-sm me-2">
+                                    <i class="bi bi-trash"></i> Clear
+                                </button>
+                                <button id="saveNotes" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-save"></i> Save Notes
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Right Column: SQL Editor & Results -->
-            <div class="col-lg-7">
-                <div class="card shadow-sm mb-4">
-                     <div class="card-header bg-gradient-secondary text-white">
-                        <h5 class="mb-0"><i class="bi bi-terminal me-2"></i> SQL Query Editor</h5>
+            <div class="col-lg-6">
+                <div class="card shadow-sm border-0 rounded-4 mb-4">
+                    <div class="card-header bg-gradient-secondary text-white rounded-top-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-terminal me-2"></i> SQL Query Editor</h5>
+                            <button class="btn btn-sm btn-outline-light" id="toggle-fullscreen">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <form method="post">
                             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                             <div class="mb-3">
-                                <label for="sqlQueryArea" class="form-label">Enter your SQL query:</label>
-                                <textarea asp-for="UserQuery" class="form-control" id="sqlQueryArea" rows="10" placeholder="SELECT column FROM table WHERE condition;"></textarea>
+                                <div class="editor-toolbar bg-light p-2 rounded-top border">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 template-btn" data-template="SELECT * FROM ">SELECT</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 template-btn" data-template="WHERE ">WHERE</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 template-btn" data-template="JOIN ">JOIN</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 template-btn" data-template="GROUP BY ">GROUP BY</button>
+                                </div>
+                                <textarea asp-for="UserQuery" class="form-control rounded-0 rounded-bottom" id="sqlQueryArea" rows="10" placeholder="SELECT column FROM table WHERE condition;"></textarea>
                                 <span asp-validation-for="UserQuery" class="text-danger"></span>
                             </div>
-                            <button type="submit" class="btn btn-success"><i class="bi bi-play-fill me-1"></i> Run Query</button>
+                            <div class="d-flex align-items-center">
+                                <button type="submit" class="btn btn-success px-4">
+                                    <i class="bi bi-play-fill me-1"></i> Run Query
+                                </button>
+                                <div class="ms-auto">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="autoFormatCheck">
+                                        <label class="form-check-label" for="autoFormatCheck">Auto-format</label>
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -108,8 +178,8 @@
                 <!-- Results Area -->
                 @if (Model.IsPost) // Only show results section after a POST request
                 {
-                    <div class="card shadow-sm">
-                         <div class="card-header @(Model.IsCorrectSolution ? "bg-gradient-success" : (string.IsNullOrEmpty(Model.ErrorMessage) ? "bg-gradient-info" : "bg-gradient-danger")) text-white">
+                    <div class="card shadow-sm border-0 rounded-4">
+                         <div class="card-header @(Model.IsCorrectSolution ? "bg-gradient-success" : (string.IsNullOrEmpty(Model.ErrorMessage) ? "bg-gradient-info" : "bg-gradient-danger")) text-white rounded-top-4">
                             <h5 class="mb-0">
                                 @if (Model.IsCorrectSolution)
                                 {
@@ -128,27 +198,38 @@
                         <div class="card-body">
                             @if (Model.IsCorrectSolution)
                             {
-                                <div class="alert alert-success" role="alert">
-                                    <strong>Congratulations!</strong> You found the correct solution.
+                                <div class="alert alert-success border-0 shadow-sm" role="alert">
+                                    <div class="d-flex">
+                                        <div class="me-3 fs-2"><i class="bi bi-trophy-fill"></i></div>
+                                        <div>
+                                            <h5 class="alert-heading">Congratulations!</h5>
+                                            <p>You solved the mystery correctly. Well done, detective!</p>
+                                        </div>
+                                    </div>
                                 </div>
                             }
                             @if (!string.IsNullOrEmpty(Model.QueryResult))
                             {
-                                <div>
-                                    <strong>Your Query Returned:</strong>
-                                    <pre><code class="result">@Model.QueryResult</code></pre>
+                                <div class="result-container">
+                                    <h6 class="mb-2">Results:</h6>
+                                    <div class="table-responsive">
+                                        <div id="formatted-results">
+                                            <!-- Results will be formatted as HTML table by JavaScript -->
+                                        </div>
+                                        <pre class="d-none"><code class="result" id="raw-results">@Model.QueryResult</code></pre>
+                                    </div>
                                 </div>
                             }
                             @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                             {
-                                 <div class="alert alert-danger" role="alert">
-                                    <strong>Error:</strong>
+                                 <div class="alert alert-danger shadow-sm border-0" role="alert">
+                                    <h6><i class="bi bi-bug me-2"></i>Error:</h6>
                                     <pre><code class="error">@Model.ErrorMessage</code></pre>
                                 </div>
                             }
                             @if (!Model.IsCorrectSolution && string.IsNullOrEmpty(Model.QueryResult) && string.IsNullOrEmpty(Model.ErrorMessage))
                             {
-                                 <p class="text-muted">Your query executed but returned no results or an unknown status.</p>
+                                 <p class="text-muted">Your query executed but returned no results.</p>
                             }
                         </div>
                     </div>
@@ -158,53 +239,554 @@
     }
     else
     {
-        <div class="alert alert-danger" role="alert">
-            Mystery not found or details are missing. Please go back to the <a href="/Mysteries">Mysteries list</a>.
+        <div class="alert alert-danger shadow-sm border-0" role="alert">
+            <h5><i class="bi bi-exclamation-circle me-2"></i> Mystery not found</h5>
+            <p>The mystery you're looking for doesn't exist or details are missing.</p>
+            <a href="/Mysteries" class="btn btn-outline-danger">Return to Mysteries List</a>
         </div>
     }
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <!-- Add Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/sql.min.js"></script>
+
     <style>
-        /* Basic styling for code blocks */
+        /* Modern styling */
+        .card {
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+        
+        .mystery-icon i {
+            font-size: 2.5rem;
+            background: rgba(255,255,255,0.2);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .rounded-4 {
+            border-radius: 0.7rem!important;
+        }
+        
+        .rounded-top-4 {
+            border-top-left-radius: 0.7rem!important;
+            border-top-right-radius: 0.7rem!important;
+        }
+        
+        /* Custom gradients */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #6259ca, #4e36e2);
+        }
+        
+        .bg-gradient-secondary {
+            background: linear-gradient(135deg, #5c636a, #343a40);
+        }
+        
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #1cae59, #0ca750);
+        }
+        
+        .bg-gradient-info {
+            background: linear-gradient(135deg, #17a2b8, #0f8999);
+        }
+        
+        .bg-gradient-danger {
+            background: linear-gradient(135deg, #dc3545, #b02a37);
+        }
+        
+        /* Database visualization */
+        .schema-container {
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            background-color: #f8fafc;
+        }
+        
+        .table-card {
+            border: 1px solid #cfd8e3;
+            border-radius: 0.5rem;
+            background: white;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            max-width: 300px;
+        }
+        
+        .table-card h6 {
+            border-bottom: 2px solid #eaeef3;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #364152;
+            font-weight: 600;
+        }
+        
+        .table-column {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #f0f4f8;
+        }
+        
+        .table-column:last-child {
+            border-bottom: none;
+        }
+        
+        .column-name {
+            font-weight: 500;
+        }
+        
+        .column-pk {
+            color: #d63384;
+            font-weight: 700;
+        }
+        
+        .column-fk {
+            color: #0d6efd;
+            font-weight: 500;
+        }
+        
+        .relation-line {
+            stroke: #0d6efd;
+            stroke-width: 2px;
+        }
+        
+        /* Notes feature */
+        #userNotes {
+            background-color: #fffde7;
+            border-color: #fff9c4;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        #userNotes:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 235, 59, 0.25);
+            border-color: #ffd600;
+        }
+        
+        .saved-indicator {
+            color: #198754;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            font-size: 0.9rem;
+        }
+        
+        .saved-indicator.visible {
+            opacity: 1;
+        }
+        
+        /* Editor styling */
+        #sqlQueryArea {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.95rem;
+            tab-size: 4;
+        }
+        
+        .editor-toolbar {
+            border-bottom: none;
+        }
+        
+        /* Results table styling */
+        .query-results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.05);
+        }
+        
+        .query-results-table thead {
+            background-color: #4e36e2;
+            color: white;
+        }
+        
+        .query-results-table th, .query-results-table td {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .query-results-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        .query-results-table tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* Skill tags */
+        .skill-tag {
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Fullscreen editor */
+        .editor-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1050;
+            background: white;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .editor-fullscreen textarea {
+            height: calc(100vh - 200px) !important;
+        }      
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        /* Code blocks */
         pre code {
             display: block;
-            padding: 1em;
-            background-color: #f8f9fa; /* Light background */
-            border: 1px solid #dee2e6; /* Subtle border */
-            border-radius: 0.25rem;
-            font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 0.9em;
-            white-space: pre-wrap; /* Wrap long lines */
-            word-break: break-all;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
         }
-        pre code.sql { /* Specific style for SQL schema/data */
-             background-color: #eef;
-        }
-         pre code.result, pre code.error { /* Specific style for results/errors */
-             background-color: #f1f1f1;
-             max-height: 300px; /* Limit result height */
-             overflow-y: auto; /* Add scroll if needed */
-        }
-        .skill-tag {
-            display: inline-block;
-            background-color: #e9ecef;
-            color: #495057;
-            padding: 0.25em 0.6em;
-            margin-right: 0.5em;
-            margin-bottom: 0.5em;
-            border-radius: 0.25rem;
-            font-size: 0.85em;
-        }
-        /* Style for accordion buttons */
-        .accordion-button:not(.collapsed) {
-            color: var(--bs-primary);
-            background-color: var(--bs-primary-bg-subtle);
+        
+        .result-container {
+            animation: fadeIn 0.5s ease;
         }
     </style>
-    <!-- Optional: Add syntax highlighting library like highlight.js -->
-    @* <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css"> *@
-    @* <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script> *@
-    @* <script>hljs.highlightAll();</script> *@
+
+    <script>
+        // Initialize syntax highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+            
+            // Initialize schema visualization
+            visualizeSchema();
+            
+            // Format result data as HTML table if available
+            formatResultsAsTable();
+            
+            // Initialize notes functionality
+            initNotesFeature();
+            
+            // Initialize editor functionality
+            initEditorFeatures();
+        });
+        
+        // 1. Schema Visualization
+        function visualizeSchema() {
+            const container = document.getElementById('schema-diagram');
+            if (!container) return;
+            
+            try {
+                // Parse schema from the database schema text
+                const schemaText = `@Html.Raw(Json.Serialize(Model.Mystery?.Details?.DatabaseSchema))`;
+                const tables = parseSchemaFromSQL(schemaText);
+                
+                if (tables.length === 0) {
+                    container.innerHTML = '<div class="alert alert-warning">Could not parse schema visualization.</div>';
+                    return;
+                }
+                
+                // Render tables
+                let html = '';
+                tables.forEach(table => {
+                    html += `
+                        <div class="table-card">
+                            <h6>${table.name}</h6>
+                            <div class="table-columns">
+                    `;
+                    
+                    table.columns.forEach(column => {
+                        let columnClass = '';
+                        let columnBadge = '';
+                        
+                        if (column.isPrimaryKey) {
+                            columnClass = 'column-pk';
+                            columnBadge = '<span class="badge bg-danger rounded-pill ms-1">PK</span>';
+                        } else if (column.isForeignKey) {
+                            columnClass = 'column-fk';
+                            columnBadge = '<span class="badge bg-primary rounded-pill ms-1">FK</span>';
+                        }
+                        
+                        html += `
+                            <div class="table-column">
+                                <span class="column-name ${columnClass}">${column.name} ${columnBadge}</span>
+                                <span class="column-type">${column.type}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+                
+                // Add relationship lines with SVG (simplified - in a real app would be more sophisticated)
+                if (tables.length > 1) {
+                    // Draw relationships between tables with foreign keys
+                    // This is a placeholder for more advanced visualization logic
+                    container.innerHTML += `
+                        <div class="text-center text-muted mt-3">
+                            <i class="bi bi-arrow-left-right me-2"></i>
+                            Tables are connected by foreign key relationships
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error visualizing schema:', error);
+                container.innerHTML = '<div class="alert alert-warning">Error parsing schema.</div>';
+            }
+        }
+        
+        // Helper function to parse SQL schema into structured data
+        function parseSchemaFromSQL(sql) {
+            const tables = [];
+            
+            // Simple regex pattern matching for CREATE TABLE statements
+            const tablePattern = /CREATE\s+TABLE\s+(\w+)\s*\(([\s\S]*?)\);/g;
+            let match;
+            
+            while ((match = tablePattern.exec(sql)) !== null) {
+                const tableName = match[1];
+                const columnsText = match[2];
+                
+                // Parse columns
+                const columnLines = columnsText.split(',').map(line => line.trim());
+                const columns = [];
+                
+                columnLines.forEach(line => {
+                    // Skip if it's not a column definition (like constraints)
+                    if (line.startsWith('FOREIGN KEY') || line.startsWith('PRIMARY KEY') || line.startsWith('CONSTRAINT')) {
+                        return;
+                    }
+                    
+                    // Basic column parsing
+                    const parts = line.split(/\s+/);
+                    if (parts.length >= 2) {
+                        const columnName = parts[0];
+                        const columnType = parts[1];
+                        
+                        columns.push({
+                            name: columnName,
+                            type: columnType,
+                            isPrimaryKey: line.toUpperCase().includes('PRIMARY KEY') || columnName.endsWith('ID'),
+                            isForeignKey: line.toUpperCase().includes('FOREIGN KEY') || line.includes('REFERENCES') || columnsText.includes(`FOREIGN KEY (${columnName})`)
+                        });
+                    }
+                });
+                
+                tables.push({
+                    name: tableName,
+                    columns: columns
+                });
+            }
+            
+            return tables;
+        }
+        
+        // 2. Format results as HTML table
+        function formatResultsAsTable() {
+            const rawResults = document.getElementById('raw-results');
+            const formattedResults = document.getElementById('formatted-results');
+            
+            if (!rawResults || !formattedResults) return;
+            
+            try {
+                // Parse the text-based results into rows and columns
+                const resultText = rawResults.textContent;
+                const rows = resultText.trim().split('\n');
+                
+                if (rows.length < 2) {
+                    formattedResults.innerHTML = `<pre>${resultText}</pre>`;
+                    return;
+                }
+                
+                // First row is the header
+                const headers = rows[0].split(' | ').map(h => h.trim());
+                
+                // Create HTML table
+                let tableHtml = '<table class="query-results-table">';
+                
+                // Table header
+                tableHtml += '<thead><tr>';
+                headers.forEach(header => {
+                    tableHtml += `<th>${header}</th>`;
+                });
+                tableHtml += '</tr></thead>';
+                
+                // Table body (skip first row which is header, and separator line)
+                tableHtml += '<tbody>';
+                for (let i = 2; i < rows.length; i++) {
+                    const cellValues = rows[i].split(' | ').map(cell => cell.trim());
+                    
+                    tableHtml += '<tr>';
+                    cellValues.forEach(value => {
+                        tableHtml += `<td>${value === 'NULL' ? '<span class="text-muted">NULL</span>' : value}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                }
+                tableHtml += '</tbody></table>';
+                
+                formattedResults.innerHTML = tableHtml;
+            } catch (error) {
+                console.error('Error formatting results:', error);
+                // Fall back to raw output
+                formattedResults.innerHTML = `<pre>${rawResults.textContent}</pre>`;
+            }
+        }
+        
+        // 3. Notes feature with localStorage
+        function initNotesFeature() {
+            const userNotes = document.getElementById('userNotes');
+            const saveBtn = document.getElementById('saveNotes');
+            const clearBtn = document.getElementById('clearNotes');
+            const savedIndicator = document.getElementById('notes-saved');
+            
+            if (!userNotes || !saveBtn || !clearBtn) return;
+            
+            const mysteryId = '@Model.Mystery?.Id';
+            const storageKey = `queryMyst_notes_${mysteryId}`;
+            
+            // Load saved notes
+            const savedNotes = localStorage.getItem(storageKey);
+            if (savedNotes) {
+                userNotes.value = savedNotes;
+            }
+            
+            // Auto-save on typing (debounced)
+            let saveTimeout;
+            userNotes.addEventListener('input', function() {
+                clearTimeout(saveTimeout);
+                savedIndicator.classList.remove('visible');
+                
+                saveTimeout = setTimeout(function() {
+                    localStorage.setItem(storageKey, userNotes.value);
+                    savedIndicator.classList.add('visible');
+                    
+                    // Hide saved indicator after 2 seconds
+                    setTimeout(function() {
+                        savedIndicator.classList.remove('visible');
+                    }, 2000);
+                }, 1000);
+            });
+            
+            // Manual save
+            saveBtn.addEventListener('click', function() {
+                localStorage.setItem(storageKey, userNotes.value);
+                savedIndicator.classList.add('visible');
+                
+                // Add animation effect
+                saveBtn.classList.add('disabled');
+                setTimeout(function() {
+                    saveBtn.classList.remove('disabled');
+                    savedIndicator.classList.remove('visible');
+                }, 1500);
+            });
+            
+            // Clear notes
+            clearBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear your notes?')) {
+                    userNotes.value = '';
+                    localStorage.removeItem(storageKey);
+                    savedIndicator.classList.remove('visible');
+                }
+            });
+        }
+        
+        // 4. SQL Editor enhancements
+        function initEditorFeatures() {
+            const sqlEditor = document.getElementById('sqlQueryArea');
+            const templateBtns = document.querySelectorAll('.template-btn');
+            const fullscreenBtn = document.getElementById('toggle-fullscreen');
+            const editorContainer = fullscreenBtn?.closest('.card');
+            const formatCheck = document.getElementById('autoFormatCheck');
+            
+            // SQL templates insertion
+            templateBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const template = this.dataset.template;
+                    
+                    // Insert at cursor position or append
+                    if (sqlEditor.selectionStart || sqlEditor.selectionStart === 0) {
+                        const startPos = sqlEditor.selectionStart;
+                        const endPos = sqlEditor.selectionEnd;
+                        sqlEditor.value = sqlEditor.value.substring(0, startPos) + template + 
+                            sqlEditor.value.substring(endPos, sqlEditor.value.length);
+                        sqlEditor.selectionStart = startPos + template.length;
+                        sqlEditor.selectionEnd = startPos + template.length;
+                    } else {
+                        sqlEditor.value += template;
+                    }
+                    
+                    sqlEditor.focus();
+                });
+            });
+            
+            // Fullscreen toggle
+            if (fullscreenBtn && editorContainer) {
+                fullscreenBtn.addEventListener('click', function() {
+                    editorContainer.classList.toggle('editor-fullscreen');
+                    
+                    const isFullscreen = editorContainer.classList.contains('editor-fullscreen');
+                    fullscreenBtn.innerHTML = isFullscreen ? 
+                        '<i class="bi bi-fullscreen-exit"></i>' : 
+                        '<i class="bi bi-arrows-fullscreen"></i>';
+                        
+                    if (isFullscreen) {
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+            
+            // Auto-format SQL (basic implementation)
+            if (formatCheck && sqlEditor) {
+                formatCheck.addEventListener('change', function() {
+                    if (this.checked && sqlEditor.value) {
+                        sqlEditor.value = formatSQL(sqlEditor.value);
+                    }
+                });
+            }
+        }
+        
+        // Helper for basic SQL formatting
+        function formatSQL(sql) {
+            // This is a very simplified formatter
+            // In a production app, you'd use a proper SQL formatter library
+            
+            // Uppercase keywords
+            const keywords = ['SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 
+                             'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'AND', 'OR', 'ON', 'AS'];
+                             
+            let formatted = sql;
+            
+            // Replace keywords with uppercase versions
+            keywords.forEach(keyword => {
+                const regex = new RegExp('\\b' + keyword + '\\b', 'gi');
+                formatted = formatted.replace(regex, keyword);
+            });
+            
+            // Add line breaks
+            ['SELECT', 'FROM', 'WHERE', 'JOIN', 'GROUP BY', 'ORDER BY', 'HAVING'].forEach(term => {
+                const regex = new RegExp('\\b' + term + '\\b', 'g');
+                formatted = formatted.replace(regex, '\n' + term);
+            });
+            
+            return formatted;
+        }
+    </script>
 }
