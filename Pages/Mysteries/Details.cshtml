@@ -1,5 +1,5 @@
 @page "{id:int}"
-@model QueryMyst.Pages.Mysteries.DetailsModel
+@model QueryMyst.Pages.Mysteries.DetailsModel // Make sure this namespace is correct
 @{
     ViewData["Title"] = $"Mystery: {Model.Mystery?.Title}";
 }
@@ -14,14 +14,14 @@
                     <div class="card-body py-3">
                         <div class="d-flex align-items-center">
                             <div class="mystery-icon me-3">
-                                @Html.Raw(Model.Mystery.Icon)
+                                @Html.Raw(Model.Mystery.Icon ?? "<i class='bi bi-question-diamond'></i>")
                             </div>
                             <div>
                                 <h2 class="mb-0">@Model.Mystery.Title</h2>
                                 <div class="mt-2">
                                     <span class="badge @Model.Mystery.DifficultyClass me-2">@Model.Mystery.Difficulty</span>
                                     <span class="badge bg-secondary me-2">@Model.Mystery.Category</span>
-                                    @if (Model.Mystery.RequiredSkills != null)
+                                    @if (Model.Mystery.RequiredSkills != null && Model.Mystery.RequiredSkills.Any())
                                     {
                                         @foreach (var skill in Model.Mystery.RequiredSkills)
                                         {
@@ -37,16 +37,17 @@
 
             <!-- Left Column: Mystery Info -->
             <div class="col-lg-5">
-                <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card shadow-sm border-0 rounded-4 mb-4 h-100">
                     <div class="card-header bg-gradient-primary text-white rounded-top-4">
                         <h4 class="mb-0"><i class="bi bi-book-half me-2"></i> Case File</h4>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body d-flex flex-column">
                         <h5 class="mt-2 mb-3 text-primary"><i class="bi bi-info-circle me-2"></i>Description</h5>
                         <p class="lead">@Model.Mystery.Details.FullDescription</p>
 
+                        <!-- Hints and Clues -->
                         <div class="accordion mt-4" id="hintsAccordion">
-                            <div class="accordion-item border-0 shadow-sm mb-3 rounded-3">
+                           <div class="accordion-item border-0 shadow-sm mb-3 rounded-3">
                                 <h2 class="accordion-header" id="hintsHeading">
                                     <button class="accordion-button collapsed rounded-3" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapseHints" aria-expanded="false"
@@ -91,12 +92,12 @@
                         </div>
 
                         <!-- Database Schema Visualization -->
-                        <h5 class="mt-4 mb-3 text-primary"><i class="bi bi-database me-2"></i>Database Schema</h5>
-                        <ul class="nav nav-tabs mb-3" id="schemaViews" role="tablist">
+                        <h5 class="mt-4 mb-3 text-primary"><i class="bi bi-diagram-3-fill me-2"></i>Database Schema</h5>
+                         <ul class="nav nav-tabs mb-3" id="schemaViews" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="visual-tab" data-bs-toggle="tab"
                                     data-bs-target="#visual-schema" type="button" role="tab" aria-selected="true">
-                                    <i class="bi bi-diagram-3 me-1"></i> Visual
+                                    <i class="bi bi-eye-fill me-1"></i> Visual
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
@@ -106,150 +107,156 @@
                                 </button>
                             </li>
                         </ul>
-                        <div class="tab-content" id="schemaViewsContent">
+                        <div class="tab-content flex-grow-1" id="schemaViewsContent">
                             <div class="tab-pane fade show active" id="visual-schema" role="tabpanel">
-                                <div id="schema-diagram" class="schema-container">
+                                <!-- Container for the NEW schema visualization -->
+                                <div id="schema-diagram" class="schema-viz-container">
                                     <!-- Dynamic visualization will be rendered here by JavaScript -->
+                                    <div class="text-muted text-center p-3">Loading schema visualization...</div>
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="code-schema" role="tabpanel">
-                                <pre><code class="language-sql">@Model.Mystery.Details.DatabaseSchema</code></pre>
+                                <h6 class="mt-2 mb-2">Schema Definition:</h6>
+                                <pre><code class="language-sql bg-light border rounded p-2">@Model.Mystery.Details.DatabaseSchema</code></pre>
                                 <h6 class="mt-4 mb-2">Sample Data:</h6>
-                                <pre><code class="language-sql">@Model.Mystery.Details.SampleData</code></pre>
+                                <pre><code class="language-sql bg-light border rounded p-2">@Model.Mystery.Details.SampleData</code></pre>
                             </div>
                         </div>
 
                         <!-- Notes Section -->
-                        <div class="mt-4">
+                        <div class="mt-auto pt-4"> <!-- Push notes to bottom -->
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="text-primary mb-0"><i class="bi bi-pencil-square me-2"></i>Your Notes</h5>
                                 <span id="notes-saved" class="saved-indicator"><i class="bi bi-check-circle"></i>
                                     Saved</span>
                             </div>
                             <div class="form-floating mt-2">
-                                <textarea class="form-control" id="userNotes" style="height: 150px"
+                                <textarea class="form-control" id="userNotes" style="height: 100px"
                                 placeholder="Your notes about this mystery"></textarea>
-                                <label for="userNotes">Take notes about your approach, findings, or ideas</label>
+                                <label for="userNotes">Take notes about your approach...</label>
                             </div>
                             <div class="d-flex justify-content-end mt-2">
-                                <button id="clearNotes" class="btn btn-outline-secondary btn-sm me-2">
+                                <button id="clearNotes" class="btn btn-outline-secondary btn-sm me-2" title="Clear Notes">
                                     <i class="bi bi-trash"></i> Clear
                                 </button>
-                                <button id="saveNotes" class="btn btn-primary btn-sm">
+                                <button id="saveNotes" class="btn btn-primary btn-sm" title="Save Notes Now">
                                     <i class="bi bi-save"></i> Save Notes
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </div> <!-- End Card Body -->
+                </div> <!-- End Card -->
+            </div> <!-- End Left Column -->
 
             <!-- Right Column: SQL Editor & Results -->
             <div class="col-lg-7">
-                <div class="card shadow-sm border-0 rounded-4 mb-4">
-                    <div class="card-header bg-gradient-secondary text-white rounded-top-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="bi bi-terminal me-2"></i> SQL Query Editor</h5>
-                            <button class="btn btn-sm btn-outline-light" id="toggle-fullscreen">
-                                <i class="bi bi-arrows-fullscreen"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <form method="post">
-                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                            <div class="mb-3">
-                                <div class="editor-toolbar bg-light p-2 rounded-top border">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 template-btn"
-                                        data-template="SELECT * FROM ">SELECT</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 template-btn"
-                                        data-template="WHERE ">WHERE</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 template-btn"
-                                        data-template="JOIN ">JOIN</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary me-1 template-btn"
-                                        data-template="GROUP BY ">GROUP BY</button>
-                                </div>
-                                <textarea asp-for="UserQuery" class="form-control rounded-0 rounded-bottom"
-                                    id="sqlQueryArea" rows="10"
-                                    placeholder="SELECT column FROM table WHERE condition;"></textarea>
-                                <span asp-validation-for="UserQuery" class="text-danger"></span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <button type="submit" class="btn btn-success px-4">
-                                    <i class="bi bi-play-fill me-1"></i> Run Query
+                <div class="d-flex flex-column h-100">
+                     <!-- SQL Editor Card -->
+                    <div class="card shadow-sm border-0 rounded-4 mb-4 @(Model.IsPost ? "flex-grow-0" : "flex-grow-1")">
+                        <div class="card-header bg-gradient-secondary text-white rounded-top-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-terminal me-2"></i> SQL Query Editor</h5>
+                                <button class="btn btn-sm btn-outline-light" id="toggle-fullscreen" title="Toggle Fullscreen Editor">
+                                    <i class="bi bi-arrows-fullscreen"></i>
                                 </button>
-                                <div class="ms-auto">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" id="autoFormatCheck">
-                                        <label class="form-check-label" for="autoFormatCheck">Auto-format</label>
-                                    </div>
-                                </div>
                             </div>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Results Area -->
-                @if (Model.IsPost) // Only show results section after a POST request
-                {
-                    <div class="card shadow-sm border-0 rounded-4">
-                        <div
-                            class="card-header @(Model.IsCorrectSolution ? "bg-gradient-success" : (string.IsNullOrEmpty(Model.ErrorMessage) ? "bg-gradient-info" : "bg-gradient-danger")) text-white rounded-top-4">
-                            <h5 class="mb-0">
-                                @if (Model.IsCorrectSolution)
-                                {
-                                    <i class="bi bi-check-circle-fill me-2"></i> <span>Correct Solution!</span>
-                                }
-                                else if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                                {
-                                    <i class="bi bi-exclamation-triangle-fill me-2"></i> <span>Error</span>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-search me-2"></i> <span>Query Results</span>
-                                }
-                            </h5>
                         </div>
                         <div class="card-body">
-                            @if (Model.IsCorrectSolution)
-                            {
-                                <div class="alert alert-success border-0 shadow-sm" role="alert">
-                                    <div class="d-flex">
-                                        <div class="me-3 fs-2"><i class="bi bi-trophy-fill"></i></div>
-                                        <div>
-                                            <h5 class="alert-heading">Congratulations!</h5>
-                                            <p>You solved the mystery correctly. Well done, detective!</p>
+                            <form method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+                                <div class="mb-3">
+                                    <div class="editor-toolbar bg-light p-1 rounded-top border d-flex flex-wrap gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="SELECT * FROM ">SELECT *</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="SELECT COUNT(*) FROM ">COUNT(*)</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="WHERE ">WHERE</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="JOIN ">JOIN</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="ON ">ON</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="GROUP BY ">GROUP BY</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="ORDER BY ">ORDER BY</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="LIMIT ">LIMIT</button>
+                                    </div>
+                                    <textarea asp-for="UserQuery" class="form-control rounded-0 rounded-bottom"
+                                        id="sqlQueryArea" rows="8"
+                                        placeholder="-- Enter your SQL query here...
+SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '2023-01-01';"
+                                        aria-label="SQL Query Input Area"></textarea>
+                                    <span asp-validation-for="UserQuery" class="text-danger small"></span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <button type="submit" class="btn btn-success px-4">
+                                        <i class="bi bi-play-fill me-1"></i> Run Query
+                                    </button>
+                                    <div class="ms-auto">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="autoFormatCheck">
+                                            <label class="form-check-label small" for="autoFormatCheck">Auto-format</label>
                                         </div>
                                     </div>
                                 </div>
-                            }
-                            @if (!string.IsNullOrEmpty(Model.QueryResult))
-                            {
-                                <div class="result-container">
-                                    <h6 class="mb-2">Results:</h6>
-                                    <div class="table-responsive">
-                                        <div id="formatted-results">
-                                            <!-- Results will be formatted as HTML table by JavaScript -->
-                                        </div>
-                                        <pre class="d-none"><code class="result" id="raw-results">@Model.QueryResult</code></pre>
-                                    </div>
-                                </div>
-                            }
-                            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                            {
-                                <div class="alert alert-danger shadow-sm border-0" role="alert">
-                                    <h6><i class="bi bi-bug me-2"></i>Error:</h6>
-                                    <pre><code class="error">@Model.ErrorMessage</code></pre>
-                                </div>
-                            }
-                            @if (!Model.IsCorrectSolution && string.IsNullOrEmpty(Model.QueryResult) &&
-                                                string.IsNullOrEmpty(Model.ErrorMessage))
-                            {
-                                <p class="text-muted">Your query executed but returned no results.</p>
-                            }
+                            </form>
                         </div>
                     </div>
-                }
+
+                    <!-- Results Area (Only shows after Post) -->
+                    @if (Model.IsPost)
+                    {
+                        <div class="card shadow-sm border-0 rounded-4 flex-grow-1"> <!-- Results take remaining space -->
+                            <div class="card-header @(Model.IsCorrectSolution ? "bg-gradient-success" : (string.IsNullOrEmpty(Model.ErrorMessage) ? "bg-gradient-info" : "bg-gradient-danger")) text-white rounded-top-4">
+                                <h5 class="mb-0">
+                                    @if (Model.IsCorrectSolution)
+                                    {
+                                        <i class="bi bi-check-circle-fill me-2"></i> <span>Correct Solution!</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                                    {
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i> <span>Query Error</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-search me-2"></i> <span>Query Results</span>
+                                    }
+                                </h5>
+                            </div>
+                            <div class="card-body overflow-auto"> <!-- Make results scrollable -->
+                                @if (Model.IsCorrectSolution)
+                                {
+                                    <div class="alert alert-success border-0 shadow-sm" role="alert">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3 fs-2"><i class="bi bi-trophy-fill"></i></div>
+                                            <div>
+                                                <h5 class="alert-heading">Congratulations!</h5>
+                                                <p class="mb-0">You solved the mystery correctly. Well done, detective!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.QueryResult))
+                                {
+                                    <div class="result-container">
+                                        <h6 class="mb-2 text-muted">Your Query Results:</h6>
+                                        <!-- Formatted results will appear here -->
+                                        <div id="formatted-results" class="table-responsive">
+                                            <div class="text-center text-muted p-3">Formatting results...</div>
+                                        </div>
+                                        <!-- Raw results are hidden but used by JS -->
+                                        <pre class="d-none"><code class="result" id="raw-results">@Model.QueryResult</code></pre>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                                {
+                                    <div class="alert alert-danger shadow-sm border-0" role="alert">
+                                        <h6 class="mb-1"><i class="bi bi-bug-fill me-2"></i>Error Details:</h6>
+                                        <pre class="mb-0"><code class="error small">@Model.ErrorMessage</code></pre>
+                                    </div>
+                                }
+                                @if (!Model.IsCorrectSolution && string.IsNullOrEmpty(Model.QueryResult) && string.IsNullOrEmpty(Model.ErrorMessage))
+                                {
+                                     <p class="text-muted text-center mt-3">Your query executed successfully but returned no results.</p>
+                                }
+                            </div> <!-- End Results Card Body -->
+                        </div> <!-- End Results Card -->
+                    }
+                 </div> <!-- End Right Column Flex Container -->
             </div> <!-- End Right Column -->
         </div> <!-- End Row -->
     }
@@ -257,7 +264,7 @@
     {
         <div class="alert alert-danger shadow-sm border-0" role="alert">
             <h5><i class="bi bi-exclamation-circle me-2"></i> Mystery not found</h5>
-            <p>The mystery you're looking for doesn't exist or details are missing.</p>
+            <p>The mystery you're looking for doesn't exist or critical details are missing.</p>
             <a href="/Mysteries" class="btn btn-outline-danger">Return to Mysteries List</a>
         </div>
     }
@@ -269,17 +276,16 @@
     }
 
     <!-- Add Highlight.js for code syntax highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs2015.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/sql.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
 
     <style>
         /* Base card styling */
         .card {
             transition: all 0.2s ease;
             overflow: hidden;
-            margin-bottom: 1rem !important;
-            /* Reduced margin between cards */
+            /* margin-bottom: 1rem !important; Let flexbox handle spacing */
         }
 
         .mystery-icon i {
@@ -293,371 +299,245 @@
             justify-content: center;
         }
 
-        .rounded-4 {
-            border-radius: 0.7rem !important;
-        }
-
-        .rounded-top-4 {
-            border-top-left-radius: 0.7rem !important;
-            border-top-right-radius: 0.7rem !important;
-        }
+        .rounded-4 { border-radius: 0.7rem !important; }
+        .rounded-top-4 { border-top-left-radius: 0.7rem !important; border-top-right-radius: 0.7rem !important; }
 
         /* Custom gradients */
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #6259ca, #4e36e2);
-        }
-
-        .bg-gradient-secondary {
-            background: linear-gradient(135deg, #5c636a, #343a40);
-        }
-
-        .bg-gradient-success {
-            background: linear-gradient(135deg, #1cae59, #0ca750);
-        }
-
-        .bg-gradient-info {
-            background: linear-gradient(135deg, #17a2b8, #0f8999);
-        }
-
-        .bg-gradient-danger {
-            background: linear-gradient(135deg, #dc3545, #b02a37);
-        }
-
-        /* Database visualization */
-        .schema-container {
-            min-height: 200px;
-            padding: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            background-color: #f8fafc;
-        }
-
-        .table-card {
-            border: 1px solid #cfd8e3;
-            border-radius: 0.5rem;
-            background: white;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            max-width: 300px;
-        }
-
-        .table-card h6 {
-            border-bottom: 2px solid #eaeef3;
-            padding-bottom: 0.5rem;
-            margin-bottom: 0.5rem;
-            color: #364152;
-            font-weight: 600;
-        }
-
-        .table-column {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.25rem 0;
-            border-bottom: 1px solid #f0f4f8;
-        }
-
-        .table-column:last-child {
-            border-bottom: none;
-        }
-
-        .column-name {
-            font-weight: 500;
-        }
-
-        .column-pk {
-            color: #d63384;
-            font-weight: 700;
-        }
-
-        .column-fk {
-            color: #0d6efd;
-            font-weight: 500;
-        }
-
-        .relation-line {
-            stroke: #0d6efd;
-            stroke-width: 2px;
-        }
+        .bg-gradient-primary { background: linear-gradient(135deg, #6259ca, #4e36e2); }
+        .bg-gradient-secondary { background: linear-gradient(135deg, #5c636a, #343a40); }
+        .bg-gradient-success { background: linear-gradient(135deg, #1cae59, #0ca750); }
+        .bg-gradient-info { background: linear-gradient(135deg, #17a2b8, #0f8999); }
+        .bg-gradient-danger { background: linear-gradient(135deg, #dc3545, #b02a37); }
 
         /* Notes feature */
-        #userNotes {
-            background-color: #fffde7;
-            border-color: #fff9c4;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-
-        #userNotes:focus {
-            box-shadow: 0 0 0 0.25rem rgba(255, 235, 59, 0.25);
-            border-color: #ffd600;
-        }
-
-        .saved-indicator {
-            color: #198754;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            font-size: 0.9rem;
-        }
-
-        .saved-indicator.visible {
-            opacity: 1;
-        }
+        #userNotes { background-color: #fffde7; border-color: #fff9c4; font-family: 'Segoe UI', Roboto, sans-serif; }
+        #userNotes:focus { box-shadow: 0 0 0 0.25rem rgba(255, 235, 59, 0.25); border-color: #ffd600; }
+        .saved-indicator { color: #198754; opacity: 0; transition: opacity 0.5s ease; font-size: 0.9rem; }
+        .saved-indicator.visible { opacity: 1; }
 
         /* Editor styling */
-        #sqlQueryArea {
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 0.95rem;
-            tab-size: 4;
-            min-height: 200px;
-        }
-
-        .editor-toolbar {
-            border-bottom: none;
-        }
+        #sqlQueryArea { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.95rem; tab-size: 4; min-height: 150px; resize: vertical; }
+        .editor-toolbar { border-bottom: none; }
 
         /* Results table styling */
-        .query-results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1rem;
-            overflow-x: auto;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .query-results-table thead {
-            background-color: #4e36e2;
-            color: white;
-        }
-
-        .query-results-table th,
-        .query-results-table td {
-            padding: 0.75rem;
-            border: 1px solid #dee2e6;
-        }
-
-        .query-results-table tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-
-        .query-results-table tr:hover {
-            background-color: #e9ecef;
-        }
+        .query-results-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05); font-size: 0.9rem; }
+        .query-results-table thead { background-color: #4e36e2; color: white; position: sticky; top: 0; z-index: 1; } /* Sticky header */
+        .query-results-table th, .query-results-table td { padding: 0.6rem 0.8rem; border: 1px solid #dee2e6; text-align: left; white-space: nowrap; }
+        .query-results-table tbody tr:nth-child(even) { background-color: #f8fafc; }
+        .query-results-table tbody tr:hover { background-color: #e9ecef; }
+        .query-results-table td .text-muted { font-style: italic; color: #999 !important;}
 
         /* Skill tags */
-        .skill-tag {
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .skill-tag { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* Fullscreen editor */
-        .editor-fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1050;
-            background: white;
-            padding: 1rem;
-            overflow-y: auto;
-        }
+        .editor-fullscreen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1050; background: white; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; }
+        .editor-fullscreen .card-header { border-radius: 0 !important; }
+        .editor-fullscreen .card-body { flex-grow: 1; display: flex; flex-direction: column; }
+        .editor-fullscreen form { flex-grow: 1; display: flex; flex-direction: column; }
+        .editor-fullscreen form > div:first-of-type { flex-grow: 1; display: flex; flex-direction: column; } /* Make textarea container grow */
+        .editor-fullscreen #sqlQueryArea { flex-grow: 1; height: auto !important; /* Let flex grow determine height */ min-height: 300px; } /* Remove fixed height */
 
-        .editor-fullscreen textarea {
-            height: calc(100vh - 200px) !important;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
 
         /* Code blocks */
-        pre code {
-            display: block;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            white-space: pre-wrap;
-        }
+        pre code { display: block; padding: 0.75rem 1rem; border-radius: 0.3rem; font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; }
+        pre code.error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .result-container { animation: fadeIn 0.5s ease; }
+        @@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .result-container {
-            animation: fadeIn 0.5s ease;
-        }
+        /* --- FIXES FOR COLUMN LAYOUT & SCROLLING --- */
+        .row { display: flex; flex-wrap: wrap; }
+        .col-lg-5, .col-lg-7 { display: flex; flex-direction: column; }
+        .h-100 { height: 100%; }
+        .flex-grow-1 { flex-grow: 1 !important; }
+        .flex-grow-0 { flex-grow: 0 !important; }
+        .overflow-auto { overflow: auto; }
+        .card-body { overflow: auto; } /* Default overflow auto for card bodies */
 
-        /* ---- FIXES FOR RIGHT COLUMN SPACING ISSUES ---- */
+        /* --- NEW Schema Visualization V2 Styles --- */
+        .schema-viz-container {
+            display: flex; flex-wrap: wrap; gap: 1.5rem; padding: 1rem;
+            border: 1px solid #e0e0e0; border-radius: 0.75rem;
+            background-color: #f8f9fa; position: relative;
+            overflow: auto; min-height: 200px; align-items: flex-start; /* Align tables top */
+            justify-content: center; /* Center tables horizontally */
+        }
+        .schema-table {
+            background-color: #ffffff; border: 1px solid #d1d9e6;
+            border-radius: 0.6rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            padding: 0; width: 260px; flex-shrink: 0; display: flex; flex-direction: column;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; margin-bottom: 1rem; /* Add some bottom margin */
+        }
+        .schema-table:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); }
+        .schema-table-header {
+            background: linear-gradient(135deg, #7f7fd5, #86a8e7, #91eae4); color: white;
+            padding: 0.6rem 1rem; border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem;
+            display: flex; align-items: center; font-weight: 600; font-size: 1.05rem;
+        }
+        .schema-table-header i { margin-right: 0.6rem; font-size: 1.1rem; opacity: 0.9; }
+        .schema-table-body { padding: 0.3rem; flex-grow: 1; }
+        .schema-column {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.4rem 0.6rem; border-bottom: 1px solid #f0f3f7; font-size: 0.85rem;
+            transition: background-color 0.15s ease; position: relative; /* For line positioning */
+        }
+        .schema-column:last-child { border-bottom: none; }
+        .schema-column.pk-column { background-color: #fff8e1; }
+        .schema-column.fk-column { background-color: #e3f2fd; }
+        .schema-column:hover { background-color: #f1f3f5; }
+        .schema-col-name { display: flex; align-items: center; gap: 0.4rem; color: #343a40; font-weight: 500;}
+        .schema-col-name i { font-size: 0.9em; }
+        .schema-col-name .pk-indicator { color: #e67e22; }
+        .schema-col-name .fk-indicator { color: #3498db; }
+        .schema-col-type { color: #6c757d; font-family: 'Courier New', Courier, monospace; background-color: #e9ecef; padding: 0.1rem 0.4rem; border-radius: 0.2rem; font-size: 0.75rem; }
+        .schema-viz-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .relationship-line { stroke: #5a7d9a; stroke-width: 2; fill: none; stroke-dasharray: 4 2; marker-end: url(#arrowhead); }
+        #arrowhead path { fill: #5a7d9a; }
 
-        /* Make the row use flexbox to ensure equal height columns */
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        /* Make both columns the same height */
-        .col-lg-5, .col-lg-7 {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Make the cards fill the available height in both columns */
-        .col-lg-5 > .card, .col-lg-7 > .card {
-            flex-grow: 1;
-            margin-bottom: 0 !important;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Make card body expand to fill space */
-        .col-lg-5 > .card > .card-body,
-        .col-lg-7 > .card > .card-body {
-            flex-grow: 1;
-            overflow: auto;
-        }
-
-        /* When results are present, adjust card heights */
-        .col-lg-7.has-results .card:first-child {
-            flex-grow: 0;
-        }
-
-        /* Ensure the height is consistent across different screen sizes */
-        @@media (min-width: 992px) {
-            .col-lg-5, .col-lg-7 {
-                min-height: calc(100vh - 250px);
-                max-height: 800px;
-            }
-        }
     </style>
 
     <script>
-        // Initialize syntax highlighting
         document.addEventListener('DOMContentLoaded', function () {
-            hljs.highlightAll();
+            // Initialize syntax highlighting for SQL blocks
+            document.querySelectorAll('pre code.language-sql').forEach((block) => {
+                hljs.highlightElement(block);
+            });
 
             // Initialize schema visualization
             visualizeSchema();
 
             // Format result data as HTML table if available
             formatResultsAsTable();
-            
-            // Add has-results class to right column when results are present
-            const rightColumn = document.querySelector('.col-lg-7');
-            if (rightColumn && document.querySelector('.result-container, .alert-danger')) {
-                rightColumn.classList.add('has-results');
-            }
 
             // Initialize notes functionality
             initNotesFeature();
 
             // Initialize editor functionality
             initEditorFeatures();
+
+            // Adjust right column layout if results are present
+             const rightColumn = document.querySelector('.col-lg-7 > .d-flex');
+             if (rightColumn && document.querySelector('.result-container, .alert-danger')) {
+                 // If results/error exist, make editor card non-growable
+                 const editorCard = rightColumn.querySelector('.card:first-child');
+                 if(editorCard) editorCard.classList.replace('flex-grow-1', 'flex-grow-0');
+             }
         });
 
-        // 1. Schema Visualization
-        function visualizeSchema() {
-            const container = document.getElementById('schema-diagram');
-            if (!container) return;
+        // --- 1. Schema Visualization (Corrected Parser + SVG Lines) ---
 
-            try {
-                // Parse schema from the database schema text
-                const schemaText = `@Html.Raw(Json.Serialize(Model.Mystery?.Details?.DatabaseSchema))`;
-                const tables = parseSchemaFromSQL(schemaText);
-
-                if (tables.length === 0) {
-                    container.innerHTML = '<div class="alert alert-warning">Could not parse schema visualization.</div>';
-                    return;
-                }
-
-                // Render tables
-                let html = '';
-                tables.forEach(table => {
-                    html += `
-                            <div class="table-card">
-                                <h6>${table.name}</h6>
-                                <div class="table-columns">
-                        `;
-
-                    table.columns.forEach(column => {
-                        let columnClass = '';
-                        let columnBadge = '';
-
-                        if (column.isPrimaryKey) {
-                            columnClass = 'column-pk';
-                            columnBadge = '<span class="badge bg-danger rounded-pill ms-1">PK</span>';
-                        } else if (column.isForeignKey) {
-                            columnClass = 'column-fk';
-                            columnBadge = '<span class="badge bg-primary rounded-pill ms-1">FK</span>';
-                        }
-
-                        html += `
-                                <div class="table-column">
-                                    <span class="column-name ${columnClass}">${column.name} ${columnBadge}</span>
-                                    <span class="column-type">${column.type}</span>
-                                </div>
-                            `;
-                    });
-
-                    html += `
-                                </div>
-                            </div>
-                        `;
-                });
-
-                container.innerHTML = html;
-
-                // Add relationship lines with SVG (simplified - in a real app would be more sophisticated)
-                if (tables.length > 1) {
-                    // Draw relationships between tables with foreign keys
-                    // This is a placeholder for more advanced visualization logic
-                    container.innerHTML += `
-                            <div class="text-center text-muted mt-3">
-                                <i class="bi bi-arrow-left-right me-2"></i>
-                                Tables are connected by foreign key relationships
-                            </div>
-                        `;
-                }
-            } catch (error) {
-                console.error('Error visualizing schema:', error);
-                container.innerHTML = '<div class="alert alert-warning">Error parsing schema.</div>';
-            }
-        }
-
-        // Helper function to parse SQL schema into structured data
-        function parseSchemaFromSQL(sql) {
+        // IMPORTANT: Corrected SQL Parser - Relies on explicit keywords, not heuristics
+       function parseSchemaFromSQL(sql) {
             const tables = [];
+            if (!sql) return tables;
 
-            // Simple regex pattern matching for CREATE TABLE statements
-            const tablePattern = /CREATE\s+TABLE\s+(\w+)\s*\(([\s\S]*?)\);/g;
-            let match;
+            // Regex to capture CREATE TABLE statements, including quoted names and the definition body
+             const tablePattern = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[\w`"\[\]]+\.)?([\w`"\[\]]+)\s*\(([\s\S]*?)\)\s*;/gi;
+            let tableMatch;
 
-            while ((match = tablePattern.exec(sql)) !== null) {
-                const tableName = match[1];
-                const columnsText = match[2];
-
-                // Parse columns
-                const columnLines = columnsText.split(',').map(line => line.trim());
+            while ((tableMatch = tablePattern.exec(sql)) !== null) {
+                const tableName = tableMatch[1].replace(/[`"\[\]]/g, ''); // Clean table name
+                const definitionBody = tableMatch[2]; // Content within (...)
                 const columns = [];
+                let tablePrimaryKeys = []; // Store PKs defined separately at table level
+                let foreignKeys = []; // Store FK definitions { column, referencesTable, referencesColumn }
 
-                columnLines.forEach(line => {
-                    // Skip if it's not a column definition (like constraints)
-                    if (line.startsWith('FOREIGN KEY') || line.startsWith('PRIMARY KEY') || line.startsWith('CONSTRAINT')) {
-                        return;
+                 // Split definition body into individual lines (more robustly than just comma)
+                 // Handles constraints on separate lines and commas within defaults/checks
+                 const lines = definitionBody.split(/,\s*(?![^()]*\))/).map(line => line.trim()).filter(line => line);
+
+
+                lines.forEach(line => {
+                    const upperLine = line.toUpperCase();
+
+                    // --- Primary Key Parsing ---
+                    if (upperLine.startsWith('PRIMARY KEY')) {
+                        const pkMatch = line.match(/\((.*?)\)/);
+                        if (pkMatch && pkMatch[1]) {
+                            tablePrimaryKeys = pkMatch[1].split(',').map(c => c.trim().replace(/[`"\[\]]/g, ''));
+                        }
+                        return; // This line is a constraint, not a column
+                    }
+                    if (upperLine.startsWith('CONSTRAINT') && upperLine.includes('PRIMARY KEY')) {
+                         const pkMatch = line.match(/PRIMARY\s+KEY\s*\((.*?)\)/i);
+                         if (pkMatch && pkMatch[1]) {
+                            tablePrimaryKeys = pkMatch[1].split(',').map(c => c.trim().replace(/[`"\[\]]/g, ''));
+                         }
+                         return;
                     }
 
-                    // Basic column parsing
+                    // --- Foreign Key Parsing ---
+                    if (upperLine.startsWith('FOREIGN KEY') || (upperLine.startsWith('CONSTRAINT') && upperLine.includes('FOREIGN KEY'))) {
+                        const fkMatch = line.match(/FOREIGN\s+KEY\s*\(([\w`"\[\], ]+)\)\s+REFERENCES\s+([\w`"\[\]]+)(?:\s*\(([\w`"\[\], ]+)\))?/i);
+                        if (fkMatch) {
+                            const fkColumns = fkMatch[1].split(',').map(c => c.trim().replace(/[`"\[\]]/g, ''));
+                            const refTable = fkMatch[2].replace(/[`"\[\]]/g, '');
+                            // Referenced columns might be omitted if they match PK of referenced table
+                            const refColumns = fkMatch[3] ? fkMatch[3].split(',').map(c => c.trim().replace(/[`"\[\]]/g, '')) : [];
+
+                            fkColumns.forEach((fkCol, index) => {
+                                foreignKeys.push({
+                                    column: fkCol,
+                                    referencesTable: refTable,
+                                    // Assume ref column matches FK col if not specified (common case for single col FK)
+                                    referencesColumn: refColumns.length > index ? refColumns[index] : fkCol
+                                });
+                            });
+                        }
+                         return; // Constraint line
+                    }
+
+                    // --- Column Parsing ---
+                    // Skip other constraints for column detection
+                     if (upperLine.startsWith('CONSTRAINT') || upperLine.startsWith('UNIQUE') || upperLine.startsWith('CHECK')) {
+                         return;
+                     }
+
                     const parts = line.split(/\s+/);
                     if (parts.length >= 2) {
-                        const columnName = parts[0];
-                        const columnType = parts[1];
+                        const columnName = parts[0].replace(/[`"\[\]]/g, '');
+                        const columnType = parts[1]; // Basic type, might need refinement for complex types
+                        const isInlinePK = upperLine.includes(' PRIMARY KEY');
+                        const hasInlineFKRef = upperLine.includes(' REFERENCES ');
 
                         columns.push({
                             name: columnName,
-                            type: columnType,
-                            isPrimaryKey: line.toUpperCase().includes('PRIMARY KEY') || columnName.endsWith('ID'),
-                            isForeignKey: line.toUpperCase().includes('FOREIGN KEY') || line.includes('REFERENCES') || columnsText.includes(`FOREIGN KEY (${columnName})`)
+                            type: columnType.toUpperCase(),
+                            isPrimaryKey: isInlinePK, // Detect only INLINE PK here
+                            isForeignKey: hasInlineFKRef, // Detect only INLINE FK here (will be confirmed later)
+                            // Store inline reference info if present
+                            inlineRefTable: hasInlineFKRef ? line.match(/REFERENCES\s+([\w`"\[\]]+)/i)?.[1]?.replace(/[`"\[\]]/g, '') : null,
+                            inlineRefCol: hasInlineFKRef ? line.match(/REFERENCES\s+[\w`"\[\]]+\s*\(([\w`"\[\]]+)\)/i)?.[1]?.replace(/[`"\[\]]/g, '') : null
                         });
                     }
                 });
+
+                 // --- Post-processing ---
+                 // Apply table-level PKs
+                 columns.forEach(column => {
+                     if (tablePrimaryKeys.includes(column.name)) {
+                         column.isPrimaryKey = true;
+                     }
+                 });
+
+                // Apply table-level FKs and mark columns
+                 foreignKeys.forEach(fk => {
+                    const col = columns.find(c => c.name === fk.column);
+                    if (col) {
+                        col.isForeignKey = true;
+                        col.referencesTable = fk.referencesTable; // Store target table
+                        col.referencesColumn = fk.referencesColumn; // Store target column
+                    }
+                 });
+
+                // Apply inline FKs and mark columns (if not already marked by table-level constraint)
+                columns.forEach(col => {
+                    if (col.isForeignKey && col.inlineRefTable && !col.referencesTable) {
+                         col.referencesTable = col.inlineRefTable;
+                         col.referencesColumn = col.inlineRefCol ?? col.name; // Assume FK name matches PK name if ref col omitted
+                    }
+                });
+
 
                 tables.push({
                     name: tableName,
@@ -668,67 +548,266 @@
             return tables;
         }
 
-        // 2. Format results as HTML table
-        function formatResultsAsTable() {
-            const rawResults = document.getElementById('raw-results');
-            const formattedResults = document.getElementById('formatted-results');
 
-            if (!rawResults || !formattedResults) return;
+        // Visualization Function with SVG
+        function visualizeSchema() {
+            const container = document.getElementById('schema-diagram');
+            if (!container) { console.error("Schema container not found"); return; }
+
+            container.style.position = 'relative';
+            container.innerHTML = ''; // Clear previous content
+
+            const svgNs = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNs, "svg");
+            svg.setAttribute('class', 'schema-viz-svg');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%'); // Will adjust later if needed
+
+            const defs = document.createElementNS(svgNs, "defs");
+            const marker = document.createElementNS(svgNs, "marker");
+            marker.setAttribute("id", "arrowhead");
+            marker.setAttribute("viewBox", "0 0 10 10");
+            marker.setAttribute("refX", "5"); // Center arrowhead on line end
+            marker.setAttribute("refY", "5");
+            marker.setAttribute("markerWidth", "6");
+            marker.setAttribute("markerHeight", "6");
+            marker.setAttribute("orient", "auto-start-reverse"); // Point towards the line start
+            const path = document.createElementNS(svgNs, "path");
+            path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z"); // Arrow shape
+            path.setAttribute("fill", "#5a7d9a");
+            marker.appendChild(path);
+            defs.appendChild(marker);
+            svg.appendChild(defs);
+
+            container.appendChild(svg);
 
             try {
-                // Parse the text-based results into rows and columns
-                const resultText = rawResults.textContent;
-                const rows = resultText.trim().split('\n');
+                 const schemaDataElement = document.querySelector('#code-schema code.language-sql'); // Get schema from code block
+                 const schemaText = schemaDataElement ? schemaDataElement.textContent : '';
+                 //const schemaText = `@Html.Raw(Json.Serialize(Model.Mystery?.Details?.DatabaseSchema ?? ""))`; // Alternative if needed
 
-                if (rows.length < 2) {
-                    formattedResults.innerHTML = `<pre>${resultText}</pre>`;
+
+                if (!schemaText) throw new Error("Schema text could not be retrieved.");
+
+                const tables = parseSchemaFromSQL(schemaText);
+
+                if (tables.length === 0) {
+                    container.innerHTML = '<div class="alert alert-info text-center">No tables found or could not parse schema.</div>';
                     return;
                 }
 
-                // First row is the header
-                const headers = rows[0].split(' | ').map(h => h.trim());
+                const tableElements = {};
 
-                // Create HTML table
-                let tableHtml = '<table class="query-results-table">';
+                // Render Table Cards
+                tables.forEach((table) => {
+                    const tableDiv = document.createElement('div');
+                    tableDiv.className = 'schema-table';
+                    tableDiv.id = `schema-table-${table.name}`;
+                    tableElements[table.name] = tableDiv;
 
-                // Table header
-                tableHtml += '<thead><tr>';
-                headers.forEach(header => {
-                    tableHtml += `<th>${header}</th>`;
-                });
-                tableHtml += '</tr></thead>';
+                    let tableIcon = 'bi-table';
+                    if (table.name.toLowerCase().includes('customer')) tableIcon = 'bi-people-fill';
+                    if (table.name.toLowerCase().includes('order')) tableIcon = 'bi-cart-check-fill';
+                    if (table.name.toLowerCase().includes('product')) tableIcon = 'bi-box-seam';
 
-                // Table body (skip first row which is header, and separator line)
-                tableHtml += '<tbody>';
-                for (let i = 2; i < rows.length; i++) {
-                    const cellValues = rows[i].split(' | ').map(cell => cell.trim());
+                    let tableHtml = `
+                        <div class="schema-table-header">
+                            <i class="bi ${tableIcon}"></i> ${table.name}
+                        </div>
+                        <div class="schema-table-body">`;
 
-                    tableHtml += '<tr>';
-                    cellValues.forEach(value => {
-                        tableHtml += `<td>${value === 'NULL' ? '<span class="text-muted">NULL</span>' : value}</td>`;
+                    table.columns.forEach(column => {
+                        let pkIndicator = '';
+                        let fkIndicator = '';
+                        let columnRowClass = 'schema-column';
+                        let title = '';
+
+                        if (column.isPrimaryKey) {
+                            pkIndicator = '<i class="bi bi-key-fill pk-indicator"></i>';
+                            columnRowClass += ' pk-column';
+                            title = 'Primary Key';
+                        }
+                        if (column.isForeignKey) {
+                            const targetTable = column.referencesTable || 'Unknown';
+                            const targetCol = column.referencesColumn || 'Unknown';
+                            fkIndicator = `<i class="bi bi-link-45deg fk-indicator"></i>`;
+                            columnRowClass += ' fk-column';
+                            title = `Foreign Key (references ${targetTable}.${targetCol})`;
+                         }
+
+                        tableHtml += `
+                            <div class="${columnRowClass}" title="${title}"
+                                 data-table="${table.name}" data-column="${column.name}"
+                                 data-pk="${column.isPrimaryKey}" data-fk="${column.isForeignKey}"
+                                 data-references-table="${column.referencesTable || ''}"
+                                 data-references-column="${column.referencesColumn || ''}">
+                                <span class="schema-col-name">
+                                    ${pkIndicator} ${fkIndicator} ${column.name}
+                                </span>
+                                <span class="schema-col-type">${column.type}</span>
+                            </div>`;
                     });
-                    tableHtml += '</tr>';
-                }
-                tableHtml += '</tbody></table>';
 
-                formattedResults.innerHTML = tableHtml;
+                    tableHtml += `</div>`; // End table-body
+                    tableDiv.innerHTML = tableHtml;
+                    container.appendChild(tableDiv);
+                });
+
+                // Draw Relationship Lines (after tables are in DOM)
+                setTimeout(() => {
+                    drawRelationshipLines(container, svg, tables);
+                    // Adjust SVG height after drawing lines
+                    const bbox = svg.getBBox();
+                    const padding = 20; // Add some padding
+                    svg.setAttribute('height', Math.max(container.clientHeight, bbox.y + bbox.height + padding));
+                 }, 150); // Delay to allow rendering
+
             } catch (error) {
-                console.error('Error formatting results:', error);
-                // Fall back to raw output
-                formattedResults.innerHTML = `<pre>${rawResults.textContent}</pre>`;
+                console.error('Error visualizing schema:', error);
+                container.innerHTML = `<div class="alert alert-warning">Error rendering schema: ${error.message}</div>`;
             }
         }
 
-        // 3. Notes feature with localStorage
+        // Helper to draw SVG lines
+        function drawRelationshipLines(container, svg, tables) {
+             const svgRect = container.getBoundingClientRect();
+             if (!svgRect.width || !svgRect.height) return; // Don't draw if container isn't visible/sized
+
+            const drawnRelations = new Set(); // Prevent drawing duplicate lines for composite FKs
+
+            tables.forEach(table => {
+                table.columns.forEach(column => {
+                    if (column.isForeignKey && column.referencesTable && column.referencesColumn) {
+                        const relationKey = `${table.name}.${column.name}->${column.referencesTable}.${column.referencesColumn}`;
+                        if (drawnRelations.has(relationKey)) return; // Skip if already drawn
+
+                         const fkElement = container.querySelector(`.schema-column[data-table="${table.name}"][data-column="${column.name}"]`);
+                         // Find the target PK element
+                          const pkElement = container.querySelector(`.schema-column[data-table="${column.referencesTable}"][data-column="${column.referencesColumn}"][data-pk="true"]`);
+
+                         if (fkElement && pkElement) {
+                             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                             const fkRect = fkElement.getBoundingClientRect();
+                             const pkRect = pkElement.getBoundingClientRect();
+
+                            // Calculate midpoints relative to SVG container
+                             let x1, y1, x2, y2;
+
+                            // Basic logic: connect right side of FK table to left side of PK table (or vice versa)
+                             const fkTableRect = fkElement.closest('.schema-table').getBoundingClientRect();
+                             const pkTableRect = pkElement.closest('.schema-table').getBoundingClientRect();
+
+                            if (fkTableRect.left < pkTableRect.left) { // FK table is to the left
+                                 x1 = fkRect.right - svgRect.left;
+                                 y1 = fkRect.top + fkRect.height / 2 - svgRect.top;
+                                 x2 = pkRect.left - svgRect.left;
+                                 y2 = pkRect.top + pkRect.height / 2 - svgRect.top;
+                             } else { // FK table is to the right (or same column)
+                                 x1 = fkRect.left - svgRect.left;
+                                 y1 = fkRect.top + fkRect.height / 2 - svgRect.top;
+                                 x2 = pkRect.right - svgRect.left;
+                                 y2 = pkRect.top + pkRect.height / 2 - svgRect.top;
+                             }
+                             // Adjust for arrowhead size to prevent overlap
+                             const angle = Math.atan2(y2 - y1, x2 - x1);
+                             const arrowLength = 6; // Match markerWidth/Height
+                             x2 -= arrowLength * Math.cos(angle);
+                             y2 -= arrowLength * Math.sin(angle);
+
+
+                             line.setAttribute("x1", x1);
+                             line.setAttribute("y1", y1);
+                             line.setAttribute("x2", x2);
+                             line.setAttribute("y2", y2);
+                             line.setAttribute("class", "relationship-line");
+                             line.setAttribute("marker-end", "url(#arrowhead)");
+
+                             svg.appendChild(line);
+                             drawnRelations.add(relationKey); // Mark as drawn
+                         } else {
+                             if (!fkElement) console.warn(`FK element not found: ${table.name}.${column.name}`);
+                             if (!pkElement) console.warn(`Target PK element not found: ${column.referencesTable}.${column.referencesColumn}`);
+                         }
+                    }
+                });
+            });
+        }
+
+
+        // --- 2. Format results as HTML table ---
+        function formatResultsAsTable() {
+            const rawResultsCode = document.getElementById('raw-results');
+            const formattedResultsDiv = document.getElementById('formatted-results');
+
+            if (!rawResultsCode || !formattedResultsDiv) return;
+
+            try {
+                const resultText = rawResultsCode.textContent.trim();
+                if (!resultText || resultText === "Query executed successfully, but returned no rows." || resultText.startsWith("Could not format")) {
+                     formattedResultsDiv.innerHTML = `<p class="text-muted p-3">${resultText || 'No textual results to display.'}</p>`;
+                     return;
+                }
+
+                const lines = resultText.split('\n');
+                if (lines.length < 1) { // Need at least headers
+                    formattedResultsDiv.innerHTML = `<pre>${resultText}</pre>`; // Fallback
+                    return;
+                }
+
+                // Assume first line is headers, second is separator
+                const headers = lines[0].split('|').map(h => h.trim());
+                if (headers.length === 0 || (headers.length === 1 && headers[0] === '')) {
+                   formattedResultsDiv.innerHTML = `<pre>${resultText}</pre>`; // Fallback if header parsing fails
+                   return;
+                }
+
+                // Create HTML table
+                let tableHtml = '<table class="table table-striped table-bordered table-hover query-results-table">';
+                tableHtml += '<thead class="table-dark"><tr>';
+                headers.forEach(header => {
+                    tableHtml += `<th>${header || ' '}</th>`; // Handle potential empty header parts
+                });
+                tableHtml += '</tr></thead>';
+
+                tableHtml += '<tbody>';
+                // Data rows start from index 2 (after header and separator)
+                 for (let i = 2; i < lines.length; i++) {
+                     const cellValues = lines[i].split('|').map(cell => cell.trim());
+                     // Ensure the number of cells matches the number of headers
+                     if (cellValues.length === headers.length) {
+                         tableHtml += '<tr>';
+                         cellValues.forEach(value => {
+                              tableHtml += `<td>${value === 'NULL' ? '<span class="text-muted">NULL</span>' : value}</td>`;
+                         });
+                         tableHtml += '</tr>';
+                     } else {
+                        // Handle potential row parsing issues (e.g., data contains '|')
+                         console.warn(`Row ${i} has ${cellValues.length} cells, expected ${headers.length}. Row data: ${lines[i]}`);
+                         // Optionally add a row indicating the issue
+                         // tableHtml += `<tr><td colspan="${headers.length}" class="text-danger">Error parsing this row</td></tr>`;
+                     }
+                 }
+                 tableHtml += '</tbody></table>';
+
+                formattedResultsDiv.innerHTML = tableHtml;
+            } catch (error) {
+                console.error('Error formatting results:', error);
+                formattedResultsDiv.innerHTML = `<div class="alert alert-warning">Error formatting results.</div><pre>${rawResultsCode?.textContent || ''}</pre>`; // Fallback
+            }
+        }
+
+
+        // --- 3. Notes feature with localStorage ---
         function initNotesFeature() {
             const userNotes = document.getElementById('userNotes');
             const saveBtn = document.getElementById('saveNotes');
             const clearBtn = document.getElementById('clearNotes');
             const savedIndicator = document.getElementById('notes-saved');
 
-            if (!userNotes || !saveBtn || !clearBtn) return;
+            if (!userNotes || !saveBtn || !clearBtn || !savedIndicator) return;
 
             const mysteryId = '@Model.Mystery?.Id';
+            if (!mysteryId) return; // Don't run if mystery ID isn't available
             const storageKey = `queryMyst_notes_${mysteryId}`;
 
             // Load saved notes
@@ -737,127 +816,109 @@
                 userNotes.value = savedNotes;
             }
 
-            // Auto-save on typing (debounced)
             let saveTimeout;
             userNotes.addEventListener('input', function () {
                 clearTimeout(saveTimeout);
                 savedIndicator.classList.remove('visible');
 
-                saveTimeout = setTimeout(function () {
+                saveTimeout = setTimeout(() => {
                     localStorage.setItem(storageKey, userNotes.value);
                     savedIndicator.classList.add('visible');
-
-                    // Hide saved indicator after 2 seconds
-                    setTimeout(function () {
-                        savedIndicator.classList.remove('visible');
-                    }, 2000);
-                }, 1000);
+                    setTimeout(() => savedIndicator.classList.remove('visible'), 2000);
+                }, 1000); // Auto-save after 1 second of inactivity
             });
 
-            // Manual save
             saveBtn.addEventListener('click', function () {
+                clearTimeout(saveTimeout); // Prevent auto-save from interfering
                 localStorage.setItem(storageKey, userNotes.value);
                 savedIndicator.classList.add('visible');
-
-                // Add animation effect
-                saveBtn.classList.add('disabled');
-                setTimeout(function () {
-                    saveBtn.classList.remove('disabled');
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Saved';
+                setTimeout(() => {
                     savedIndicator.classList.remove('visible');
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i class="bi bi-save"></i> Save Notes';
                 }, 1500);
             });
 
-            // Clear notes
             clearBtn.addEventListener('click', function () {
-                if (confirm('Are you sure you want to clear your notes?')) {
+                if (confirm('Are you sure you want to clear your notes for this mystery? This cannot be undone.')) {
                     userNotes.value = '';
                     localStorage.removeItem(storageKey);
                     savedIndicator.classList.remove('visible');
+                     clearTimeout(saveTimeout);
                 }
             });
         }
 
-        // 4. SQL Editor enhancements
+        // --- 4. SQL Editor enhancements ---
         function initEditorFeatures() {
             const sqlEditor = document.getElementById('sqlQueryArea');
             const templateBtns = document.querySelectorAll('.template-btn');
             const fullscreenBtn = document.getElementById('toggle-fullscreen');
-            const editorContainer = fullscreenBtn?.closest('.card');
+            const editorCard = fullscreenBtn?.closest('.card'); // Find the editor's card
             const formatCheck = document.getElementById('autoFormatCheck');
 
-            // SQL templates insertion
+            if (!sqlEditor) return;
+
             templateBtns.forEach(btn => {
                 btn.addEventListener('click', function () {
                     const template = this.dataset.template;
+                    const startPos = sqlEditor.selectionStart;
+                    const endPos = sqlEditor.selectionEnd;
+                    const scrollTop = sqlEditor.scrollTop; // Preserve scroll position
 
-                    // Insert at cursor position or append
-                    if (sqlEditor.selectionStart || sqlEditor.selectionStart === 0) {
-                        const startPos = sqlEditor.selectionStart;
-                        const endPos = sqlEditor.selectionEnd;
-                        sqlEditor.value = sqlEditor.value.substring(0, startPos) + template +
-                            sqlEditor.value.substring(endPos, sqlEditor.value.length);
-                        sqlEditor.selectionStart = startPos + template.length;
-                        sqlEditor.selectionEnd = startPos + template.length;
-                    } else {
-                        sqlEditor.value += template;
-                    }
-
+                    sqlEditor.value = sqlEditor.value.substring(0, startPos) + template + sqlEditor.value.substring(endPos);
+                    sqlEditor.selectionStart = sqlEditor.selectionEnd = startPos + template.length;
+                    sqlEditor.scrollTop = scrollTop; // Restore scroll position
                     sqlEditor.focus();
                 });
             });
 
-            // Fullscreen toggle
-            if (fullscreenBtn && editorContainer) {
+            if (fullscreenBtn && editorCard) {
                 fullscreenBtn.addEventListener('click', function () {
-                    editorContainer.classList.toggle('editor-fullscreen');
-
-                    const isFullscreen = editorContainer.classList.contains('editor-fullscreen');
-                    fullscreenBtn.innerHTML = isFullscreen ?
-                        '<i class="bi bi-fullscreen-exit"></i>' :
-                        '<i class="bi bi-arrows-fullscreen"></i>';
-
-                    if (isFullscreen) {
-                        document.body.style.overflow = 'hidden';
-                    } else {
-                        document.body.style.overflow = '';
-                    }
+                    editorCard.classList.toggle('editor-fullscreen');
+                    document.body.style.overflow = editorCard.classList.contains('editor-fullscreen') ? 'hidden' : ''; // Prevent body scroll in fullscreen
+                    fullscreenBtn.innerHTML = editorCard.classList.contains('editor-fullscreen')
+                        ? '<i class="bi bi-fullscreen-exit"></i>'
+                        : '<i class="bi bi-arrows-fullscreen"></i>';
+                     fullscreenBtn.title = editorCard.classList.contains('editor-fullscreen') ? 'Exit Fullscreen' : 'Enter Fullscreen';
                 });
             }
 
-            // Auto-format SQL (basic implementation)
-            if (formatCheck && sqlEditor) {
-                formatCheck.addEventListener('change', function () {
-                    if (this.checked && sqlEditor.value) {
-                        sqlEditor.value = formatSQL(sqlEditor.value);
-                    }
-                });
-            }
+             if (formatCheck) {
+                 formatCheck.addEventListener('change', function () {
+                     if (this.checked && sqlEditor.value) {
+                         // Placeholder: Implement or integrate a real SQL formatter if desired
+                         // sqlEditor.value = formatSQL(sqlEditor.value); // Your basic formatter
+                         console.warn("Auto-formatting is basic. Consider a library for complex SQL.");
+                         sqlEditor.value = formatSQL(sqlEditor.value); // Use the basic one for now
+                     }
+                 });
+             }
         }
 
-        // Helper for basic SQL formatting
+        // Basic SQL Formatter (very simplified)
         function formatSQL(sql) {
-            // This is a very simplified formatter
-            // In a production app, you'd use a proper SQL formatter library
+             let formatted = sql;
+             const keywords = ['SELECT', 'FROM', 'WHERE', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'OUTER JOIN', 'JOIN', 'ON', 'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM', 'AND', 'OR', 'AS', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'];
 
-            // Uppercase keywords
-            const keywords = ['SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER',
-                'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'AND', 'OR', 'ON', 'AS'];
+            // Uppercase keywords (case-insensitive replace)
+             keywords.forEach(keyword => {
+                 const regex = new RegExp(`\\b${keyword.replace(' ', '\\s+')}\\b`, 'gi');
+                 formatted = formatted.replace(regex, keyword.toUpperCase());
+             });
 
-            let formatted = sql;
+            // Add line breaks before major clauses (simple approach)
+            formatted = formatted.replace(/\s+(FROM|WHERE|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|JOIN|GROUP BY|ORDER BY|HAVING|VALUES|SET)\b/g, '\n$1');
+            // Indent clauses slightly (very basic)
+             formatted = formatted.replace(/\n(WHERE|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|JOIN|ON|AND|OR|GROUP BY|ORDER BY|HAVING|VALUES|SET)\b/g, '\n  $1');
 
-            // Replace keywords with uppercase versions
-            keywords.forEach(keyword => {
-                const regex = new RegExp('\\b' + keyword + '\\b', 'gi');
-                formatted = formatted.replace(regex, keyword);
-            });
+            // Add line breaks after commas in SELECT (if multiple columns)
+             formatted = formatted.replace(/(SELECT\s+.*?,)\s+/gi, '$1\n  ');
 
-            // Add line breaks
-            ['SELECT', 'FROM', 'WHERE', 'JOIN', 'GROUP BY', 'ORDER BY', 'HAVING'].forEach(term => {
-                const regex = new RegExp('\\b' + term + '\\b', 'g');
-                formatted = formatted.replace(regex, '\n' + term);
-            });
-
-            return formatted;
+            return formatted.trim(); // Trim leading/trailing whitespace
         }
+
     </script>
 }
