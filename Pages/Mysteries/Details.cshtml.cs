@@ -120,51 +120,51 @@ namespace QueryMyst.Pages.Mysteries // Replace with your actual Pages namespace
                            (solutionResultJson, _) = await ExecuteQueryAndGetJsonAsync(connection, Mystery.Details.SolutionQuery);
 
                            // 5. Compare Results
-                           // Replace existing comparison with a more flexible approach
                            if (userResultJson != null && solutionResultJson != null) {
                                try {
                                    var userResults = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(userResultJson);
                                    var solutionResults = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(solutionResultJson);
                                    
-                                   // Check if we have the same number of rows
-                                   if (userResults.Count == solutionResults.Count) {
-                                       bool allRowsMatch = true;
-                                       
-                                       // For each row in the solution
-                                       for (int i = 0; i < solutionResults.Count; i++) {
-                                           bool rowMatched = false;
+                                   // Ensure both results exist and are valid
+                                   if (userResults != null && solutionResults != null) {
+                                       // First check: row count
+                                       if (userResults.Count == solutionResults.Count) {
+                                           // Convert each row to a normalized string representation for comparison
+                                           // This handles different column names and ordering
+                                           var normalizedSolutionRows = new List<string>();
+                                           var normalizedUserRows = new List<string>();
                                            
-                                           // Try to find a matching row in user results (ignoring column names)
-                                           foreach (var userRow in userResults) {
-                                               bool currentRowMatches = true;
-                                               
-                                               // Check if all values in this solution row exist in the user row
-                                               foreach (var solutionValue in solutionResults[i].Values) {
-                                                   bool valueFound = userRow.Values.Any(userVal => 
-                                                       userVal?.ToString() == solutionValue?.ToString());
-                                                   
-                                                   if (!valueFound) {
-                                                       currentRowMatches = false;
-                                                       break;
-                                                   }
-                                               }
-                                               
-                                               if (currentRowMatches) {
-                                                   rowMatched = true;
-                                                   break;
-                                               }
+                                           // Create comparable string representations of each row from solution
+                                           foreach (var row in solutionResults) {
+                                               var values = row.Values
+                                                   .Select(v => v?.ToString() ?? "NULL")
+                                                   .OrderBy(v => v) // Sort values for consistent comparison
+                                                   .ToList();
+                                               normalizedSolutionRows.Add(string.Join("|", values));
                                            }
                                            
-                                           if (!rowMatched) {
-                                               allRowsMatch = false;
-                                               break;
+                                           // Create comparable string representations of each row from user results
+                                           foreach (var row in userResults) {
+                                               var values = row.Values
+                                                   .Select(v => v?.ToString() ?? "NULL")
+                                                   .OrderBy(v => v) // Sort values for consistent comparison
+                                                   .ToList();
+                                               normalizedUserRows.Add(string.Join("|", values));
                                            }
+                                           
+                                           // Count frequencies of each distinct row in both result sets
+                                           var solutionRowCounts = CountRowFrequencies(normalizedSolutionRows);
+                                           var userRowCounts = CountRowFrequencies(normalizedUserRows);
+                                           
+                                           // Compare the frequency dictionaries to ensure they match exactly
+                                           IsCorrectSolution = DictionariesMatch(solutionRowCounts, userRowCounts);
                                        }
-                                       
-                                       IsCorrectSolution = allRowsMatch;
+                                       else {
+                                           IsCorrectSolution = false;
+                                       }
                                    }
                                    else {
-                                       IsCorrectSolution = false; // Different number of rows
+                                       IsCorrectSolution = false;
                                    }
                                }
                                catch (Exception ex) {
@@ -391,6 +391,35 @@ namespace QueryMyst.Pages.Mysteries // Replace with your actual Pages namespace
                 // Return raw JSON in case of unexpected formatting errors
                 return "Could not format results. Raw JSON:\n" + json;
             }
+        }
+
+        // Helper methods for improved result comparison
+        private Dictionary<string, int> CountRowFrequencies(List<string> rows) {
+            var frequencies = new Dictionary<string, int>();
+            foreach (var row in rows) {
+                if (frequencies.ContainsKey(row)) {
+                    frequencies[row]++;
+                } else {
+                    frequencies[row] = 1;
+                }
+            }
+            return frequencies;
+        }
+
+        private bool DictionariesMatch(Dictionary<string, int> dict1, Dictionary<string, int> dict2) {
+            // Check if both dictionaries have the same keys
+            if (!dict1.Keys.OrderBy(k => k).SequenceEqual(dict2.Keys.OrderBy(k => k))) {
+                return false;
+            }
+            
+            // Check if the values for each key match
+            foreach (var key in dict1.Keys) {
+                if (dict1[key] != dict2[key]) {
+                    return false;
+                }
+            }
+            
+            return true;
         }
     }
 }
