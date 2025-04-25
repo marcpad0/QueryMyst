@@ -109,13 +109,31 @@
                         </ul>
                         <div class="tab-content flex-grow-1" id="schemaViewsContent">
                             <div class="tab-pane fade show active" id="visual-schema" role="tabpanel">
-                                <!-- Container for the NEW schema visualization -->
-                                <div id="schema-diagram" class="schema-viz-container">
-                                    <!-- Dynamic visualization will be rendered here by JavaScript -->
-                                    <div class="text-muted text-center p-3">Loading schema visualization...</div>
+                                <!-- Container for the NEW enhanced interactive schema visualization -->
+                                <div class="schema-enhanced-container">
+                                    <div class="schema-controls">
+                                        <button type="button" id="schema-zoom-in" class="btn btn-sm btn-outline-primary" title="Zoom In">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </button>
+                                        <button type="button" id="schema-zoom-out" class="btn btn-sm btn-outline-primary" title="Zoom Out">
+                                            <i class="bi bi-zoom-out"></i>
+                                        </button>
+                                        <button type="button" id="schema-reset" class="btn btn-sm btn-outline-secondary" title="Reset View">
+                                            <i class="bi bi-arrows-fullscreen"></i>
+                                        </button>
+                                    </div>
+                                    <div id="schema-viewport" class="schema-viewport">
+                                        <div id="schema-workspace" class="schema-workspace">
+                                            <!-- Interactive visualization will be rendered here -->
+                                        </div>
+                                    </div>
+                                    <div class="schema-info small text-muted mt-2">
+                                        <i class="bi bi-info-circle me-1"></i> Drag tables to reposition. Use mouse wheel or buttons to zoom. Click and drag empty space to pan.
+                                    </div>
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="code-schema" role="tabpanel">
+                                <!-- Keep the code tab unchanged -->
                                 <h6 class="mt-2 mb-2">Schema Definition:</h6>
                                 <pre><code class="language-sql bg-light border rounded p-2">@Model.Mystery.Details.DatabaseSchema</code></pre>
                                 <h6 class="mt-4 mb-2">Sample Data:</h6>
@@ -354,46 +372,142 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
         .overflow-auto { overflow: auto; }
         .card-body { overflow: auto; } /* Default overflow auto for card bodies */
 
-        /* --- NEW Schema Visualization V2 Styles --- */
-        .schema-viz-container {
-            display: flex; flex-wrap: wrap; gap: 1.5rem; padding: 1rem;
-            border: 1px solid #e0e0e0; border-radius: 0.75rem;
-            background-color: #f8f9fa; position: relative;
-            overflow: auto; min-height: 200px; align-items: flex-start; /* Align tables top */
-            justify-content: center; /* Center tables horizontally */
+        /* --- ENHANCED INTERACTIVE Schema Visualization --- */
+        .schema-enhanced-container {
+            position: relative;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.75rem;
+            background-color: #f8f9fa;
+            background-image: 
+                radial-gradient(circle, rgba(200, 200, 200, 0.1) 1px, transparent 1px),
+                radial-gradient(circle, rgba(200, 200, 200, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            overflow: hidden;
+            min-height: 400px;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
         }
-        .schema-table {
-            background-color: #ffffff; border: 1px solid #d1d9e6;
-            border-radius: 0.6rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-            padding: 0; width: 260px; flex-shrink: 0; display: flex; flex-direction: column;
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; margin-bottom: 1rem; /* Add some bottom margin */
-        }
-        .schema-table:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); }
-        .schema-table-header {
-            background: linear-gradient(135deg, #7f7fd5, #86a8e7, #91eae4); color: white;
-            padding: 0.6rem 1rem; border-top-left-radius: 0.6rem; border-top-right-radius: 0.6rem;
-            display: flex; align-items: center; font-weight: 600; font-size: 1.05rem;
-        }
-        .schema-table-header i { margin-right: 0.6rem; font-size: 1.1rem; opacity: 0.9; }
-        .schema-table-body { padding: 0.3rem; flex-grow: 1; }
-        .schema-column {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0.4rem 0.6rem; border-bottom: 1px solid #f0f3f7; font-size: 0.85rem;
-            transition: background-color 0.15s ease; position: relative; /* For line positioning */
-        }
-        .schema-column:last-child { border-bottom: none; }
-        .schema-column.pk-column { background-color: #fff8e1; }
-        .schema-column.fk-column { background-color: #e3f2fd; }
-        .schema-column:hover { background-color: #f1f3f5; }
-        .schema-col-name { display: flex; align-items: center; gap: 0.4rem; color: #343a40; font-weight: 500;}
-        .schema-col-name i { font-size: 0.9em; }
-        .schema-col-name .pk-indicator { color: #e67e22; }
-        .schema-col-name .fk-indicator { color: #3498db; }
-        .schema-col-type { color: #6c757d; font-family: 'Courier New', Courier, monospace; background-color: #e9ecef; padding: 0.1rem 0.4rem; border-radius: 0.2rem; font-size: 0.75rem; }
-        .schema-viz-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-        .relationship-line { stroke: #5a7d9a; stroke-width: 2; fill: none; stroke-dasharray: 4 2; marker-end: url(#arrowhead); }
-        #arrowhead path { fill: #5a7d9a; }
 
+        .schema-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            display: flex;
+            gap: 5px;
+            background-color: rgba(255,255,255,0.8);
+            padding: 5px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .schema-viewport {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+            min-height: 350px;
+            width: 100%;
+        }
+
+        .schema-viewport.grabbing {
+            cursor: grabbing;
+        }
+
+        .schema-workspace {
+            position: absolute;
+            transform-origin: 0 0;
+            min-width: 100%;
+            min-height: 100%;
+            transition: transform 0.1s ease;
+        }
+
+        .schema-table {
+            background-color: #ffffff;
+            border-radius: 0.8rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            cursor: move;
+            transition: box-shadow 0.2s ease, transform 0.1s ease;
+            user-select: none;
+            position: absolute; /* For drag positioning */
+        }
+
+        .schema-table.dragging {
+            z-index: 100;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: scale(1.02);
+        }
+
+        .schema-table:hover {
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .schema-table-header {
+            background-image: linear-gradient(135deg, #6366F1, #8B5CF6, #3B82F6);
+            color: white;
+            padding: 0.7rem 1rem;
+            border-top-left-radius: 0.8rem;
+            border-top-right-radius: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .schema-table-header i {
+            margin-right: 0.6rem;
+            font-size: 1.1rem;
+        }
+
+        .schema-table-body {
+            padding: 0.3rem;
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 250px;
+        }
+
+        .schema-column {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.7rem;
+            border-bottom: 1px solid #f0f3f7;
+            font-size: 0.85rem;
+            transition: background-color 0.15s ease;
+        }
+
+        .schema-column.pk-column {
+            background-color: #FEF3C7;
+        }
+
+        .schema-column.fk-column {
+            background-color: #DBEAFE;
+        }
+
+        .schema-info {
+            padding: 5px 10px;
+            text-align: center;
+            background-color: rgba(255,255,255,0.8);
+            border-top: 1px solid #eee;
+        }
+
+        /* SVG connector styling */
+        .relationship-line {
+            stroke: rgba(100, 116, 139, 0.6);
+            stroke-width: 2;
+            stroke-dasharray: 5 3;
+            pointer-events: none; /* prevent lines from blocking mouse events */
+        }
+
+        .relationship-arrow {
+            fill: rgba(100, 116, 139, 0.6);
+        }
     </style>
 
     <script>
@@ -403,7 +517,615 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
                 hljs.highlightElement(block);
             });
 
-            // Initialize schema visualization
+            // --- Interactive Schema Visualization ---
+            function visualizeSchema() {
+                // Get container elements
+                const viewport = document.getElementById('schema-viewport');
+                const workspace = document.getElementById('schema-workspace');
+                
+                if (!viewport || !workspace) {
+                    console.error("Schema viewport or workspace not found");
+                    return;
+                }
+                
+                // Clear previous content
+                workspace.innerHTML = '';
+                
+                // Create SVG element for relationships
+                const svg = document.createElementNS(SVG_NAMESPACE, "svg");
+                svg.setAttribute('class', 'schema-relationships');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+                svg.style.position = 'absolute';
+                svg.style.top = '0';
+                svg.style.left = '0';
+                svg.style.pointerEvents = 'none';
+                svg.style.zIndex = '0';
+                workspace.appendChild(svg);
+                
+                try {
+                    const schemaDataElement = document.querySelector('#code-schema code.language-sql');
+                    const schemaText = schemaDataElement ? schemaDataElement.textContent : '';
+
+                    if (!schemaText) {
+                        throw new Error("Schema text could not be retrieved.");
+                    }
+
+                    const tables = parseSchemaFromSQL(schemaText);
+
+                    if (tables.length === 0) {
+                        workspace.innerHTML = '<div class="alert alert-info text-center">No tables found or could not parse schema.</div>';
+                        return;
+                    }
+
+                    // Calculate initial layout
+                    const viewportWidth = viewport.clientWidth;
+                    const viewportHeight = viewport.clientHeight;
+                    const containerWidth = Math.max(1200, viewportWidth * 1.5); // Make workspace larger than viewport
+                    const layout = calculateTableLayout(tables, containerWidth);
+                    
+                    // Set workspace initial size based on table positions
+                    let maxX = 0, maxY = 0;
+                    Object.values(layout.positions).forEach(pos => {
+                        maxX = Math.max(maxX, pos.x + TABLE_WIDTH);
+                        maxY = Math.max(maxY, pos.y + TABLE_HEIGHT);
+                    });
+                    
+                    workspace.style.width = `${maxX + 100}px`;
+                    workspace.style.height = `${maxY + 100}px`;
+
+                    // Create table elements with absolute positioning
+                    const tableElements = {};
+                    tables.forEach((table) => {
+                        const tablePosition = layout.positions[table.name] || { x: 0, y: 0 };
+                        const tableElement = createTableElement(table, tablePosition);
+                        tableElements[table.name] = tableElement;
+                        workspace.appendChild(tableElement);
+                    });
+
+                    // Draw relationship connections
+                    drawRelationships(svg, layout.relationships, tableElements);
+
+                    // Initialize pan and zoom
+                    initPanZoom(viewport, workspace);
+                    
+                    // Initialize drag functionality for tables
+                    Object.values(tableElements).forEach(tableElement => {
+                        initDraggable(tableElement, svg, layout.relationships, tableElements);
+                    });
+                    
+                    // Add zoom controls
+                    initZoomControls(viewport, workspace);
+                    
+                    // Center the workspace initially
+                    centerWorkspace(viewport, workspace);
+                    
+                } catch (error) {
+                    console.error('Error visualizing schema:', error);
+                    workspace.innerHTML = `<div class="alert alert-warning">Error rendering schema: ${error.message}</div>`;
+                }
+            }
+
+            // Create a table element with its columns
+            function createTableElement(table, position) {
+                const tableElement = document.createElement('div');
+                tableElement.className = 'schema-table';
+                tableElement.id = `schema-table-${table.name}`;
+                tableElement.style.left = `${position.x}px`;
+                tableElement.style.top = `${position.y}px`;
+                tableElement.dataset.name = table.name;
+                
+                // Choose icon based on table name
+                let tableIcon = 'bi-table';
+                if (table.name.toLowerCase().includes('employee')) tableIcon = 'bi-people-fill';
+                if (table.name.toLowerCase().includes('computer')) tableIcon = 'bi-pc-display';
+                if (table.name.toLowerCase().includes('authentication')) tableIcon = 'bi-shield-lock';
+                if (table.name.toLowerCase().includes('network')) tableIcon = 'bi-diagram-3';
+                if (table.name.toLowerCase().includes('log')) tableIcon = 'bi-journal-text';
+                if (table.name.toLowerCase().includes('ip') || table.name.toLowerCase().includes('external')) tableIcon = 'bi-globe';
+                if (table.name.toLowerCase().includes('file')) tableIcon = 'bi-file-earmark';
+                
+                let tableHtml = `
+                    <div class="schema-table-header">
+                        <div><i class="bi ${tableIcon}"></i>${table.name}</div>
+                        <div class="table-badge">${table.columns.length}</div>
+                    </div>
+                    <div class="schema-table-body">`;
+                
+                // Add columns
+                table.columns.forEach(column => {
+                    let columnClass = 'schema-column';
+                    let pkIcon = '';
+                    let fkIcon = '';
+                    let title = '';
+                    
+                    if (column.isPrimaryKey) {
+                        pkIcon = '<i class="bi bi-key-fill text-warning me-1"></i>';
+                        columnClass += ' pk-column';
+                        title = 'Primary Key';
+                    }
+                    if (column.isForeignKey) {
+                        fkIcon = '<i class="bi bi-link-45deg text-primary me-1"></i>';
+                        columnClass += ' fk-column';
+                        title += (title ? ' & ' : '') + `Foreign Key (→ ${column.referencesTable || 'Unknown'})`;
+                    }
+                    
+                    tableHtml += `
+                        <div class="${columnClass}" title="${title}">
+                            <div class="schema-col-name">
+                                ${pkIcon}${fkIcon}${column.name}
+                            </div>
+                            <div class="schema-col-type">${column.type}</div>
+                        </div>`;
+                });
+                
+                tableHtml += '</div>'; // Close table body
+                tableElement.innerHTML = tableHtml;
+                
+                return tableElement;
+            }
+
+            // Draw relationship lines between tables
+            function drawRelationships(svg, relationships, tableElements) {
+                if (!svg || !relationships) return;
+                
+                // Clear previous lines
+                while (svg.firstChild) {
+                    svg.removeChild(svg.firstChild);
+                }
+                
+                // Group relationships by source-target pair
+                const relationshipGroups = {};
+                relationships.forEach(rel => {
+                    const key = `${rel.from}->${rel.to}`;
+                    if (!relationshipGroups[key]) relationshipGroups[key] = [];
+                    relationshipGroups[key].push(rel);
+                });
+                
+                // Create each relationship line
+                Object.entries(relationshipGroups).forEach(([key, relations]) => {
+                    const [fromTable, toTable] = key.split('->');
+                    
+                    const fromElement = tableElements[fromTable];
+                    const toElement = tableElements[toTable];
+                    
+                    if (!fromElement || !toElement) return;
+                    
+                    // Get element positions for connection points
+                    const fromRect = fromElement.getBoundingClientRect();
+                    const toRect = toElement.getBoundingClientRect();
+                    const fromBox = { 
+                        x: parseFloat(fromElement.style.left), 
+                        y: parseFloat(fromElement.style.top),
+                        width: fromElement.offsetWidth,
+                        height: fromElement.offsetHeight
+                    };
+                    const toBox = { 
+                        x: parseFloat(toElement.style.left), 
+                        y: parseFloat(toElement.style.top),
+                        width: toElement.offsetWidth,
+                        height: toElement.offsetHeight
+                    };
+                    
+                    // Find connecting points on table edges
+                    const fromPoint = findConnectionPoint(fromBox, toBox);
+                    const toPoint = findConnectionPoint(toBox, fromBox);
+                    
+                    // Create the path with cubic bezier curve
+                    const path = document.createElementNS(SVG_NAMESPACE, "path");
+                    
+                    // Calculate control points for curve (better path)
+                    const dx = toPoint.x - fromPoint.x;
+                    const dy = toPoint.y - fromPoint.y;
+                    const midX = fromPoint.x + dx * 0.5;
+                    const midY = fromPoint.y + dy * 0.5;
+                    
+                    // Adjust control points for smoother curves
+                    const controlLen = Math.min(Math.abs(dx), Math.abs(dy)) * 0.5 + 50;
+                    const controlPoints = calculateControlPoints(fromPoint, toPoint, controlLen);
+                    
+                    // Draw the bezier curve path
+                    const pathData = `M ${fromPoint.x} ${fromPoint.y} C ${controlPoints.cp1x} ${controlPoints.cp1y}, ${controlPoints.cp2x} ${controlPoints.cp2y}, ${toPoint.x} ${toPoint.y}`;
+                    
+                    path.setAttribute("d", pathData);
+                    path.setAttribute("class", "relationship-line");
+                    path.setAttribute("data-from", fromTable);
+                    path.setAttribute("data-to", toTable);
+                    
+                    // Add arrow marker
+                    const markerId = `arrow-${fromTable.replace(/\s+/g, '')}-${toTable.replace(/\s+/g, '')}`;
+                    addArrowMarker(svg, markerId);
+                    path.setAttribute("marker-end", `url(#${markerId})`);
+                    
+                    // Add tooltip
+                    const relationshipTitle = document.createElementNS(SVG_NAMESPACE, "title");
+                    const relInfo = relations.map(r => `${r.fromColumn} → ${r.toColumn}`).join(', ');
+                    relationshipTitle.textContent = `${fromTable} → ${toTable} (${relInfo})`;
+                    path.appendChild(relationshipTitle);
+                    
+                    svg.appendChild(path);
+                    
+                    // Add badge showing multiple relationships if needed
+                    if (relations.length > 1) {
+                        const textBg = document.createElementNS(SVG_NAMESPACE, "circle");
+                        const midPoint = {
+                            x: midX, 
+                            y: midY
+                        };
+                        
+                        textBg.setAttribute("cx", midPoint.x);
+                        textBg.setAttribute("cy", midPoint.y);
+                        textBg.setAttribute("r", 12);
+                        textBg.setAttribute("fill", "#6466f1");
+                        svg.appendChild(textBg);
+                        
+                        const textElement = document.createElementNS(SVG_NAMESPACE, "text");
+                        textElement.setAttribute("x", midPoint.x);
+                        textElement.setAttribute("y", midPoint.y + 4);
+                        textElement.setAttribute("text-anchor", "middle");
+                        textElement.setAttribute("font-size", "10px");
+                        textElement.setAttribute("fill", "white");
+                        textElement.textContent = relations.length;
+                        svg.appendChild(textElement);
+                    }
+                });
+            }
+
+            // Find connection points between two boxes
+            function findConnectionPoint(fromBox, toBox) {
+                // Find center points
+                const fromCenter = { x: fromBox.x + fromBox.width/2, y: fromBox.y + fromBox.height/2 };
+                const toCenter = { x: toBox.x + toBox.width/2, y: toBox.y + toBox.height/2 };
+                
+                // Determine connection edge based on relative positions
+                let x, y;
+                
+                // Horizontal positioning
+                if (fromCenter.x < toCenter.x) { // from is to the left of to
+                    x = fromBox.x + fromBox.width;
+                } else { // from is to the right of to
+                    x = fromBox.x;
+                }
+                
+                // Vertical positioning
+                if (fromCenter.y < toCenter.y) { // from is above to
+                    y = fromBox.y + fromBox.height;
+                } else { // from is below to
+                    y = fromBox.y;
+                }
+                
+                // If boxes are more aligned horizontally than vertically, connect on sides
+                if (Math.abs(fromCenter.x - toCenter.x) > Math.abs(fromCenter.y - toCenter.y)) {
+                    y = fromBox.y + fromBox.height/2;
+                } else {
+                    x = fromBox.x + fromBox.width/2;
+                }
+                
+                return { x, y };
+            }
+
+            // Calculate control points for curve
+            function calculateControlPoints(p1, p2, controlLen) {
+                const dx = p2.x - p1.x;
+                const dy = p2.y - p1.y;
+                const angle = Math.atan2(dy, dx);
+                
+                // Determine control point directions based on connection sides
+                let cp1Angle = angle;
+                let cp2Angle = angle + Math.PI;
+                
+                const cp1x = p1.x + Math.cos(cp1Angle) * controlLen;
+                const cp1y = p1.y + Math.sin(cp1Angle) * controlLen;
+                const cp2x = p2.x + Math.cos(cp2Angle) * controlLen;
+                const cp2y = p2.y + Math.sin(cp2Angle) * controlLen;
+                
+                return { cp1x, cp1y, cp2x, cp2y };
+            }
+
+            // Add arrow marker for relationship lines
+            function addArrowMarker(svg, id) {
+                const defs = svg.querySelector("defs") || (() => {
+                    const defsElement = document.createElementNS(SVG_NAMESPACE, "defs");
+                    svg.appendChild(defsElement);
+                    return defsElement;
+                })();
+                
+                const marker = document.createElementNS(SVG_NAMESPACE, "marker");
+                marker.setAttribute("id", id);
+                marker.setAttribute("viewBox", "0 0 10 10");
+                marker.setAttribute("refX", "9");
+                marker.setAttribute("refY", "5");
+                marker.setAttribute("markerWidth", "6");
+                marker.setAttribute("markerHeight", "6");
+                marker.setAttribute("orient", "auto");
+                
+                const path = document.createElementNS(SVG_NAMESPACE, "path");
+                path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
+                path.setAttribute("class", "relationship-arrow");
+                
+                marker.appendChild(path);
+                defs.appendChild(marker);
+                
+                return marker;
+            }
+
+            // Make a table element draggable
+            function initDraggable(element, svg, relationships, tableElements) {
+                if (!element) return;
+                
+                let isDragging = false;
+                let startX, startY;
+                let elementStartX, elementStartY;
+                
+                element.addEventListener('mousedown', startDrag);
+                element.addEventListener('touchstart', startDrag, { passive: false });
+                
+                function startDrag(e) {
+                    if (e.target.closest('.schema-table-body')) return; // Allow text selection inside body
+                    
+                    e.preventDefault();
+                    
+                    // Add dragging class for styling
+                    element.classList.add('dragging');
+                    
+                    // Get initial positions
+                    isDragging = true;
+                    startX = e.clientX || (e.touches && e.touches[0].clientX);
+                    startY = e.clientY || (e.touches && e.touches[0].clientY);
+                    
+                    elementStartX = parseFloat(element.style.left) || 0;
+                    elementStartY = parseFloat(element.style.top) || 0;
+                    
+                    // Add global event listeners
+                    document.addEventListener('mousemove', onDrag);
+                    document.addEventListener('touchmove', onDrag, { passive: false });
+                    document.addEventListener('mouseup', stopDrag);
+                    document.addEventListener('touchend', stopDrag);
+                    
+                    // Bring table to front while dragging
+                    element.style.zIndex = '100';
+                }
+                
+                function onDrag(e) {
+                    if (!isDragging) return;
+                    
+                    e.preventDefault();
+                    
+                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                    
+                    // Calculate new position
+                    const deltaX = clientX - startX;
+                    const deltaY = clientY - startY;
+                    
+                    element.style.left = (elementStartX + deltaX) + 'px';
+                    element.style.top = (elementStartY + deltaY) + 'px';
+                    
+                    // Update connections
+                    drawRelationships(svg, relationships, tableElements);
+                }
+                
+                function stopDrag() {
+                    if (!isDragging) return;
+                    
+                    isDragging = false;
+                    element.classList.remove('dragging');
+                    element.style.zIndex = '1';
+                    
+                    // Update connections one final time
+                    drawRelationships(svg, relationships, tableElements);
+                    
+                    // Remove global event listeners
+                    document.removeEventListener('mousemove', onDrag);
+                    document.removeEventListener('touchmove', onDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                    document.removeEventListener('touchend', stopDrag);
+                }
+            }
+
+            // Initialize pan and zoom functionality
+            function initPanZoom(viewport, workspace) {
+                if (!viewport || !workspace) return;
+                
+                let isPanning = false;
+                let startPointX, startPointY;
+                let startTransformX = 0, startTransformY = 0;
+                let currentScale = 1;
+                
+                // Get transform values
+                function getTransform() {
+                    const transform = workspace.style.transform;
+                    let translateX = 0, translateY = 0, scale = 1;
+                    
+                    if (transform) {
+                        const match = transform.match(/translate\((-?\d+\.?\d*)px,\s*(-?\d+\.?\d*)px\)/);
+                        if (match) {
+                            translateX = parseFloat(match[1]);
+                            translateY = parseFloat(match[2]);
+                        }
+                        
+                        const scaleMatch = transform.match(/scale\((\d+\.?\d*)\)/);
+                        if (scaleMatch) {
+                            scale = parseFloat(scaleMatch[1]);
+                        }
+                    }
+                    
+                    return { translateX, translateY, scale };
+                }
+                
+                // Set transform values
+                function setTransform(translateX, translateY, scale) {
+                    workspace.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+                    currentScale = scale;
+                }
+                
+                // Start pan
+                viewport.addEventListener('mousedown', function(e) {
+                    // Only handle clicks on the background, not on tables
+                    if (e.target !== viewport && e.target !== workspace && !e.target.classList.contains('schema-relationships')) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    isPanning = true;
+                    viewport.classList.add('grabbing');
+                    
+                    startPointX = e.clientX;
+                    startPointY = e.clientY;
+                    
+                    const { translateX, translateY } = getTransform();
+                    startTransformX = translateX;
+                    startTransformY = translateY;
+                });
+                
+                // Pan move
+                document.addEventListener('mousemove', function(e) {
+                    if (!isPanning) return;
+                    
+                    const deltaX = e.clientX - startPointX;
+                    const deltaY = e.clientY - startPointY;
+                    
+                    setTransform(
+                        startTransformX + deltaX,
+                        startTransformY + deltaY,
+                        currentScale
+                    );
+                });
+                
+                // End pan
+                document.addEventListener('mouseup', function() {
+                    isPanning = false;
+                    viewport.classList.remove('grabbing');
+                });
+                
+                // Zoom with wheel
+                viewport.addEventListener('wheel', function(e) {
+                    e.preventDefault();
+                    
+                    const { translateX, translateY, scale } = getTransform();
+                    const rect = viewport.getBoundingClientRect();
+                    
+                    // Mouse position relative to viewport
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+                    
+                    // Mouse position in workspace coordinates (before scaling)
+                    const workspaceX = (mouseX - translateX) / scale;
+                    const workspaceY = (mouseY - translateY) / scale;
+                    
+                    // Calculate new scale
+                    const scaleDelta = e.deltaY > 0 ? 0.9 : 1.1;
+                    const newScale = Math.min(Math.max(scale * scaleDelta, 0.25), 3);
+                    
+                    // Calculate new translate values to zoom in/out toward mouse position
+                    const newTranslateX = mouseX - workspaceX * newScale;
+                    const newTranslateY = mouseY - workspaceY * newScale;
+                    
+                    // Apply transform
+                    setTransform(newTranslateX, newTranslateY, newScale);
+                }, { passive: false });
+            }
+
+            // Initialize zoom control buttons
+            function initZoomControls(viewport, workspace) {
+                const zoomInBtn = document.getElementById('schema-zoom-in');
+                const zoomOutBtn = document.getElementById('schema-zoom-out');
+                const resetBtn = document.getElementById('schema-reset');
+                
+                if (!zoomInBtn || !zoomOutBtn || !resetBtn) return;
+                
+                // Get current transform
+                function getTransform() {
+                    const transform = workspace.style.transform;
+                    let translateX = 0, translateY = 0, scale = 1;
+                    
+                    if (transform) {
+                        const match = transform.match(/translate\((-?\d+\.?\d*)px,\s*(-?\d+\.?\d*)px\)/);
+                        if (match) {
+                            translateX = parseFloat(match[1]);
+                            translateY = parseFloat(match[2]);
+                        }
+                        
+                        const scaleMatch = transform.match(/scale\((\d+\.?\d*)\)/);
+                        if (scaleMatch) {
+                            scale = parseFloat(scaleMatch[1]);
+                        }
+                    }
+                    
+                    return { translateX, translateY, scale };
+                }
+                
+                // Zoom in button
+                zoomInBtn.addEventListener('click', function() {
+                    const { translateX, translateY, scale } = getTransform();
+                    const newScale = Math.min(scale * 1.2, 3);
+                    
+                    // Adjust translate values to zoom toward center
+                    const viewportRect = viewport.getBoundingClientRect();
+                    const viewportCenterX = viewportRect.width / 2;
+                    const viewportCenterY = viewportRect.height / 2;
+                    
+                    // Calculate point to zoom toward (viewport center in workspace coordinates)
+                    const focusX = (viewportCenterX - translateX) / scale;
+                    const focusY = (viewportCenterY - translateY) / scale;
+                    
+                    // Calculate new translate values
+                    const newTranslateX = viewportCenterX - focusX * newScale;
+                    const newTranslateY = viewportCenterY - focusY * newScale;
+                    
+                    workspace.style.transform = `translate(${newTranslateX}px, ${newTranslateY}px) scale(${newScale})`;
+                });
+                
+                // Zoom out button
+                zoomOutBtn.addEventListener('click', function() {
+                    const { translateX, translateY, scale } = getTransform();
+                    const newScale = Math.max(scale * 0.8, 0.25);
+                    
+                    // Adjust translate values similar to zoom in
+                    const viewportRect = viewport.getBoundingClientRect();
+                    const viewportCenterX = viewportRect.width / 2;
+                    const viewportCenterY = viewportRect.height / 2;
+                    
+                    const focusX = (viewportCenterX - translateX) / scale;
+                    const focusY = (viewportCenterY - translateY) / scale;
+                    
+                    const newTranslateX = viewportCenterX - focusX * newScale;
+                    const newTranslateY = viewportCenterY - focusY * newScale;
+                    
+                    workspace.style.transform = `translate(${newTranslateX}px, ${newTranslateY}px) scale(${newScale})`;
+                });
+                
+                // Reset view button
+                resetBtn.addEventListener('click', function() {
+                    centerWorkspace(viewport, workspace);
+                });
+            }
+
+            // Center workspace in viewport
+            function centerWorkspace(viewport, workspace) {
+                if (!viewport || !workspace) return;
+                
+                // Calculate size differences
+                const viewportWidth = viewport.clientWidth;
+                const viewportHeight = viewport.clientHeight;
+                const workspaceWidth = parseFloat(workspace.style.width);
+                const workspaceHeight = parseFloat(workspace.style.height);
+                
+                // Calculate scale to fit (with some margin)
+                const margin = 40;
+                const scaleX = (viewportWidth - margin) / workspaceWidth;
+                const scaleY = (viewportHeight - margin) / workspaceHeight;
+                const scale = Math.min(scaleX, scaleY, 0.8); // Cap scale
+                
+                // Calculate centering translation
+                const translateX = (viewportWidth - workspaceWidth * scale) / 2;
+                const translateY = (viewportHeight - workspaceHeight * scale) / 2;
+                
+                // Apply transform
+                workspace.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            }
+
+            // Initialize enhanced schema visualization
             visualizeSchema();
 
             // Format result data as HTML table if available
@@ -424,15 +1146,21 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
              }
         });
 
-        // --- 1. Schema Visualization (Corrected Parser + SVG Lines) ---
+        // Define constants at a higher scope so they're accessible to all functions
+        const TABLE_WIDTH = 260; // Width of table element
+        const TABLE_HEIGHT = 150; // Estimated average height
+        const HORIZONTAL_SPACING = 30;
+        const VERTICAL_SPACING = 50;
+        const SVG_NAMESPACE = "http://www.w3.org/2000/svg"; // Define SVG namespace here
 
-        // IMPORTANT: Corrected SQL Parser - Relies on explicit keywords, not heuristics
-       function parseSchemaFromSQL(sql) {
+        // --- 1. Schema Visualization (Enhanced with Auto-Layout) ---
+        
+        function parseSchemaFromSQL(sql) {
             const tables = [];
             if (!sql) return tables;
 
             // Regex to capture CREATE TABLE statements, including quoted names and the definition body
-             const tablePattern = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[\w`"\[\]]+\.)?([\w`"\[\]]+)\s*\(([\s\S]*?)\)\s*;/gi;
+            const tablePattern = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[\w`"\[\]]+\.)?([\w`"\[\]]+)\s*\(([\s\S]*?)\)\s*;/gi;
             let tableMatch;
 
             while ((tableMatch = tablePattern.exec(sql)) !== null) {
@@ -442,10 +1170,8 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
                 let tablePrimaryKeys = []; // Store PKs defined separately at table level
                 let foreignKeys = []; // Store FK definitions { column, referencesTable, referencesColumn }
 
-                 // Split definition body into individual lines (more robustly than just comma)
-                 // Handles constraints on separate lines and commas within defaults/checks
-                 const lines = definitionBody.split(/,\s*(?![^()]*\))/).map(line => line.trim()).filter(line => line);
-
+                // Split definition body into individual lines (handles constraints better)
+                const lines = definitionBody.split(/,\s*(?![^()]*\))/).map(line => line.trim()).filter(line => line);
 
                 lines.forEach(line => {
                     const upperLine = line.toUpperCase();
@@ -459,11 +1185,11 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
                         return; // This line is a constraint, not a column
                     }
                     if (upperLine.startsWith('CONSTRAINT') && upperLine.includes('PRIMARY KEY')) {
-                         const pkMatch = line.match(/PRIMARY\s+KEY\s*\((.*?)\)/i);
-                         if (pkMatch && pkMatch[1]) {
+                        const pkMatch = line.match(/PRIMARY\s+KEY\s*\((.*?)\)/i);
+                        if (pkMatch && pkMatch[1]) {
                             tablePrimaryKeys = pkMatch[1].split(',').map(c => c.trim().replace(/[`"\[\]]/g, ''));
-                         }
-                         return;
+                        }
+                        return;
                     }
 
                     // --- Foreign Key Parsing ---
@@ -479,24 +1205,31 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
                                 foreignKeys.push({
                                     column: fkCol,
                                     referencesTable: refTable,
-                                    // Assume ref column matches FK col if not specified (common case for single col FK)
+                                    // If reference columns are specified, use them; otherwise assume they match the FK column name
                                     referencesColumn: refColumns.length > index ? refColumns[index] : fkCol
                                 });
                             });
                         }
-                         return; // Constraint line
+                        return; // Constraint line
                     }
 
                     // --- Column Parsing ---
-                    // Skip other constraints for column detection
-                     if (upperLine.startsWith('CONSTRAINT') || upperLine.startsWith('UNIQUE') || upperLine.startsWith('CHECK')) {
-                         return;
-                     }
+                    // Skip other constraints
+                    if (upperLine.startsWith('CONSTRAINT') || upperLine.startsWith('UNIQUE') || upperLine.startsWith('CHECK')) {
+                        return;
+                    }
 
+                    // Parse column definition
                     const parts = line.split(/\s+/);
                     if (parts.length >= 2) {
                         const columnName = parts[0].replace(/[`"\[\]]/g, '');
-                        const columnType = parts[1]; // Basic type, might need refinement for complex types
+                        let columnType = parts[1]; // Basic type
+                        
+                        // Handle complex types with parentheses like VARCHAR(50)
+                        if (parts.length > 2 && parts[2].startsWith('(')) {
+                            columnType += ' ' + parts.slice(2).join(' ').split(' ')[0];
+                        }
+                        
                         const isInlinePK = upperLine.includes(' PRIMARY KEY');
                         const hasInlineFKRef = upperLine.includes(' REFERENCES ');
 
@@ -512,32 +1245,31 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
                     }
                 });
 
-                 // --- Post-processing ---
-                 // Apply table-level PKs
-                 columns.forEach(column => {
-                     if (tablePrimaryKeys.includes(column.name)) {
-                         column.isPrimaryKey = true;
-                     }
-                 });
-
-                // Apply table-level FKs and mark columns
-                 foreignKeys.forEach(fk => {
-                    const col = columns.find(c => c.name === fk.column);
-                    if (col) {
-                        col.isForeignKey = true;
-                        col.referencesTable = fk.referencesTable; // Store target table
-                        col.referencesColumn = fk.referencesColumn; // Store target column
-                    }
-                 });
-
-                // Apply inline FKs and mark columns (if not already marked by table-level constraint)
-                columns.forEach(col => {
-                    if (col.isForeignKey && col.inlineRefTable && !col.referencesTable) {
-                         col.referencesTable = col.inlineRefTable;
-                         col.referencesColumn = col.inlineRefCol ?? col.name; // Assume FK name matches PK name if ref col omitted
+                // --- Post-processing ---
+                // Apply table-level PKs
+                columns.forEach(column => {
+                    if (tablePrimaryKeys.includes(column.name)) {
+                        column.isPrimaryKey = true;
                     }
                 });
 
+                // Apply table-level FKs
+                foreignKeys.forEach(fk => {
+                    const col = columns.find(c => c.name === fk.column);
+                    if (col) {
+                        col.isForeignKey = true;
+                        col.referencesTable = fk.referencesTable;
+                        col.referencesColumn = fk.referencesColumn;
+                    }
+                });
+
+                // Apply inline FKs (if not already marked by table-level constraint)
+                columns.forEach(col => {
+                    if (col.isForeignKey && col.inlineRefTable && !col.referencesTable) {
+                        col.referencesTable = col.inlineRefTable;
+                        col.referencesColumn = col.inlineRefCol ?? col.name;
+                    }
+                });
 
                 tables.push({
                     name: tableName,
@@ -548,377 +1280,120 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
             return tables;
         }
 
-
-        // Visualization Function with SVG
-        function visualizeSchema() {
-            const container = document.getElementById('schema-diagram');
-            if (!container) { console.error("Schema container not found"); return; }
-
-            container.style.position = 'relative';
-            container.innerHTML = ''; // Clear previous content
-
-            const svgNs = "http://www.w3.org/2000/svg";
-            const svg = document.createElementNS(svgNs, "svg");
-            svg.setAttribute('class', 'schema-viz-svg');
-            svg.setAttribute('width', '100%');
-            svg.setAttribute('height', '100%'); // Will adjust later if needed
-
-            const defs = document.createElementNS(svgNs, "defs");
-            const marker = document.createElementNS(svgNs, "marker");
-            marker.setAttribute("id", "arrowhead");
-            marker.setAttribute("viewBox", "0 0 10 10");
-            marker.setAttribute("refX", "5"); // Center arrowhead on line end
-            marker.setAttribute("refY", "5");
-            marker.setAttribute("markerWidth", "6");
-            marker.setAttribute("markerHeight", "6");
-            marker.setAttribute("orient", "auto-start-reverse"); // Point towards the line start
-            const path = document.createElementNS(svgNs, "path");
-            path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z"); // Arrow shape
-            path.setAttribute("fill", "#5a7d9a");
-            marker.appendChild(path);
-            defs.appendChild(marker);
-            svg.appendChild(defs);
-
-            container.appendChild(svg);
-
-            try {
-                 const schemaDataElement = document.querySelector('#code-schema code.language-sql'); // Get schema from code block
-                 const schemaText = schemaDataElement ? schemaDataElement.textContent : '';
-                 //const schemaText = `@Html.Raw(Json.Serialize(Model.Mystery?.Details?.DatabaseSchema ?? ""))`; // Alternative if needed
-
-
-                if (!schemaText) throw new Error("Schema text could not be retrieved.");
-
-                const tables = parseSchemaFromSQL(schemaText);
-
-                if (tables.length === 0) {
-                    container.innerHTML = '<div class="alert alert-info text-center">No tables found or could not parse schema.</div>';
-                    return;
-                }
-
-                const tableElements = {};
-
-                // Render Table Cards
-                tables.forEach((table) => {
-                    const tableDiv = document.createElement('div');
-                    tableDiv.className = 'schema-table';
-                    tableDiv.id = `schema-table-${table.name}`;
-                    tableElements[table.name] = tableDiv;
-
-                    let tableIcon = 'bi-table';
-                    if (table.name.toLowerCase().includes('customer')) tableIcon = 'bi-people-fill';
-                    if (table.name.toLowerCase().includes('order')) tableIcon = 'bi-cart-check-fill';
-                    if (table.name.toLowerCase().includes('product')) tableIcon = 'bi-box-seam';
-
-                    let tableHtml = `
-                        <div class="schema-table-header">
-                            <i class="bi ${tableIcon}"></i> ${table.name}
-                        </div>
-                        <div class="schema-table-body">`;
-
-                    table.columns.forEach(column => {
-                        let pkIndicator = '';
-                        let fkIndicator = '';
-                        let columnRowClass = 'schema-column';
-                        let title = '';
-
-                        if (column.isPrimaryKey) {
-                            pkIndicator = '<i class="bi bi-key-fill pk-indicator"></i>';
-                            columnRowClass += ' pk-column';
-                            title = 'Primary Key';
-                        }
-                        if (column.isForeignKey) {
-                            const targetTable = column.referencesTable || 'Unknown';
-                            const targetCol = column.referencesColumn || 'Unknown';
-                            fkIndicator = `<i class="bi bi-link-45deg fk-indicator"></i>`;
-                            columnRowClass += ' fk-column';
-                            title = `Foreign Key (references ${targetTable}.${targetCol})`;
-                         }
-
-                        tableHtml += `
-                            <div class="${columnRowClass}" title="${title}"
-                                 data-table="${table.name}" data-column="${column.name}"
-                                 data-pk="${column.isPrimaryKey}" data-fk="${column.isForeignKey}"
-                                 data-references-table="${column.referencesTable || ''}"
-                                 data-references-column="${column.referencesColumn || ''}">
-                                <span class="schema-col-name">
-                                    ${pkIndicator} ${fkIndicator} ${column.name}
-                                </span>
-                                <span class="schema-col-type">${column.type}</span>
-                            </div>`;
-                    });
-
-                    tableHtml += `</div>`; // End table-body
-                    tableDiv.innerHTML = tableHtml;
-                    container.appendChild(tableDiv);
-                });
-
-                // Draw Relationship Lines (after tables are in DOM)
-                setTimeout(() => {
-                    drawRelationshipLines(container, svg, tables);
-                    // Adjust SVG height after drawing lines
-                    const bbox = svg.getBBox();
-                    const padding = 20; // Add some padding
-                    svg.setAttribute('height', Math.max(container.clientHeight, bbox.y + bbox.height + padding));
-                 }, 150); // Delay to allow rendering
-
-            } catch (error) {
-                console.error('Error visualizing schema:', error);
-                container.innerHTML = `<div class="alert alert-warning">Error rendering schema: ${error.message}</div>`;
-            }
-        }
-
-        // Helper to draw SVG lines
-        function drawRelationshipLines(container, svg, tables) {
-             const svgRect = container.getBoundingClientRect();
-             if (!svgRect.width || !svgRect.height) return; // Don't draw if container isn't visible/sized
-
-            const drawnRelations = new Set(); // Prevent drawing duplicate lines for composite FKs
-
+        // Auto-layout calculation for tables
+        function calculateTableLayout(tables, containerWidth) {
+            // Determine relationships between tables
+            const relationships = [];
+            const tableMap = {};
+            
+            // Create a lookup map of tables
+            tables.forEach(table => {
+                tableMap[table.name] = table;
+            });
+            
+            // Find all relationships
             tables.forEach(table => {
                 table.columns.forEach(column => {
-                    if (column.isForeignKey && column.referencesTable && column.referencesColumn) {
-                        const relationKey = `${table.name}.${column.name}->${column.referencesTable}.${column.referencesColumn}`;
-                        if (drawnRelations.has(relationKey)) return; // Skip if already drawn
-
-                         const fkElement = container.querySelector(`.schema-column[data-table="${table.name}"][data-column="${column.name}"]`);
-                         // Find the target PK element
-                          const pkElement = container.querySelector(`.schema-column[data-table="${column.referencesTable}"][data-column="${column.referencesColumn}"][data-pk="true"]`);
-
-                         if (fkElement && pkElement) {
-                             const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                             const fkRect = fkElement.getBoundingClientRect();
-                             const pkRect = pkElement.getBoundingClientRect();
-
-                            // Calculate midpoints relative to SVG container
-                             let x1, y1, x2, y2;
-
-                            // Basic logic: connect right side of FK table to left side of PK table (or vice versa)
-                             const fkTableRect = fkElement.closest('.schema-table').getBoundingClientRect();
-                             const pkTableRect = pkElement.closest('.schema-table').getBoundingClientRect();
-
-                            if (fkTableRect.left < pkTableRect.left) { // FK table is to the left
-                                 x1 = fkRect.right - svgRect.left;
-                                 y1 = fkRect.top + fkRect.height / 2 - svgRect.top;
-                                 x2 = pkRect.left - svgRect.left;
-                                 y2 = pkRect.top + pkRect.height / 2 - svgRect.top;
-                             } else { // FK table is to the right (or same column)
-                                 x1 = fkRect.left - svgRect.left;
-                                 y1 = fkRect.top + fkRect.height / 2 - svgRect.top;
-                                 x2 = pkRect.right - svgRect.left;
-                                 y2 = pkRect.top + pkRect.height / 2 - svgRect.top;
-                             }
-                             // Adjust for arrowhead size to prevent overlap
-                             const angle = Math.atan2(y2 - y1, x2 - x1);
-                             const arrowLength = 6; // Match markerWidth/Height
-                             x2 -= arrowLength * Math.cos(angle);
-                             y2 -= arrowLength * Math.sin(angle);
-
-
-                             line.setAttribute("x1", x1);
-                             line.setAttribute("y1", y1);
-                             line.setAttribute("x2", x2);
-                             line.setAttribute("y2", y2);
-                             line.setAttribute("class", "relationship-line");
-                             line.setAttribute("marker-end", "url(#arrowhead)");
-
-                             svg.appendChild(line);
-                             drawnRelations.add(relationKey); // Mark as drawn
-                         } else {
-                             if (!fkElement) console.warn(`FK element not found: ${table.name}.${column.name}`);
-                             if (!pkElement) console.warn(`Target PK element not found: ${column.referencesTable}.${column.referencesColumn}`);
-                         }
+                    if (column.isForeignKey && column.referencesTable) {
+                        relationships.push({
+                            from: table.name,
+                            to: column.referencesTable,
+                            fromColumn: column.name,
+                            toColumn: column.referencesColumn
+                        });
                     }
                 });
             });
-        }
-
-
-        // --- 2. Format results as HTML table ---
-        function formatResultsAsTable() {
-            const rawResultsCode = document.getElementById('raw-results');
-            const formattedResultsDiv = document.getElementById('formatted-results');
-
-            if (!rawResultsCode || !formattedResultsDiv) return;
-
-            try {
-                const resultText = rawResultsCode.textContent.trim();
-                if (!resultText || resultText === "Query executed successfully, but returned no rows." || resultText.startsWith("Could not format")) {
-                     formattedResultsDiv.innerHTML = `<p class="text-muted p-3">${resultText || 'No textual results to display.'}</p>`;
-                     return;
-                }
-
-                const lines = resultText.split('\n');
-                if (lines.length < 1) { // Need at least headers
-                    formattedResultsDiv.innerHTML = `<pre>${resultText}</pre>`; // Fallback
-                    return;
-                }
-
-                // Assume first line is headers, second is separator
-                const headers = lines[0].split('|').map(h => h.trim());
-                if (headers.length === 0 || (headers.length === 1 && headers[0] === '')) {
-                   formattedResultsDiv.innerHTML = `<pre>${resultText}</pre>`; // Fallback if header parsing fails
-                   return;
-                }
-
-                // Create HTML table
-                let tableHtml = '<table class="table table-striped table-bordered table-hover query-results-table">';
-                tableHtml += '<thead class="table-dark"><tr>';
-                headers.forEach(header => {
-                    tableHtml += `<th>${header || ' '}</th>`; // Handle potential empty header parts
-                });
-                tableHtml += '</tr></thead>';
-
-                tableHtml += '<tbody>';
-                // Data rows start from index 2 (after header and separator)
-                 for (let i = 2; i < lines.length; i++) {
-                     const cellValues = lines[i].split('|').map(cell => cell.trim());
-                     // Ensure the number of cells matches the number of headers
-                     if (cellValues.length === headers.length) {
-                         tableHtml += '<tr>';
-                         cellValues.forEach(value => {
-                              tableHtml += `<td>${value === 'NULL' ? '<span class="text-muted">NULL</span>' : value}</td>`;
-                         });
-                         tableHtml += '</tr>';
-                     } else {
-                        // Handle potential row parsing issues (e.g., data contains '|')
-                         console.warn(`Row ${i} has ${cellValues.length} cells, expected ${headers.length}. Row data: ${lines[i]}`);
-                         // Optionally add a row indicating the issue
-                         // tableHtml += `<tr><td colspan="${headers.length}" class="text-danger">Error parsing this row</td></tr>`;
-                     }
-                 }
-                 tableHtml += '</tbody></table>';
-
-                formattedResultsDiv.innerHTML = tableHtml;
-            } catch (error) {
-                console.error('Error formatting results:', error);
-                formattedResultsDiv.innerHTML = `<div class="alert alert-warning">Error formatting results.</div><pre>${rawResultsCode?.textContent || ''}</pre>`; // Fallback
+            
+            // Group tables by their relationship depth
+            const tableDepths = {};
+            const processed = new Set();
+            const rootTables = new Set(tables.map(t => t.name));
+            
+            // Remove tables that are referenced by others from root tables
+            relationships.forEach(rel => {
+                rootTables.delete(rel.to);
+            });
+            
+            // If no root tables (circular references), just pick the first table
+            if (rootTables.size === 0 && tables.length > 0) {
+                rootTables.add(tables[0].name);
             }
-        }
-
-
-        // --- 3. Notes feature with localStorage ---
-        function initNotesFeature() {
-            const userNotes = document.getElementById('userNotes');
-            const saveBtn = document.getElementById('saveNotes');
-            const clearBtn = document.getElementById('clearNotes');
-            const savedIndicator = document.getElementById('notes-saved');
-
-            if (!userNotes || !saveBtn || !clearBtn || !savedIndicator) return;
-
-            const mysteryId = '@Model.Mystery?.Id';
-            if (!mysteryId) return; // Don't run if mystery ID isn't available
-            const storageKey = `queryMyst_notes_${mysteryId}`;
-
-            // Load saved notes
-            const savedNotes = localStorage.getItem(storageKey);
-            if (savedNotes) {
-                userNotes.value = savedNotes;
+            
+            // Assign depths using breadth-first traversal
+            let currentDepth = 0;
+            let currentLevel = [...rootTables];
+            
+            while (currentLevel.length > 0) {
+                const nextLevel = [];
+                
+                currentLevel.forEach(tableName => {
+                    if (!processed.has(tableName)) {
+                        tableDepths[tableName] = currentDepth;
+                        processed.add(tableName);
+                        
+                        // Find all tables this one references
+                        relationships.forEach(rel => {
+                            if (rel.from === tableName && !processed.has(rel.to)) {
+                                nextLevel.push(rel.to);
+                            }
+                        });
+                    }
+                });
+                
+                currentDepth++;
+                currentLevel = nextLevel;
             }
-
-            let saveTimeout;
-            userNotes.addEventListener('input', function () {
-                clearTimeout(saveTimeout);
-                savedIndicator.classList.remove('visible');
-
-                saveTimeout = setTimeout(() => {
-                    localStorage.setItem(storageKey, userNotes.value);
-                    savedIndicator.classList.add('visible');
-                    setTimeout(() => savedIndicator.classList.remove('visible'), 2000);
-                }, 1000); // Auto-save after 1 second of inactivity
-            });
-
-            saveBtn.addEventListener('click', function () {
-                clearTimeout(saveTimeout); // Prevent auto-save from interfering
-                localStorage.setItem(storageKey, userNotes.value);
-                savedIndicator.classList.add('visible');
-                saveBtn.disabled = true;
-                saveBtn.innerHTML = '<i class="bi bi-check-lg"></i> Saved';
-                setTimeout(() => {
-                    savedIndicator.classList.remove('visible');
-                    saveBtn.disabled = false;
-                    saveBtn.innerHTML = '<i class="bi bi-save"></i> Save Notes';
-                }, 1500);
-            });
-
-            clearBtn.addEventListener('click', function () {
-                if (confirm('Are you sure you want to clear your notes for this mystery? This cannot be undone.')) {
-                    userNotes.value = '';
-                    localStorage.removeItem(storageKey);
-                    savedIndicator.classList.remove('visible');
-                     clearTimeout(saveTimeout);
+            
+            // Handle any remaining tables (circular references)
+            tables.forEach(table => {
+                if (!processed.has(table.name)) {
+                    tableDepths[table.name] = currentDepth;
+                    currentDepth++;
                 }
             });
-        }
-
-        // --- 4. SQL Editor enhancements ---
-        function initEditorFeatures() {
-            const sqlEditor = document.getElementById('sqlQueryArea');
-            const templateBtns = document.querySelectorAll('.template-btn');
-            const fullscreenBtn = document.getElementById('toggle-fullscreen');
-            const editorCard = fullscreenBtn?.closest('.card'); // Find the editor's card
-            const formatCheck = document.getElementById('autoFormatCheck');
-
-            if (!sqlEditor) return;
-
-            templateBtns.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    const template = this.dataset.template;
-                    const startPos = sqlEditor.selectionStart;
-                    const endPos = sqlEditor.selectionEnd;
-                    const scrollTop = sqlEditor.scrollTop; // Preserve scroll position
-
-                    sqlEditor.value = sqlEditor.value.substring(0, startPos) + template + sqlEditor.value.substring(endPos);
-                    sqlEditor.selectionStart = sqlEditor.selectionEnd = startPos + template.length;
-                    sqlEditor.scrollTop = scrollTop; // Restore scroll position
-                    sqlEditor.focus();
-                });
+            
+            // Group tables by depth
+            const tablesByDepth = {};
+            Object.entries(tableDepths).forEach(([tableName, depth]) => {
+                if (!tablesByDepth[depth]) tablesByDepth[depth] = [];
+                tablesByDepth[depth].push(tableName);
             });
-
-            if (fullscreenBtn && editorCard) {
-                fullscreenBtn.addEventListener('click', function () {
-                    editorCard.classList.toggle('editor-fullscreen');
-                    document.body.style.overflow = editorCard.classList.contains('editor-fullscreen') ? 'hidden' : ''; // Prevent body scroll in fullscreen
-                    fullscreenBtn.innerHTML = editorCard.classList.contains('editor-fullscreen')
-                        ? '<i class="bi bi-fullscreen-exit"></i>'
-                        : '<i class="bi bi-arrows-fullscreen"></i>';
-                     fullscreenBtn.title = editorCard.classList.contains('editor-fullscreen') ? 'Exit Fullscreen' : 'Enter Fullscreen';
+            
+            // Calculate positions
+            const positions = {};
+            
+            const maxTablesPerRow = Math.max(1, Math.floor((containerWidth - HORIZONTAL_SPACING) / (TABLE_WIDTH + HORIZONTAL_SPACING)));
+            let yOffset = VERTICAL_SPACING;
+            
+            Object.entries(tablesByDepth).forEach(([depth, tableNames]) => {
+                let xOffset = HORIZONTAL_SPACING;
+                let maxHeight = 0;
+                
+                // Calculate how many tables will fit per row
+                const tablesInCurrentRow = Math.min(tableNames.length, maxTablesPerRow);
+                const horizontalGap = (containerWidth - (tablesInCurrentRow * TABLE_WIDTH)) / (tablesInCurrentRow + 1);
+                
+                tableNames.forEach((tableName, index) => {
+                    const table = tableMap[tableName];
+                    const rowIndex = Math.floor(index / maxTablesPerRow);
+                    const colIndex = index % maxTablesPerRow;
+                    
+                    const x = horizontalGap + colIndex * (TABLE_WIDTH + horizontalGap);
+                    const y = yOffset + rowIndex * (TABLE_HEIGHT + VERTICAL_SPACING);
+                    
+                    positions[tableName] = { x, y };
+                    
+                    // Track max height for this row
+                    const estimatedHeight = 50 + (table.columns.length * 30); // Header + columns
+                    maxHeight = Math.max(maxHeight, estimatedHeight);
                 });
-            }
-
-             if (formatCheck) {
-                 formatCheck.addEventListener('change', function () {
-                     if (this.checked && sqlEditor.value) {
-                         // Placeholder: Implement or integrate a real SQL formatter if desired
-                         // sqlEditor.value = formatSQL(sqlEditor.value); // Your basic formatter
-                         console.warn("Auto-formatting is basic. Consider a library for complex SQL.");
-                         sqlEditor.value = formatSQL(sqlEditor.value); // Use the basic one for now
-                     }
-                 });
-             }
+                
+                // Update yOffset for next depth level
+                yOffset += Math.ceil(tableNames.length / maxTablesPerRow) * (maxHeight + VERTICAL_SPACING);
+            });
+            
+            return { positions, relationships };
         }
-
-        // Basic SQL Formatter (very simplified)
-        function formatSQL(sql) {
-             let formatted = sql;
-             const keywords = ['SELECT', 'FROM', 'WHERE', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'OUTER JOIN', 'JOIN', 'ON', 'GROUP BY', 'ORDER BY', 'HAVING', 'LIMIT', 'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM', 'AND', 'OR', 'AS', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'];
-
-            // Uppercase keywords (case-insensitive replace)
-             keywords.forEach(keyword => {
-                 const regex = new RegExp(`\\b${keyword.replace(' ', '\\s+')}\\b`, 'gi');
-                 formatted = formatted.replace(regex, keyword.toUpperCase());
-             });
-
-            // Add line breaks before major clauses (simple approach)
-            formatted = formatted.replace(/\s+(FROM|WHERE|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|JOIN|GROUP BY|ORDER BY|HAVING|VALUES|SET)\b/g, '\n$1');
-            // Indent clauses slightly (very basic)
-             formatted = formatted.replace(/\n(WHERE|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|JOIN|ON|AND|OR|GROUP BY|ORDER BY|HAVING|VALUES|SET)\b/g, '\n  $1');
-
-            // Add line breaks after commas in SELECT (if multiple columns)
-             formatted = formatted.replace(/(SELECT\s+.*?,)\s+/gi, '$1\n  ');
-
-            return formatted.trim(); // Trim leading/trailing whitespace
-        }
-
     </script>
 }
