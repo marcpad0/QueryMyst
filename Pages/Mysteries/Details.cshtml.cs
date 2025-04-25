@@ -120,7 +120,63 @@ namespace QueryMyst.Pages.Mysteries // Replace with your actual Pages namespace
                            (solutionResultJson, _) = await ExecuteQueryAndGetJsonAsync(connection, Mystery.Details.SolutionQuery);
 
                            // 5. Compare Results
-                           IsCorrectSolution = userResultJson != null && solutionResultJson != null && userResultJson == solutionResultJson;
+                           // Replace existing comparison with a more flexible approach
+                           if (userResultJson != null && solutionResultJson != null) {
+                               try {
+                                   var userResults = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(userResultJson);
+                                   var solutionResults = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(solutionResultJson);
+                                   
+                                   // Check if we have the same number of rows
+                                   if (userResults.Count == solutionResults.Count) {
+                                       bool allRowsMatch = true;
+                                       
+                                       // For each row in the solution
+                                       for (int i = 0; i < solutionResults.Count; i++) {
+                                           bool rowMatched = false;
+                                           
+                                           // Try to find a matching row in user results (ignoring column names)
+                                           foreach (var userRow in userResults) {
+                                               bool currentRowMatches = true;
+                                               
+                                               // Check if all values in this solution row exist in the user row
+                                               foreach (var solutionValue in solutionResults[i].Values) {
+                                                   bool valueFound = userRow.Values.Any(userVal => 
+                                                       userVal?.ToString() == solutionValue?.ToString());
+                                                   
+                                                   if (!valueFound) {
+                                                       currentRowMatches = false;
+                                                       break;
+                                                   }
+                                               }
+                                               
+                                               if (currentRowMatches) {
+                                                   rowMatched = true;
+                                                   break;
+                                               }
+                                           }
+                                           
+                                           if (!rowMatched) {
+                                               allRowsMatch = false;
+                                               break;
+                                           }
+                                       }
+                                       
+                                       IsCorrectSolution = allRowsMatch;
+                                   }
+                                   else {
+                                       IsCorrectSolution = false; // Different number of rows
+                                   }
+                               }
+                               catch (Exception ex) {
+                                   _logger.LogError(ex, "Error comparing query results");
+                                   IsCorrectSolution = false;
+                               }
+                           }
+                           else {
+                               IsCorrectSolution = false;
+                           }
+
+                           QueryResult = FormatResultFromJson(userResultJson); // Display formatted user result
                         }
                         else
                         {
@@ -128,8 +184,6 @@ namespace QueryMyst.Pages.Mysteries // Replace with your actual Pages namespace
                             ErrorMessage = "Could not verify solution: Missing expected result query.";
                             IsCorrectSolution = false; // Cannot be correct if we can't compare
                         }
-
-                        QueryResult = FormatResultFromJson(userResultJson); // Display formatted user result
                     }
                     else
                     {
