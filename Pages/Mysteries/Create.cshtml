@@ -198,17 +198,19 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                             </div>
                         </fieldset>
 
-                        @* Section 3: Hints & Distractors (Optional) *@
+                        @* Section 3: Hints & Distractors*@
                         <fieldset class="mt-4">
-                             <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-lightbulb me-2"></i>Hints & Distractors (Optional)</legend>
+                             <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-lightbulb me-2"></i>Hints & Distractors</legend>
                              <div class="mb-3">
                                 <label asp-for="Input.HintText" class="form-label fw-bold"></label>
-                                <textarea asp-for="Input.HintText" class="form-control" rows="3" placeholder="Provide a subtle hint if users get stuck..."></textarea>
+                                <!-- Remove value="" attribute -->
+                                <textarea asp-for="Input.HintText" class="form-control" rows="3" placeholder="Provide a subtle hint if users get stuck..." value="No hint provided."></textarea>
                                 <span asp-validation-for="Input.HintText" class="text-danger small"></span>
                             </div>
                              <div class="mb-3">
                                 <label asp-for="Input.FalseClues" class="form-label fw-bold"></label>
-                                <textarea asp-for="Input.FalseClues" class="form-control" rows="3" placeholder="Add misleading information or common pitfalls to watch out for..."></textarea>
+                                <!-- Remove value="" attribute -->
+                                <textarea asp-for="Input.FalseClues" class="form-control" rows="3" placeholder="Add misleading information or common pitfalls to watch out for..." value="No hint provided."></textarea>
                                 <span asp-validation-for="Input.FalseClues" class="text-danger small"></span>
                             </div>
                         </fieldset>

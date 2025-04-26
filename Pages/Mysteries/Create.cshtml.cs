@@ -82,11 +82,11 @@ namespace QueryMyst.Pages.Mysteries
             [DataType(DataType.MultilineText)]
             public string SolutionQuery { get; set; }
 
-            [Display(Name = "Hint Text (Optional)")]
+            [Display(Name = "Hint Text")]
             [DataType(DataType.MultilineText)]
             public string HintText { get; set; }
 
-            [Display(Name = "False Clues / Distractors (Optional)")]
+            [Display(Name = "False Clues / Distractors")]
             [DataType(DataType.MultilineText)]
             public string FalseClues { get; set; }
         }
