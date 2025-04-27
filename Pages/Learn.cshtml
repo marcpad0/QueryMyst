@@ -1,0 +1,297 @@
+@page "/learn"
+@model QueryMyst.Pages.LearnModel
+@{
+    ViewData["Title"] = "Learn SQLite";
+}
+
+<div class="hero-section learn-hero">
+    <div class="hero-content">
+        <h1 class="display-5 fw-bold" style="color: black;"><i class="bi bi-book-half me-2"></i> Learn SQLite</h1>
+        <p class="lead" style="color: black;">A Comprehensive Guide to the World's Most Deployed Database.</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-info-circle me-2"></i>What is SQLite?</h2>
+                    <p>SQLite is a C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine. It's the most used database engine in the world. SQLite is built into all mobile phones and most computers and comes bundled inside countless other applications that people use every day.</p>
+                    <p>Key characteristics include:</p>
+                    <ul>
+                        <li><strong>Serverless:</strong> SQLite doesn't require a separate server process. It reads and writes directly to ordinary disk files.</li>
+                        <li><strong>Self-Contained:</strong> Requires minimal support from the operating system or external library.</li>
+                        <li><strong>Transactional:</strong> ACID compliant, ensuring all changes within a transaction either occur completely or not at all.</li>
+                        <li><strong>Zero-Configuration:</strong> No setup or administration needed.</li>
+                        <li><strong>Cross-Platform:</strong> A complete database is stored in a single cross-platform disk file.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-check2-circle me-2"></i>Use Cases</h2>
+                    <ul>
+                        <li><strong>Embedded Devices & IoT:</strong> Its small footprint makes it ideal for devices with limited resources.</li>
+                        <li><strong>Application File Format:</strong> Used as the internal data storage format for desktop applications (e.g., browsers, multimedia software).</li>
+                        <li><strong>Mobile Applications:</strong> The standard database for Android and iOS development.</li>
+                        <li><strong>Website Databases:</strong> Suitable for low to medium traffic websites.</li>
+                        <li><strong>Data Analysis:</strong> Convenient for processing and analyzing datasets that fit on a single machine.</li>
+                        <li><strong>Caching:</strong> Used as a local cache for enterprise data.</li>
+                        <li><strong>Prototyping & Development:</strong> Easy to set up and use during development before potentially migrating to a client/server database.</li>
+                        <li><strong>Teaching & Testing:</strong> Excellent for learning SQL concepts without server setup.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-braces me-2"></i>Basic SQL Commands</h2>
+                    <p>Here are some fundamental SQL commands used in SQLite (and most SQL databases):</p>
+
+                    <h5 class="mt-3">Data Definition Language (DDL)</h5>
+                    <pre><code class="language-sql">-- Create a new table
+CREATE TABLE Users (
+    UserID INTEGER PRIMARY KEY AUTOINCREMENT,
+    Name TEXT NOT NULL,
+    Email TEXT UNIQUE,
+    RegistrationDate DATE DEFAULT CURRENT_DATE
+);
+
+-- Modify an existing table (e.g., add a column)
+ALTER TABLE Users ADD COLUMN IsActive BOOLEAN DEFAULT 1;
+
+-- Delete a table
+DROP TABLE Users;</code></pre>
+
+                    <h5 class="mt-3">Data Manipulation Language (DML)</h5>
+                    <pre><code class="language-sql">-- Insert data into a table
+INSERT INTO Users (Name, Email) VALUES ('Alice', 'alice@example.com');
+INSERT INTO Users (Name, Email, IsActive) VALUES ('Bob', 'bob@example.com', 0);
+
+-- Select data from a table
+SELECT UserID, Name, Email FROM Users WHERE IsActive = 1 ORDER BY Name;
+SELECT COUNT(*) FROM Users WHERE RegistrationDate > '2024-01-01';
+
+-- Update existing data
+UPDATE Users SET Email = 'alice.updated@example.com' WHERE UserID = 1;
+
+-- Delete data from a table
+DELETE FROM Users WHERE IsActive = 0;</code></pre>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-file-earmark-binary me-2"></i>Data Types</h2>
+                    <p>SQLite uses a more general, dynamic type system. A value stored in a column can be of any of the following storage classes:</p>
+                    <ul>
+                        <li><strong>NULL:</strong> The value is a NULL value.</li>
+                        <li><strong>INTEGER:</strong> A signed integer, stored in 1, 2, 3, 4, 6, or 8 bytes depending on the magnitude.</li>
+                        <li><strong>REAL:</strong> A floating-point value, stored as an 8-byte IEEE floating-point number.</li>
+                        <li><strong>TEXT:</strong> A text string, stored using the database encoding (UTF-8, UTF-16BE or UTF-16LE).</li>
+                        <li><strong>BLOB:</strong> A blob of data, stored exactly as it was input.</li>
+                    </ul>
+                    <p>SQLite supports type affinity on columns. This means the preferred storage class for a column is determined by its declared type. Common declared types like <code>VARCHAR</code>, <code>BOOLEAN</code>, <code>DATE</code>, <code>DATETIME</code> are mapped to these storage classes (mostly TEXT, INTEGER, or REAL).</p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-key me-2"></i>Constraints</h2>
+                    <p>Constraints enforce rules on data within tables:</p>
+                    <ul>
+                        <li><strong>PRIMARY KEY:</strong> Uniquely identifies each row in a table. Often an INTEGER type with AUTOINCREMENT.</li>
+                        <li><strong>FOREIGN KEY:</strong> Establishes a link between two tables, enforcing referential integrity.</li>
+                        <li><strong>UNIQUE:</strong> Ensures that all values in a column (or set of columns) are distinct.</li>
+                        <li><strong>NOT NULL:</strong> Ensures that a column cannot have a NULL value.</li>
+                        <li><strong>CHECK:</strong> Ensures that values in a column satisfy a specific condition.</li>
+                        <li><strong>DEFAULT:</strong> Provides a default value for a column when none is specified during INSERT.</li>
+                    </ul>
+                    <pre><code class="language-sql">CREATE TABLE Orders (
+    OrderID INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserID INTEGER NOT NULL,
+    OrderDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    Amount REAL CHECK(Amount > 0),
+    Status TEXT DEFAULT 'Pending',
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+);</code></pre>
+                </div>
+            </div>
+
+             <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-sort-down me-2"></i>Indexes</h2>
+                    <p>Indexes are special lookup tables that the database engine can use to speed up data retrieval operations. They are automatically created for PRIMARY KEY and UNIQUE constraints.</p>
+                    <pre><code class="language-sql">-- Create an index on the Email column for faster lookups
+CREATE INDEX idx_user_email ON Users(Email);
+
+-- Remove an index
+DROP INDEX idx_user_email;</code></pre>
+                </div>
+            </div>
+
+             <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-arrow-repeat me-2"></i>Transactions</h2>
+                    <p>Transactions group multiple SQL statements into a single unit of work, ensuring atomicity.</p>
+                    <pre><code class="language-sql">BEGIN TRANSACTION;
+-- Or just BEGIN;
+
+UPDATE Accounts SET Balance = Balance - 100 WHERE AccountID = 1;
+UPDATE Accounts SET Balance = Balance + 100 WHERE AccountID = 2;
+
+-- If everything is okay:
+COMMIT;
+
+-- If something went wrong:
+-- ROLLBACK;</code></pre>
+                </div>
+            </div>
+
+             <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-gear me-2"></i>Pragmas</h2>
+                    <p>PRAGMA commands are specific to SQLite and are used to modify its operation or query internal data.</p>
+                    <pre><code class="language-sql">-- Get schema information for a table
+PRAGMA table_info(Users);
+
+-- List all tables, indexes, etc.
+SELECT name, type, sql FROM sqlite_master WHERE type='table';
+
+-- Check foreign key constraints status (0 = off, 1 = on)
+PRAGMA foreign_keys;
+
+-- Enable foreign key constraints
+PRAGMA foreign_keys = ON;</code></pre>
+                </div>
+            </div>
+
+             <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-tools me-2"></i>Tools</h2>
+                    <ul>
+                        <li><strong>SQLite Command-Line Shell:</strong> A standalone program (`sqlite3` or `sqlite3.exe`) that allows typing SQL commands directly.</li>
+                        <li><strong>DB Browser for SQLite:</strong> A popular, free, open-source visual tool to create, design, and edit SQLite database files.</li>
+                        <li><strong>SQLiteStudio:</strong> Another free, cross-platform SQLite database manager.</li>
+                        <li><strong>Language Bindings/Libraries:</strong> Such as `Microsoft.Data.Sqlite` for C#/.NET, `sqlite3` module for Python, etc.</li>
+                    </ul>
+                </div>
+            </div>
+
+             <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-code-slash me-2"></i>Using SQLite with C# (.NET)</h2>
+                    <p>In .NET applications, the `Microsoft.Data.Sqlite` library (available via NuGet) is commonly used to interact with SQLite databases.</p>
+                    <pre><code class="language-csharp">using Microsoft.Data.Sqlite;
+using System;
+
+// Connection string points to the database file
+string connectionString = "Data Source=mydatabase.db";
+
+using (var connection = new SqliteConnection(connectionString))
+{
+    connection.Open();
+
+    // Create a table
+    var createCmd = connection.CreateCommand();
+    // Escape the  symbol for Razor by using @@
+    createCmd.CommandText = @@"CREATE TABLE IF NOT EXISTS Logs (
+                                LogID INTEGER PRIMARY KEY AUTOINCREMENT,
+                                Message TEXT,
+                                Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                             );";
+    createCmd.ExecuteNonQuery();
+
+    // Insert data
+    var insertCmd = connection.CreateCommand();
+    insertCmd.CommandText = "INSERT INTO Logs (Message) VALUES ($message)";
+    insertCmd.Parameters.AddWithValue("$message", "Application started.");
+    insertCmd.ExecuteNonQuery();
+
+    // Read data
+    var selectCmd = connection.CreateCommand();
+    selectCmd.CommandText = "SELECT Message, Timestamp FROM Logs ORDER BY Timestamp DESC LIMIT 10";
+
+    using (var reader = selectCmd.ExecuteReader())
+    {
+        while (reader.Read())
+        {
+            Console.WriteLine($"Log: {reader.GetString(0)} at {reader.GetDateTime(1)}");
+        }
+    }
+} // Connection is automatically closed here</code></pre>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="card-title h4 mb-3 border-bottom pb-2"><i class="bi bi-hand-thumbs-up-fill me-2"></i>Advantages & <i class="bi bi-hand-thumbs-down-fill me-2"></i>Disadvantages</h2>
+                    <h5>Advantages</h5>
+                    <ul>
+                        <li>Simple, lightweight, and fast.</li>
+                        <li>Reliable and robust.</li>
+                        <li>Easy to deploy (just a file).</li>
+                        <li>No server administration required.</li>
+                        <li>Public domain source code.</li>
+                    </ul>
+                    <h5>Disadvantages</h5>
+                    <ul>
+                        <li>Limited concurrency (write operations lock the entire database).</li>
+                        <li>Not suitable for high-volume, write-intensive applications.</li>
+                        <li>No built-in user management or network access (it's a library, not a server).</li>
+                        <li>Limited scalability compared to client/server databases like PostgreSQL or SQL Server.</li>
+                        <li>Fewer advanced features compared to enterprise-level databases.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+    <style>
+        .learn-hero {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            /* color: white; */ /* Removed default white color */
+            padding: 3rem 0;
+            text-align: center;
+        }
+        /* Optional: If you want ONLY the h1 and p in hero to be black, keep the above and add: */
+        /*
+        .learn-hero .hero-content h1,
+        .learn-hero .hero-content p {
+            color: black;
+        }
+        */
+        pre code {
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: 0.3rem;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            background-color: #f8f9fa; /* Light background for code */
+            border: 1px solid #e9ecef;
+        }
+        .card-title i {
+            color: var(--primary);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+          document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+          });
+        });
+    </script>
+}
