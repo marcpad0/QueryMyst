@@ -1395,5 +1395,120 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
             
             return { positions, relationships };
         }
+
+        // Format SQL query results into an HTML table
+function formatResultsAsTable() {
+    const rawResults = document.getElementById('raw-results');
+    const formattedResultsContainer = document.getElementById('formatted-results');
+    
+    if (!rawResults || !formattedResultsContainer) return;
+    
+    const rawText = rawResults.textContent.trim();
+    if (!rawText) {
+        formattedResultsContainer.innerHTML = '<div class="text-center text-muted p-3">No results to display</div>';
+        return;
+    }
+    
+    try {
+        // Split into lines and parse
+        const lines = rawText.split('\n');
+        if (lines.length < 3) {
+            formattedResultsContainer.innerHTML = '<div class="text-center text-muted p-3">No results or invalid format</div>';
+            return;
+        }
+        
+        // Get header row
+        const headerCols = lines[0].split('|').map(col => col.trim());
+        
+        // Create table HTML
+        let tableHtml = '<table class="query-results-table">';
+        
+        // Add header
+        tableHtml += '<thead><tr>';
+        headerCols.forEach(col => {
+            tableHtml += `<th>${col}</th>`;
+        });
+        tableHtml += '</tr></thead>';
+        
+        // Add body (skip header row and separator line)
+        tableHtml += '<tbody>';
+        for (let i = 2; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue; // Skip empty lines
+            
+            const rowCells = line.split('|').map(cell => cell.trim());
+            tableHtml += '<tr>';
+            rowCells.forEach(cell => {
+                const cellContent = cell === 'NULL' ? 
+                    '<span class="text-muted">NULL</span>' : 
+                    cell;
+                tableHtml += `<td>${cellContent}</td>`;
+            });
+            tableHtml += '</tr>';
+        }
+        tableHtml += '</tbody></table>';
+        
+        formattedResultsContainer.innerHTML = tableHtml;
+    } catch (err) {
+        console.error('Error formatting results:', err);
+        formattedResultsContainer.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> 
+                Could not format results. Raw output shown below:
+            </div>
+            <pre class="bg-light p-3 rounded"><code>${rawText}</code></pre>
+        `;
+    }
+}
+
+        // --- 2. Notes Feature ---
+        function initNotesFeature() {
+            const notesTextarea = document.getElementById('userNotes');
+            const savedIndicator = document.getElementById('notes-saved');
+
+            if (!notesTextarea) return;
+
+            // Load saved notes from localStorage
+            const savedNotes = localStorage.getItem('userNotes');
+            if (savedNotes) {
+                notesTextarea.value = savedNotes;
+            }
+
+            // Save notes to localStorage on input
+            notesTextarea.addEventListener('input', function() {
+                localStorage.setItem('userNotes', notesTextarea.value);
+                savedIndicator.classList.add('visible');
+            });
+
+            // Clear notes button
+            document.getElementById('clearNotes').addEventListener('click', function() {
+                notesTextarea.value = '';
+                localStorage.removeItem('userNotes');
+                savedIndicator.classList.remove('visible');
+            });
+        }
+
+        // --- 3. SQL Editor Features ---
+        function initEditorFeatures() {
+            const sqlQueryArea = document.getElementById('sqlQueryArea');
+            const autoFormatCheck = document.getElementById('autoFormatCheck');
+
+            if (autoFormatCheck) {
+                autoFormatCheck.addEventListener('change', function() {
+                    if (this.checked) {
+                        sqlQueryArea.classList.add('auto-format');
+                    } else {
+                        sqlQueryArea.classList.remove('auto-format');
+                    }
+                });
+            }
+
+            // Fullscreen toggle
+            document.getElementById('toggle-fullscreen').addEventListener('click', function() {
+                document.body.classList.toggle('editor-fullscreen-mode');
+                const card = this.closest('.card');
+                if (card) card.classList.toggle('editor-fullscreen');
+            });
+        }
     </script>
 }
