@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿// filepath: e:\Visual Studio\Progetto\QueryMyst\Pages\Mysteries.cshtml.cs
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace QueryMyst.Pages
     public class MysteriesModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly ILogger<DashboardModel> _logger; // Consider changing to ILogger<MysteriesModel>
+        private readonly ILogger<MysteriesModel> _logger; // Changed logger type
         private readonly ApplicationDbContext _context;
 
         public List<Mystery> Mysteries { get; set; }
@@ -39,7 +40,7 @@ namespace QueryMyst.Pages
 
         public MysteriesModel(
             UserManager<IdentityUser> userManager,
-            ILogger<DashboardModel> logger, // Consider changing to ILogger<MysteriesModel>
+            ILogger<MysteriesModel> logger, // Changed logger type
             ApplicationDbContext context)
         {
             _userManager = userManager;
@@ -55,12 +56,16 @@ namespace QueryMyst.Pages
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
 
-            // Base query
-            var query = _context.Mysteries.Include(m => m.UserMysteries).AsQueryable();
+            // Base query - Include Creator and UserMysteries
+            var query = _context.Mysteries
+                                .Include(m => m.Creator) // Include the Creator navigation property
+                                .Include(m => m.UserMysteries)
+                                .AsQueryable();
 
             // Populate filter options before applying filters
-            AvailableDifficulties = await query.Select(m => m.Difficulty).Distinct().OrderBy(d => d).ToListAsync();
-            AvailableCategories = await query.Select(m => m.Category).Distinct().OrderBy(c => c).ToListAsync();
+            // Use a separate query for distinct values to avoid potential performance issues with large datasets
+            AvailableDifficulties = await _context.Mysteries.Select(m => m.Difficulty).Distinct().OrderBy(d => d).ToListAsync();
+            AvailableCategories = await _context.Mysteries.Select(m => m.Category).Distinct().OrderBy(c => c).ToListAsync();
 
 
             // Apply filters
@@ -80,7 +85,7 @@ namespace QueryMyst.Pages
             }
 
             // Execute the filtered query
-            Mysteries = await query.ToListAsync();
+            Mysteries = await query.OrderBy(m => m.Title).ToListAsync(); // Example ordering
 
             // Get user's completed mysteries (can be optimized if needed)
             var userMysteries = await _context.UserMysteries
@@ -91,9 +96,10 @@ namespace QueryMyst.Pages
             UserCompletedMysteries = userMysteries;
 
             // Calculate solved counts for the filtered mysteries
+            // UserMysteries are already included, so this calculation is efficient
             MysterySolvedCounts = Mysteries.ToDictionary(
                 m => m.Id,
-                m => m.UserMysteries.Count(um => um.IsCompleted) // UserMysteries are already included
+                m => m.UserMysteries.Count(um => um.IsCompleted)
             );
 
             _logger.LogInformation("User {UserName} accessed mysteries page with filters: Difficulty={Difficulty}, Category={Category}, Search={Search}",
