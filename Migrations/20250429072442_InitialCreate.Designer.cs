@@ -11,7 +11,7 @@ using QueryMyst.Data;
 namespace QueryMyst.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250422214530_InitialCreate")]
+    [Migration("20250429072442_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -216,6 +216,44 @@ namespace QueryMyst.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("QueryMyst.Models.Achievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Criteria")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Icon")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PointsValue")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Achievements");
+                });
+
             modelBuilder.Entity("QueryMyst.Models.Mystery", b =>
                 {
                     b.Property<int>("Id")
@@ -306,6 +344,34 @@ namespace QueryMyst.Migrations
                         .IsUnique();
 
                     b.ToTable("MysteryDetails");
+                });
+
+            modelBuilder.Entity("QueryMyst.Models.UserAchievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AchievementId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("EarnedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("NotificationDisplayed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AchievementId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserAchievements");
                 });
 
             modelBuilder.Entity("QueryMyst.Models.UserMystery", b =>
@@ -419,6 +485,25 @@ namespace QueryMyst.Migrations
                     b.Navigation("Mystery");
                 });
 
+            modelBuilder.Entity("QueryMyst.Models.UserAchievement", b =>
+                {
+                    b.HasOne("QueryMyst.Models.Achievement", "Achievement")
+                        .WithMany("UserAchievements")
+                        .HasForeignKey("AchievementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Achievement");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("QueryMyst.Models.UserMystery", b =>
                 {
                     b.HasOne("QueryMyst.Models.Mystery", "Mystery")
@@ -436,6 +521,11 @@ namespace QueryMyst.Migrations
                     b.Navigation("Mystery");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("QueryMyst.Models.Achievement", b =>
+                {
+                    b.Navigation("UserAchievements");
                 });
 
             modelBuilder.Entity("QueryMyst.Models.Mystery", b =>

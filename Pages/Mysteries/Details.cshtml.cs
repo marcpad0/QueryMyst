@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite; // Required for in-memory SQLite
 using QueryMyst.Data;        // Replace with your actual Data namespace
 using QueryMyst.Models;      // Replace with your actual Models namespace
+using QueryMyst.Services;    // Add this using statement
 using System.Threading.Tasks;
 using System.Data.Common;    // Required for DbDataReader
 using System.Text;           // Required for StringBuilder
@@ -15,7 +16,7 @@ using System.Linq;          // For LINQ methods like Select
 using Microsoft.Extensions.Logging; // For ILogger
 using System;                // For DateTime, Exception
 
-namespace QueryMyst.Pages.Mysteries // Replace with your actual Pages namespace
+namespace QueryMyst.Pages.Mysteries
 {
     [Authorize]
     public class DetailsModel : PageModel
@@ -23,12 +24,18 @@ namespace QueryMyst.Pages.Mysteries // Replace with your actual Pages namespace
         private readonly ApplicationDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ILogger<DetailsModel> _logger;
+        private readonly AchievementService _achievementService; // Add this
 
-        public DetailsModel(ApplicationDbContext context, UserManager<IdentityUser> userManager, ILogger<DetailsModel> logger)
+        public DetailsModel(
+            ApplicationDbContext context, 
+            UserManager<IdentityUser> userManager, 
+            ILogger<DetailsModel> logger,
+            AchievementService achievementService) // Add this parameter
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
+            _achievementService = achievementService; // Add this
         }
 
         public Mystery Mystery { get; set; }
@@ -204,7 +211,7 @@ namespace QueryMyst.Pages.Mysteries // Replace with your actual Pages namespace
 
             // --- Update UserMystery Progress ---
             // Only proceed if there wasn't a setup/execution error before comparison
-            if (string.IsNullOrEmpty(ErrorMessage) || executionError == null) // Allow saving progress even if query had logical errors but executed
+            if (string.IsNullOrEmpty(ErrorMessage) || executionError == null)
             {
                 try
                 {
@@ -236,12 +243,26 @@ namespace QueryMyst.Pages.Mysteries // Replace with your actual Pages namespace
                     }
 
                     await _context.SaveChangesAsync();
+
+                    // Check for achievements only if the mystery was solved
+                    if (IsCorrectSolution)
+                    {
+                        // Check for new achievements
+                        var newAchievements = await _achievementService.CheckAndAwardAchievementsAsync(user.Id);
+                        
+                        // Log any new achievements
+                        if (newAchievements.Any())
+                        {
+                            _logger.LogInformation("User {UserId} earned {Count} new achievements: {Achievements}", 
+                                user.Id, 
+                                newAchievements.Count, 
+                                string.Join(", ", newAchievements.Select(ua => ua.AchievementId)));
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error updating UserMystery for User {UserId} and Mystery {MysteryId}", user.Id, id);
-                    // Non-critical error, maybe add a message but don't block the user
-                    // TempData["ProgressError"] = "Could not save progress.";
+                    _logger.LogError(ex, "Error updating UserMystery or checking achievements for User {UserId} and Mystery {MysteryId}", user.Id, id);
                 }
             }
             // --- End UserMystery Update ---

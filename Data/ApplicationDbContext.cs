@@ -15,6 +15,8 @@ namespace QueryMyst.Data
         public DbSet<Mystery> Mysteries { get; set; }
         public DbSet<MysteryDetails> MysteryDetails { get; set; }
         public DbSet<UserMystery> UserMysteries { get; set; }
+        public DbSet<Achievement> Achievements { get; set; }
+        public DbSet<UserAchievement> UserAchievements { get; set; }
         
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -45,6 +47,20 @@ namespace QueryMyst.Data
                 .HasForeignKey(m => m.CreatorId) // Foreign key in Mystery
                 .OnDelete(DeleteBehavior.Restrict); // Prevent deleting a user if they created mysteries. Choose Cascade if you want mysteries deleted when the creator is deleted.
             // --- End Configure Creator Relationship ---
+            
+            // --- Configure Achievement Relationships ---
+            builder.Entity<UserAchievement>()
+                .HasOne(ua => ua.User)
+                .WithMany()
+                .HasForeignKey(ua => ua.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
+            builder.Entity<UserAchievement>()
+                .HasOne(ua => ua.Achievement)
+                .WithMany(a => a.UserAchievements)
+                .HasForeignKey(ua => ua.AchievementId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // --- End Configure Achievement Relationships ---
                 
             // Convert RequiredSkills list to JSON string
             builder.Entity<Mystery>()

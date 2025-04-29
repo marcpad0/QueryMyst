@@ -1,0 +1,277 @@
+@page
+@model QueryMyst.Pages.AchievementsModel
+@{
+    ViewData["Title"] = "Your Achievements";
+}
+
+<div class="hero-section achievements-hero">
+    <div class="hero-content">
+        <h1 class="display-5 fw-bold"><i class="bi bi-award-fill me-2"></i> Your Achievements</h1>
+        <p class="lead">Track your SQL detective progress and unlock special badges!</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Achievement Stats Summary -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="achievement-stat">
+                                <div class="stat-value">@Model.TotalEarned / @Model.TotalAchievements</div>
+                                <div class="stat-label">Achievements Earned</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="achievement-stat">
+                                <div class="stat-value">@Model.TotalPoints</div>
+                                <div class="stat-label">Total Points</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="achievement-stat">
+                                <div class="stat-value">@(Model.TotalAchievements > 0 ? $"{(double)Model.TotalEarned / Model.TotalAchievements * 100:F0}%" : "0%")</div>
+                                <div class="stat-label">Completion Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress mt-3" style="height: 10px;">
+                        <div class="progress-bar bg-gradient-primary" role="progressbar" 
+                             style="width: @(Model.TotalAchievements > 0 ? (double)Model.TotalEarned / Model.TotalAchievements * 100 : 0)%" 
+                             aria-valuenow="@(Model.TotalAchievements > 0 ? (int)((double)Model.TotalEarned / Model.TotalAchievements * 100) : 0)" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Achievement Categories -->
+        <div class="col-lg-3 mb-4">
+            <div class="list-group sticky-top" style="top: 20px;">
+                <a href="#all" class="list-group-item list-group-item-action active">All Achievements</a>
+                <a href="#beginner" class="list-group-item list-group-item-action">Beginner</a>
+                <a href="#progress" class="list-group-item list-group-item-action">Progress</a>
+                <a href="#activity" class="list-group-item list-group-item-action">Activity</a>
+                <a href="#mastery" class="list-group-item list-group-item-action">Mastery</a>
+                <a href="#skill" class="list-group-item list-group-item-action">Skill</a>
+            </div>
+        </div>
+
+        <!-- Achievement Cards -->
+        <div class="col-lg-9">
+            <div id="all" class="mb-4">
+                <h3 class="mb-3 border-bottom pb-2">All Achievements</h3>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4">
+                    @foreach (var achievementVm in Model.Achievements)
+                    {
+                        <div class="col">
+                            <div class="card h-100 @(achievementVm.IsEarned ? "achievement-earned border-success border-2" : "achievement-locked")">
+                                <div class="card-body text-center">
+                                    <div class="achievement-icon @(achievementVm.IsEarned ? "" : "grayscale")">
+                                        @Html.Raw(achievementVm.Achievement.Icon)
+                                    </div>
+                                    <h5 class="card-title mt-3">@achievementVm.Achievement.Name</h5>
+                                    <p class="card-text">@achievementVm.Achievement.Description</p>
+                                    
+                                    @if (achievementVm.IsEarned)
+                                    {
+                                        <div class="achievement-earned-date">
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i> Earned on @achievementVm.EarnedOn?.ToString("MMM d, yyyy")
+                                            </span>
+                                        </div>
+                                    }
+                                    else if (achievementVm.RequiredProgress > 0)
+                                    {
+                                        <div class="progress mt-3" style="height: 5px;">
+                                            <div class="progress-bar bg-info" role="progressbar" 
+                                                 style="width: @(Math.Min((double)achievementVm.CurrentProgress / achievementVm.RequiredProgress * 100, 100))%" 
+                                                 aria-valuenow="@achievementVm.CurrentProgress" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="@achievementVm.RequiredProgress"></div>
+                                        </div>
+                                        <div class="progress-text small text-muted mt-1">
+                                            @achievementVm.CurrentProgress of @achievementVm.RequiredProgress
+                                        </div>
+                                    }
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary">@achievementVm.Achievement.Category</span>
+                                        <span class="badge bg-secondary">@achievementVm.Achievement.PointsValue pts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            @foreach (var category in Model.Achievements.Select(a => a.Achievement.Category).Distinct())
+            {
+                var categoryId = category.ToLower();
+                var categoryAchievements = Model.Achievements.Where(a => a.Achievement.Category == category).ToList();
+                
+                <div id="@categoryId" class="mb-4">
+                    <h3 class="mb-3 border-bottom pb-2">@category</h3>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4">
+                        @foreach (var achievementVm in categoryAchievements)
+                        {
+                            <div class="col">
+                                <div class="card h-100 @(achievementVm.IsEarned ? "achievement-earned border-success border-2" : "achievement-locked")">
+                                    <div class="card-body text-center">
+                                        <div class="achievement-icon @(achievementVm.IsEarned ? "" : "grayscale")">
+                                            @Html.Raw(achievementVm.Achievement.Icon)
+                                        </div>
+                                        <h5 class="card-title mt-3">@achievementVm.Achievement.Name</h5>
+                                        <p class="card-text">@achievementVm.Achievement.Description</p>
+                                        
+                                        @if (achievementVm.IsEarned)
+                                        {
+                                            <div class="achievement-earned-date">
+                                                <span class="badge bg-success">
+                                                    <i class="bi bi-check-circle me-1"></i> Earned on @achievementVm.EarnedOn?.ToString("MMM d, yyyy")
+                                                </span>
+                                            </div>
+                                        }
+                                        else if (achievementVm.RequiredProgress > 0)
+                                        {
+                                            <div class="progress mt-3" style="height: 5px;">
+                                                <div class="progress-bar bg-info" role="progressbar" 
+                                                     style="width: @(Math.Min((double)achievementVm.CurrentProgress / achievementVm.RequiredProgress * 100, 100))%" 
+                                                     aria-valuenow="@achievementVm.CurrentProgress" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="@achievementVm.RequiredProgress"></div>
+                                            </div>
+                                            <div class="progress-text small text-muted mt-1">
+                                                @achievementVm.CurrentProgress of @achievementVm.RequiredProgress
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-primary">@achievementVm.Achievement.Category</span>
+                                            <span class="badge bg-secondary">@achievementVm.Achievement.PointsValue pts</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .achievements-hero {
+            background: linear-gradient(135deg, #6259ca, #4e36e2);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        
+        .achievement-stat {
+            padding: 1rem 0;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #6259ca;
+            line-height: 1.2;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .achievement-icon {
+            font-size: 3rem;
+            color: #6259ca;
+            margin: 0.5rem 0;
+            height: 5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .achievement-icon i {
+            font-size: 3.5rem;
+        }
+        
+        .achievement-earned {
+            box-shadow: 0 0 15px rgba(25, 135, 84, 0.2);
+        }
+        
+        .achievement-locked {
+            opacity: 0.8;
+        }
+        
+        .grayscale {
+            filter: grayscale(100%);
+            opacity: 0.5;
+        }
+        
+        .achievement-earned-date {
+            margin-top: 1rem;
+        }
+        
+        /* Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Active nav link */
+        .list-group-item.active {
+            background-color: #6259ca;
+            border-color: #6259ca;
+        }
+        
+        /* Progress bar */
+        .progress-bar.bg-gradient-primary {
+            background: linear-gradient(135deg, #6259ca, #4e36e2);
+        }
+        
+        /* Add spacing for anchor links */
+        [id] {
+            scroll-margin-top: 20px;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Handle category navigation with active class
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.list-group-item');
+            
+            // Add click handler for list group items
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Remove active class from all links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                });
+            });
+            
+            // Check hash on page load
+            if (window.location.hash) {
+                const activeLink = document.querySelector(`.list-group-item[href="${window.location.hash}"]`);
+                if (activeLink) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    activeLink.classList.add('active');
+                }
+            }
+        });
+    </script>
+}

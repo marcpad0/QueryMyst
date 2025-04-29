@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QueryMyst.Data;
 using QueryMyst.Models; // Add this using statement
+using QueryMyst.Services; // Add this for the AchievementService
 using System;          // Add this using statement
 using System.Linq;     // Add this using statement
 using System.Collections.Generic; // Add this using statement
@@ -29,6 +30,9 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 // Add services to the container
 builder.Services.AddRazorPages();
 
+// Register Achievement Service
+builder.Services.AddScoped<AchievementService>();
+
 var app = builder.Build();
 
 // Seed the database here
@@ -40,6 +44,7 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.EnsureCreated(); // Ensure the database exists
         SeedDatabase(context); // Call the seeding method
+        SeedAchievements(context); // Call new method to seed achievements
     }
     catch (Exception ex)
     {
@@ -76,6 +81,33 @@ static void SeedDatabase(ApplicationDbContext context)
         return; // DB has been seeded
     }
 
+    // First, ensure we have a default user to use as the creator
+    string systemUserId;
+    var systemUser = context.Users.FirstOrDefault();
+    
+    if (systemUser == null)
+    {
+        // Create a default system user if none exists
+        systemUser = new IdentityUser
+        {
+            UserName = "system@querymyst.com",
+            NormalizedUserName = "SYSTEM@QUERYMYST.COM",
+            Email = "system@querymyst.com",
+            NormalizedEmail = "SYSTEM@QUERYMYST.COM",
+            EmailConfirmed = true,
+            SecurityStamp = Guid.NewGuid().ToString()
+        };
+        
+        // Set a password for the system user
+        var passwordHasher = new PasswordHasher<IdentityUser>();
+        systemUser.PasswordHash = passwordHasher.HashPassword(systemUser, "SystemP@ss123!");
+        
+        context.Users.Add(systemUser);
+        context.SaveChanges();
+    }
+    
+    systemUserId = systemUser.Id;
+
     var mysteries = new List<Mystery>
     {
         new Mystery
@@ -87,6 +119,7 @@ static void SeedDatabase(ApplicationDbContext context)
             Category = "Business Analytics",
             Icon = "<i class='bi bi-person-slash fs-1 text-info'></i>",
             RequiredSkills = new List<string> { "SELECT", "WHERE", "Subquery/JOIN" },
+            CreatorId = systemUserId, // Set the creator ID here
             Details = new MysteryDetails
             {
                 FullDescription = "The HR department has a list of all current employees in the 'Employees' table. The security team tracks building access in the 'AccessLogs' table. One employee seems to be on the payroll but has never accessed the building according to the logs. Identify this employee.",
@@ -129,6 +162,7 @@ INSERT INTO AccessLogs (LogID, EmployeeID, AccessTime) VALUES
             Category = "Business Analytics",
             Icon = "<i class='bi bi-currency-dollar fs-1 text-success'></i>",
             RequiredSkills = new List<string> { "SELECT", "ORDER BY", "LIMIT" },
+            CreatorId = systemUserId, // Set the creator ID here
             Details = new MysteryDetails
             {
                 FullDescription = "The 'Products' table contains information about various items in stock, including their name and price. Your task is to identify the single most expensive product.",
@@ -154,5 +188,86 @@ INSERT INTO Products (ProductID, Name, Category, Price) VALUES
     };
 
     context.Mysteries.AddRange(mysteries);
+    context.SaveChanges();
+}
+
+// Add a new method to seed achievements
+static void SeedAchievements(ApplicationDbContext context)
+{
+    // Check if achievements already exist
+    if (context.Achievements.Any())
+    {
+        return; // Achievements already seeded
+    }
+    
+    var achievements = new List<Achievement>
+    {
+        new Achievement { 
+            Name = "First Case Solved", 
+            Description = "You successfully solved your first SQL mystery!", 
+            Icon = "<i class='bi bi-trophy-fill'></i>", 
+            Category = "Beginner", 
+            Criteria = "FirstMystery", 
+            PointsValue = 10
+        },
+        new Achievement { 
+            Name = "SQL Novice", 
+            Description = "You've solved 5 SQL mysteries", 
+            Icon = "<i class='bi bi-award-fill'></i>", 
+            Category = "Progress", 
+            Criteria = "Solve5Mysteries", 
+            PointsValue = 25
+        },
+        new Achievement { 
+            Name = "SQL Detective", 
+            Description = "You've solved 10 SQL mysteries", 
+            Icon = "<i class='bi bi-stars'></i>", 
+            Category = "Progress", 
+            Criteria = "Solve10Mysteries", 
+            PointsValue = 50 
+        },
+        new Achievement { 
+            Name = "SQL Master", 
+            Description = "You've solved 25 SQL mysteries", 
+            Icon = "<i class='bi bi-lightning-charge-fill'></i>", 
+            Category = "Progress", 
+            Criteria = "Solve25Mysteries", 
+            PointsValue = 100 
+        },
+        new Achievement { 
+            Name = "Eager Learner", 
+            Description = "You've written 50 SQL queries", 
+            Icon = "<i class='bi bi-keyboard-fill'></i>", 
+            Category = "Activity", 
+            Criteria = "Write50Queries", 
+            PointsValue = 20 
+        },
+        new Achievement { 
+            Name = "Query Expert", 
+            Description = "You've written 100 SQL queries", 
+            Icon = "<i class='bi bi-code-slash'></i>", 
+            Category = "Activity", 
+            Criteria = "Write100Queries", 
+            PointsValue = 40 
+        },
+        new Achievement { 
+            Name = "Beginner Graduate", 
+            Description = "Solve all beginner level mysteries", 
+            Icon = "<i class='bi bi-mortarboard-fill'></i>", 
+            Category = "Mastery", 
+            Criteria = "SolveAllBeginner", 
+            PointsValue = 30 
+        },
+        new Achievement { 
+            Name = "Perfect Solution", 
+            Description = "Solve a mystery on your first attempt", 
+            Icon = "<i class='bi bi-bullseye'></i>", 
+            Category = "Skill", 
+            Criteria = "PerfectSolution", 
+            PointsValue = 15 
+        }
+    };
+    
+    context.Achievements.AddRange(achievements);
     context.SaveChanges();
 }

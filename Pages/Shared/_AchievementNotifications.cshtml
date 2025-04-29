@@ -1,0 +1,92 @@
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using QueryMyst.Data
+@using QueryMyst.Services
+@inject UserManager<IdentityUser> UserManager
+@inject AchievementService AchievementService
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div id="achievement-notifications-container" class="achievement-notifications-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Function to check for new achievements
+            async function checkAchievements() {
+                try {
+                    const response = await fetch('/api/achievements/pending', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    
+                    const achievements = await response.json();
+                    
+                    if (achievements && achievements.length > 0) {
+                        showAchievementNotifications(achievements);
+                        
+                        // Mark achievements as displayed
+                        const ids = achievements.map(a => a.id);
+                        await fetch('/api/achievements/mark-displayed', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                            },
+                            body: JSON.stringify({ achievementIds: ids })
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error checking achievements:', error);
+                }
+            }
+            
+            // Function to show achievement notifications
+            function showAchievementNotifications(achievements) {
+                const container = document.getElementById('achievement-notifications-container');
+                
+                // Process achievements one by one with a delay
+                achievements.forEach((achievement, index) => {
+                    setTimeout(() => {
+                        const notification = document.createElement('div');
+                        notification.className = 'achievement-notification';
+                        notification.innerHTML = `
+                            <div class="achievement-icon">
+                                ${achievement.icon}
+                            </div>
+                            <div class="achievement-content">
+                                <h5>Achievement Unlocked!</h5>
+                                <p class="achievement-name">${achievement.name}</p>
+                                <p class="achievement-desc">${achievement.description}</p>
+                                <div class="achievement-points">+${achievement.points} pts</div>
+                            </div>
+                        `;
+                        
+                        container.appendChild(notification);
+                        
+                        // Add visible class after a small delay for animation
+                        setTimeout(() => {
+                            notification.classList.add('visible');
+                        }, 100);
+                        
+                        // Remove notification after a delay
+                        setTimeout(() => {
+                            notification.classList.remove('visible');
+                            setTimeout(() => {
+                                notification.remove();
+                            }, 500); // Match the transition duration in CSS
+                        }, 5000); // Show for 5 seconds
+                    }, index * 1000); // Show each achievement with 1-second delay
+                });
+            }
+            
+            // Check for achievements on page load
+            await checkAchievements();
+        });
+    </script>
+}
