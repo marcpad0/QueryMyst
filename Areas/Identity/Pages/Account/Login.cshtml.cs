@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks; // Added for Task
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging; // Added for ILogger
 
 namespace QueryMyst.Areas.Identity.Pages.Account
 {
@@ -26,9 +28,9 @@ namespace QueryMyst.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Please enter your email.")]
-            [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
-            public string Email { get; set; }
+            [Required(ErrorMessage = "Please enter your username.")]
+            [Display(Name = "Username")]
+            public string Username { get; set; }
 
             [Required(ErrorMessage = "Please enter your password.")]
             [DataType(DataType.Password)]
@@ -46,6 +48,7 @@ namespace QueryMyst.Areas.Identity.Pages.Account
             }
 
             returnUrl ??= Url.Content("~/Dashboard");
+            // Ensure external logins are cleared
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
             ReturnUrl = returnUrl;
         }
@@ -54,26 +57,34 @@ namespace QueryMyst.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/Dashboard");
 
-            var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-            if (result.Succeeded)
+            if (ModelState.IsValid) // Check ModelState before attempting sign-in
             {
-                _logger.LogInformation("User logged in.");
-                return LocalRedirect(returnUrl);
+                // Sign in using Username and Password
+                var result = await _signInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User logged in.");
+                    return LocalRedirect(returnUrl);
+                }
+                else if (result.RequiresTwoFactor)
+                {
+                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+                }
+                else if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("User account locked out.");
+                    return RedirectToPage("./Lockout");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page(); // Return page to show validation errors
+                }
             }
-            else if (result.RequiresTwoFactor)
-            {
-                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-            }
-            else if (result.IsLockedOut)
-            {
-                _logger.LogWarning("User account locked out.");
-                return RedirectToPage("./Lockout");
-            }
-            else
-            {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return Page();
-            }
+
+            // If ModelState is invalid, return the page to show validation errors
+            return Page();
         }
     }
 }

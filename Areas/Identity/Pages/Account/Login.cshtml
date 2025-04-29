@@ -18,11 +18,11 @@
                     <form id="account" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-center" role="alert"></div>
 
-                        <!-- Email Input -->
+                        <!-- Username Input -->
                         <div class="form-floating mb-3">
-                            <input asp-for="Input.Email" class="form-control rounded-pill" autocomplete="username" placeholder="name@example.com" />
-                            <label asp-for="Input.Email">Email</label>
-                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            <input asp-for="Input.Username" class="form-control rounded-pill" autocomplete="username" placeholder="Your Username" />
+                            <label asp-for="Input.Username">Username</label>
+                            <span asp-validation-for="Input.Username" class="text-danger"></span>
                         </div>
 
                         <!-- Password Input -->
@@ -54,7 +54,7 @@
                                 <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
                             </p>
                             <p>
-                                Don't have an account? <a asp-page="./Register">Sign up</a>
+                                Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Sign up</a>
                             </p>
                         </div>
                     </form>

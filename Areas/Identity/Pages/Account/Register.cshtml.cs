@@ -1,7 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 
 namespace QueryMyst.Areas.Identity.Pages.Account
 {
@@ -30,6 +33,12 @@ namespace QueryMyst.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+            [Required(ErrorMessage = "Please enter a username.")]
+            [StringLength(50, ErrorMessage = "The username must be at least {2} and at most {1} characters long.", MinimumLength = 3)]
+            [RegularExpression(@"^[a-zA-Z0-9_.-]+$", ErrorMessage = "Username can only contain letters, numbers, underscores, periods, and hyphens.")]
+            [Display(Name = "Username")]
+            public string Username { get; set; }
+
             [Required(ErrorMessage = "Please enter your email.")]
             [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
             [Display(Name = "Email")]
@@ -60,11 +69,14 @@ namespace QueryMyst.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                // Use the email as the username
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                // Set Username
+                await _userStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
+
+                // Set Email
                 user.Email = Input.Email;
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
@@ -75,7 +87,15 @@ namespace QueryMyst.Areas.Identity.Pages.Account
                 }
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    // Check for duplicate username error specifically
+                    if (error.Code == "DuplicateUserName")
+                    {
+                        ModelState.AddModelError(nameof(Input.Username), error.Description);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
             }
 
