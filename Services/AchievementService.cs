@@ -29,7 +29,7 @@ namespace QueryMyst.Services
         public async Task<List<UserAchievement>> CheckAndAwardAchievementsAsync(string userId)
         {
             var newAchievements = new List<UserAchievement>();
-            
+
             try
             {
                 // Get existing user achievements to avoid re-awarding
@@ -37,91 +37,87 @@ namespace QueryMyst.Services
                     .Where(ua => ua.UserId == userId)
                     .Select(ua => ua.AchievementId)
                     .ToListAsync();
-                
+
                 // Get all available achievements
                 var allAchievements = await _context.Achievements.ToListAsync();
-                
+
                 // Get user's mystery progress
                 var userMysteries = await _context.UserMysteries
                     .Where(um => um.UserId == userId)
+                    .Include(um => um.Mystery) // Include Mystery for difficulty/category checks if needed later
                     .ToListAsync();
-                
+
                 int solvedCount = userMysteries.Count(um => um.IsCompleted);
                 int attemptedCount = userMysteries.Count;
                 int totalAttempts = userMysteries.Sum(um => um.AttemptsCount);
-                
+                // int beginnerSolvedCount = userMysteries.Count(um => um.IsCompleted && um.Mystery.Difficulty == "Beginner"); // Needed for Beginner Graduate
+
                 // Check for First Mystery Solved achievement
                 var firstSolvedAchievement = allAchievements.FirstOrDefault(a => a.Criteria == "FirstMystery");
-                if (firstSolvedAchievement != null && 
+                if (firstSolvedAchievement != null &&
                     !userAchievements.Contains(firstSolvedAchievement.Id) &&
                     solvedCount >= 1)
                 {
                     var userAchievement = await AwardAchievementAsync(userId, firstSolvedAchievement.Id);
                     if (userAchievement != null) newAchievements.Add(userAchievement);
                 }
-                
+
                 // Check for 5 Mysteries Solved achievement
                 var fiveSolvedAchievement = allAchievements.FirstOrDefault(a => a.Criteria == "Solve5Mysteries");
-                if (fiveSolvedAchievement != null && 
+                if (fiveSolvedAchievement != null &&
                     !userAchievements.Contains(fiveSolvedAchievement.Id) &&
                     solvedCount >= 5)
                 {
                     var userAchievement = await AwardAchievementAsync(userId, fiveSolvedAchievement.Id);
                     if (userAchievement != null) newAchievements.Add(userAchievement);
                 }
-                
+
                 // Check for 10 Mysteries Solved achievement
                 var tenSolvedAchievement = allAchievements.FirstOrDefault(a => a.Criteria == "Solve10Mysteries");
-                if (tenSolvedAchievement != null && 
+                if (tenSolvedAchievement != null &&
                     !userAchievements.Contains(tenSolvedAchievement.Id) &&
                     solvedCount >= 10)
                 {
                     var userAchievement = await AwardAchievementAsync(userId, tenSolvedAchievement.Id);
                     if (userAchievement != null) newAchievements.Add(userAchievement);
                 }
-                
+
                 // Check for 25 Mysteries Solved achievement
                 var twentyFiveSolvedAchievement = allAchievements.FirstOrDefault(a => a.Criteria == "Solve25Mysteries");
-                if (twentyFiveSolvedAchievement != null && 
+                if (twentyFiveSolvedAchievement != null &&
                     !userAchievements.Contains(twentyFiveSolvedAchievement.Id) &&
                     solvedCount >= 25)
                 {
                     var userAchievement = await AwardAchievementAsync(userId, twentyFiveSolvedAchievement.Id);
                     if (userAchievement != null) newAchievements.Add(userAchievement);
                 }
-                
+
                 // Check for 50 Queries written achievement
                 var fiftyQueriesAchievement = allAchievements.FirstOrDefault(a => a.Criteria == "Write50Queries");
-                if (fiftyQueriesAchievement != null && 
+                if (fiftyQueriesAchievement != null &&
                     !userAchievements.Contains(fiftyQueriesAchievement.Id) &&
                     totalAttempts >= 50)
                 {
                     var userAchievement = await AwardAchievementAsync(userId, fiftyQueriesAchievement.Id);
                     if (userAchievement != null) newAchievements.Add(userAchievement);
                 }
-                
+
                 // Check for 100 Queries written achievement
                 var hundredQueriesAchievement = allAchievements.FirstOrDefault(a => a.Criteria == "Write100Queries");
-                if (hundredQueriesAchievement != null && 
+                if (hundredQueriesAchievement != null &&
                     !userAchievements.Contains(hundredQueriesAchievement.Id) &&
                     totalAttempts >= 100)
                 {
                     var userAchievement = await AwardAchievementAsync(userId, hundredQueriesAchievement.Id);
                     if (userAchievement != null) newAchievements.Add(userAchievement);
                 }
-                
-                // Other achievement checks can be added here:
-                // - Category-specific achievements
-                // - Difficulty-based achievements
-                // - Perfect solve achievements (solved on first try)
-                
-                return newAchievements;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error while checking and awarding achievements for user {UserId}", userId);
-                return new List<UserAchievement>();
+                _logger.LogError(ex, "Error checking or awarding achievements for user {UserId}", userId);
             }
+
+            return newAchievements;
         }
         
         private async Task<UserAchievement> AwardAchievementAsync(string userId, int achievementId)

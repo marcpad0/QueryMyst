@@ -196,80 +196,21 @@ INSERT INTO Products (ProductID, Name, Category, Price) VALUES
 // Add a new method to seed achievements
 static void SeedAchievements(ApplicationDbContext context)
 {
-    // Check if achievements already exist
     if (context.Achievements.Any())
     {
-        return; // Achievements already seeded
+        return; // DB has been seeded with achievements
     }
-    
+
     var achievements = new List<Achievement>
     {
-        new Achievement { 
-            Name = "First Case Solved", 
-            Description = "You successfully solved your first SQL mystery!", 
-            Icon = "<i class='bi bi-trophy-fill'></i>", 
-            Category = "Beginner", 
-            Criteria = "FirstMystery", 
-            PointsValue = 10
-        },
-        new Achievement { 
-            Name = "SQL Novice", 
-            Description = "You've solved 5 SQL mysteries", 
-            Icon = "<i class='bi bi-award-fill'></i>", 
-            Category = "Progress", 
-            Criteria = "Solve5Mysteries", 
-            PointsValue = 25
-        },
-        new Achievement { 
-            Name = "SQL Detective", 
-            Description = "You've solved 10 SQL mysteries", 
-            Icon = "<i class='bi bi-stars'></i>", 
-            Category = "Progress", 
-            Criteria = "Solve10Mysteries", 
-            PointsValue = 50 
-        },
-        new Achievement { 
-            Name = "SQL Master", 
-            Description = "You've solved 25 SQL mysteries", 
-            Icon = "<i class='bi bi-lightning-charge-fill'></i>", 
-            Category = "Progress", 
-            Criteria = "Solve25Mysteries", 
-            PointsValue = 100 
-        },
-        new Achievement { 
-            Name = "Eager Learner", 
-            Description = "You've written 50 SQL queries", 
-            Icon = "<i class='bi bi-keyboard-fill'></i>", 
-            Category = "Activity", 
-            Criteria = "Write50Queries", 
-            PointsValue = 20 
-        },
-        new Achievement { 
-            Name = "Query Expert", 
-            Description = "You've written 100 SQL queries", 
-            Icon = "<i class='bi bi-code-slash'></i>", 
-            Category = "Activity", 
-            Criteria = "Write100Queries", 
-            PointsValue = 40 
-        },
-        new Achievement { 
-            Name = "Beginner Graduate", 
-            Description = "Solve all beginner level mysteries", 
-            Icon = "<i class='bi bi-mortarboard-fill'></i>", 
-            Category = "Mastery", 
-            Criteria = "SolveAllBeginner", 
-            PointsValue = 30 
-        },
-        new Achievement { 
-            Name = "Perfect Solution", 
-            Description = "Solve a mystery on your first attempt", 
-            Icon = "<i class='bi bi-bullseye'></i>", 
-            Category = "Skill", 
-            Criteria = "PerfectSolution", 
-            PointsValue = 15 
-        }
+        new Achievement { Name = "First Step", Description = "Solve your first mystery", Icon = "<i class='bi bi-1-circle-fill'></i>", Category = "Beginner", Criteria = "FirstMystery", PointsValue = 10 },
+        new Achievement { Name = "Novice Detective", Description = "Solve 5 mysteries", Icon = "<i class='bi bi-5-circle-fill'></i>", Category = "Progress", Criteria = "Solve5Mysteries", PointsValue = 20 },
+        new Achievement { Name = "Seasoned Investigator", Description = "Solve 10 mysteries", Icon = "<i class='bi bi-journal-check'></i>", Category = "Progress", Criteria = "Solve10Mysteries", PointsValue = 30 },
+        new Achievement { Name = "Master Sleuth", Description = "Solve 25 mysteries", Icon = "<i class='bi bi-award'></i>", Category = "Mastery", Criteria = "Solve25Mysteries", PointsValue = 50 },
+        new Achievement { Name = "Query Writer", Description = "Write 50 queries (attempts)", Icon = "<i class='bi bi-keyboard'></i>", Category = "Activity", Criteria = "Write50Queries", PointsValue = 15 },
+        new Achievement { Name = "SQL Enthusiast", Description = "Write 100 queries (attempts)", Icon = "<i class='bi bi-keyboard-fill'></i>", Category = "Activity", Criteria = "Write100Queries", PointsValue = 25 },
     };
-    
+
     context.Achievements.AddRange(achievements);
     context.SaveChanges();
 }
