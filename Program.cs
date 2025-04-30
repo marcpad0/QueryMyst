@@ -29,6 +29,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 
 // Add services to the container
 builder.Services.AddRazorPages();
+builder.Services.AddControllers(); // Add this line
 
 // Register Achievement Service
 builder.Services.AddScoped<AchievementService>();
@@ -69,6 +70,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers(); // Add this line
 
 app.Run();
 
