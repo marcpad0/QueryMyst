@@ -348,17 +348,85 @@ static void SeedAchievements(ApplicationDbContext context)
 {
     if (context.Achievements.Any())
     {
-        return; // DB has been seeded with achievements
+        return; // Achievements already seeded
     }
 
     var achievements = new List<Achievement>
     {
-        new Achievement { Name = "First Step", Description = "Solve your first mystery", Icon = "<i class='bi bi-1-circle-fill'></i>", Category = "Beginner", Criteria = "FirstMystery", PointsValue = 10 },
-        new Achievement { Name = "Novice Detective", Description = "Solve 5 mysteries", Icon = "<i class='bi bi-5-circle-fill'></i>", Category = "Progress", Criteria = "Solve5Mysteries", PointsValue = 20 },
-        new Achievement { Name = "Seasoned Investigator", Description = "Solve 10 mysteries", Icon = "<i class='bi bi-journal-check'></i>", Category = "Progress", Criteria = "Solve10Mysteries", PointsValue = 30 },
-        new Achievement { Name = "Master Sleuth", Description = "Solve 25 mysteries", Icon = "<i class='bi bi-award'></i>", Category = "Mastery", Criteria = "Solve25Mysteries", PointsValue = 50 },
-        new Achievement { Name = "Query Writer", Description = "Write 50 queries (attempts)", Icon = "<i class='bi bi-keyboard'></i>", Category = "Activity", Criteria = "Write50Queries", PointsValue = 15 },
-        new Achievement { Name = "SQL Enthusiast", Description = "Write 100 queries (attempts)", Icon = "<i class='bi bi-keyboard-fill'></i>", Category = "Activity", Criteria = "Write100Queries", PointsValue = 25 },
+        // --- Solving Mysteries ---
+        new Achievement { Name = "First Steps", Description = "Solve your first mystery.", Icon = "<i class='bi bi-signpost-split'></i>", Category = "Beginner", Criteria = "FirstMystery", PointsValue = 10 },
+        new Achievement { Name = "Apprentice Detective", Description = "Solve 5 mysteries.", Icon = "<i class='bi bi-search'></i>", Category = "Progress", Criteria = "Solve5Mysteries", PointsValue = 25 },
+        new Achievement { Name = "Seasoned Investigator", Description = "Solve 10 mysteries.", Icon = "<i class='bi bi-binoculars'></i>", Category = "Progress", Criteria = "Solve10Mysteries", PointsValue = 50 },
+        new Achievement { Name = "Master Sleuth", Description = "Solve 25 mysteries.", Icon = "<i class='bi bi-fingerprint'></i>", Category = "Progress", Criteria = "Solve25Mysteries", PointsValue = 100 },
+        new Achievement { Name = "Legendary Detective", Description = "Solve 50 mysteries.", Icon = "<i class='bi bi-trophy'></i>", Category = "Mastery", Criteria = "Solve50Mysteries", PointsValue = 200 },
+        new Achievement { Name = "Beginner Graduate", Description = "Solve 3 Beginner mysteries.", Icon = "<i class='bi bi-mortarboard'></i>", Category = "Skill", Criteria = "Solve3Beginner", PointsValue = 15 },
+        new Achievement { Name = "Intermediate Challenger", Description = "Solve 3 Intermediate mysteries.", Icon = "<i class='bi bi-bar-chart-steps'></i>", Category = "Skill", Criteria = "Solve3Intermediate", PointsValue = 30 },
+        new Achievement { Name = "Advanced Tactician", Description = "Solve 3 Advanced mysteries.", Icon = "<i class='bi bi-graph-up-arrow'></i>", Category = "Skill", Criteria = "Solve3Advanced", PointsValue = 60 },
+        new Achievement { Name = "Expert Virtuoso", Description = "Solve 1 Expert mystery.", Icon = "<i class='bi bi-gem'></i>", Category = "Mastery", Criteria = "Solve1Expert", PointsValue = 100 },
+        new Achievement { Name = "Grandmaster", Description = "Solve 3 Expert mysteries.", Icon = "<i class='bi bi-award'></i>", Category = "Mastery", Criteria = "Solve3Expert", PointsValue = 250 },
+
+        // --- Writing Queries (Attempts) ---
+        new Achievement { Name = "Query Starter", Description = "Write 10 queries.", Icon = "<i class='bi bi-keyboard'></i>", Category = "Activity", Criteria = "Write10Queries", PointsValue = 5 },
+        new Achievement { Name = "Query Enthusiast", Description = "Write 50 queries.", Icon = "<i class='bi bi-terminal'></i>", Category = "Activity", Criteria = "Write50Queries", PointsValue = 20 },
+        new Achievement { Name = "Query Pro", Description = "Write 100 queries.", Icon = "<i class='bi bi-braces'></i>", Category = "Activity", Criteria = "Write100Queries", PointsValue = 40 },
+        new Achievement { Name = "Query Master", Description = "Write 250 queries.", Icon = "<i class='bi bi-database-gear'></i>", Category = "Mastery", Criteria = "Write250Queries", PointsValue = 80 },
+        new Achievement { Name = "Query Legend", Description = "Write 500 queries.", Icon = "<i class='bi bi-cpu'></i>", Category = "Mastery", Criteria = "Write500Queries", PointsValue = 150 },
+        new Achievement { Name = "The Thousandth Query", Description = "Write 1000 queries.", Icon = "<i class='bi bi-infinity'></i>", Category = "Mastery", Criteria = "Write1000Queries", PointsValue = 300 },
+
+        // --- Creating Mysteries ---
+        new Achievement { Name = "Mystery Architect", Description = "Create your first mystery.", Icon = "<i class='bi bi-pencil-square'></i>", Category = "Creator", Criteria = "CreateFirstMystery", PointsValue = 50 },
+        new Achievement { Name = "Prolific Creator", Description = "Create 5 mysteries.", Icon = "<i class='bi bi-journal-plus'></i>", Category = "Creator", Criteria = "Create5Mysteries", PointsValue = 150 },
+        new Achievement { Name = "Master Storyteller", Description = "Create 10 mysteries.", Icon = "<i class='bi bi-book'></i>", Category = "Creator", Criteria = "Create10Mysteries", PointsValue = 300 },
+
+        // --- Streaks / Consistency (Example - Requires more logic) ---
+        // new Achievement { Name = "Daily Detective", Description = "Solve a mystery 3 days in a row.", Icon = "<i class='bi bi-calendar-check'></i>", Category = "Activity", Criteria = "Solve3DaysRow", PointsValue = 30 },
+
+        // --- Specific Skills (Example - Requires more logic/tags) ---
+        // new Achievement { Name = "Join Master", Description = "Solve 5 mysteries requiring JOINs.", Icon = "<i class='bi bi-diagram-3'></i>", Category = "Skill", Criteria = "Solve5Joins", PointsValue = 40 },
+        // new Achievement { Name = "Subquery Specialist", Description = "Solve 3 mysteries requiring subqueries.", Icon = "<i class='bi bi-box-arrow-in-down-right'></i>", Category = "Skill", Criteria = "Solve3Subqueries", PointsValue = 50 },
+
+        // Add more achievements up to 50...
+        new Achievement { Name = "Data Digger", Description = "Solve 5 mysteries in the 'Data Recovery' category.", Icon = "<i class='bi bi-tools'></i>", Category = "Skill", Criteria = "Solve5DataRecovery", PointsValue = 40 },
+        new Achievement { Name = "Business Whiz", Description = "Solve 5 mysteries in the 'Business Analytics' category.", Icon = "<i class='bi bi-briefcase'></i>", Category = "Skill", Criteria = "Solve5Business", PointsValue = 40 },
+        new Achievement { Name = "Security Sentinel", Description = "Solve 5 mysteries in the 'Security Audit' category.", Icon = "<i class='bi bi-shield-check'></i>", Category = "Skill", Criteria = "Solve5Security", PointsValue = 40 },
+        new Achievement { Name = "Puzzle Solver", Description = "Solve 5 mysteries in the 'General Puzzle' category.", Icon = "<i class='bi bi-puzzle'></i>", Category = "Skill", Criteria = "Solve5Puzzle", PointsValue = 40 },
+        new Achievement { Name = "Algorithm Ace", Description = "Solve 5 mysteries in the 'Algorithm Challenge' category.", Icon = "<i class='bi bi-gear-wide-connected'></i>", Category = "Skill", Criteria = "Solve5Algorithm", PointsValue = 40 },
+
+        new Achievement { Name = "Persistent Prober", Description = "Attempt 10 different mysteries.", Icon = "<i class='bi bi-door-open'></i>", Category = "Activity", Criteria = "Attempt10Mysteries", PointsValue = 15 },
+        new Achievement { Name = "Curious Explorer", Description = "Attempt 25 different mysteries.", Icon = "<i class='bi bi-compass'></i>", Category = "Activity", Criteria = "Attempt25Mysteries", PointsValue = 35 },
+        new Achievement { Name = "Dedicated Detective", Description = "Attempt 50 different mysteries.", Icon = "<i class='bi bi-journal-bookmark'></i>", Category = "Activity", Criteria = "Attempt50Mysteries", PointsValue = 70 },
+
+        new Achievement { Name = "Quick Learner", Description = "Solve a Beginner mystery within 5 attempts.", Icon = "<i class='bi bi-lightbulb'></i>", Category = "Skill", Criteria = "SolveBeginnerUnder5", PointsValue = 10 },
+        new Achievement { Name = "Efficient Analyst", Description = "Solve an Intermediate mystery within 10 attempts.", Icon = "<i class='bi bi-clipboard-data'></i>", Category = "Skill", Criteria = "SolveIntermediateUnder10", PointsValue = 20 },
+        new Achievement { Name = "Sharp Mind", Description = "Solve an Advanced mystery within 15 attempts.", Icon = "<i class='bi bi-brain'></i>", Category = "Skill", Criteria = "SolveAdvancedUnder15", PointsValue = 40 },
+        new Achievement { Name = "Precision Expert", Description = "Solve an Expert mystery within 20 attempts.", Icon = "<i class='bi bi-bullseye'></i>", Category = "Skill", Criteria = "SolveExpertUnder20", PointsValue = 80 },
+
+        // ... Continue adding more diverse achievements ...
+
+        new Achievement { Name = "Century Solver", Description = "Solve 100 mysteries.", Icon = "<i class='bi bi-100'></i>", Category = "Mastery", Criteria = "Solve100Mysteries", PointsValue = 400 },
+        new Achievement { Name = "Double Century", Description = "Solve 200 mysteries.", Icon = "<i class='bi bi-200'></i>", Category = "Mastery", Criteria = "Solve200Mysteries", PointsValue = 800 },
+
+        new Achievement { Name = "Creator Contributor", Description = "Have one of your created mysteries solved by 10 users.", Icon = "<i class='bi bi-people'></i>", Category = "Creator", Criteria = "MysterySolved10Times", PointsValue = 75 },
+        new Achievement { Name = "Popular Author", Description = "Have one of your created mysteries solved by 50 users.", Icon = "<i class='bi bi-star'></i>", Category = "Creator", Criteria = "MysterySolved50Times", PointsValue = 200 },
+
+        new Achievement { Name = "Perfect Score", Description = "Solve a mystery on the first attempt.", Icon = "<i class='bi bi-check2-all'></i>", Category = "Skill", Criteria = "SolveFirstAttempt", PointsValue = 25 },
+        new Achievement { Name = "Five First Tries", Description = "Solve 5 different mysteries on the first attempt.", Icon = "<i class='bi bi-5-circle'></i>", Category = "Skill", Criteria = "Solve5FirstAttempt", PointsValue = 125 },
+
+        // Add 10 more to reach 50
+        new Achievement { Name = "Intermediate Expert", Description = "Solve 10 Intermediate mysteries.", Icon = "<i class='bi bi-bar-chart-line'></i>", Category = "Skill", Criteria = "Solve10Intermediate", PointsValue = 75 },
+        new Achievement { Name = "Advanced Pro", Description = "Solve 10 Advanced mysteries.", Icon = "<i class='bi bi-graph-up'></i>", Category = "Skill", Criteria = "Solve10Advanced", PointsValue = 150 },
+        new Achievement { Name = "Expert Elite", Description = "Solve 10 Expert mysteries.", Icon = "<i class='bi bi-diamond-half'></i>", Category = "Mastery", Criteria = "Solve10Expert", PointsValue = 500 },
+
+        new Achievement { Name = "Query Artisan", Description = "Write 750 queries.", Icon = "<i class='bi bi-tools'></i>", Category = "Mastery", Criteria = "Write750Queries", PointsValue = 220 },
+        new Achievement { Name = "Query Sage", Description = "Write 1500 queries.", Icon = "<i class='bi bi-mortarboard-fill'></i>", Category = "Mastery", Criteria = "Write1500Queries", PointsValue = 450 },
+
+        new Achievement { Name = "Esteemed Creator", Description = "Create 15 mysteries.", Icon = "<i class='bi bi-award-fill'></i>", Category = "Creator", Criteria = "Create15Mysteries", PointsValue = 400 },
+        new Achievement { Name = "Legendary Author", Description = "Create 25 mysteries.", Icon = "<i class='bi bi-trophy-fill'></i>", Category = "Creator", Criteria = "Create25Mysteries", PointsValue = 600 },
+
+        new Achievement { Name = "Tenacious Tinkerer", Description = "Spend over 100 attempts on a single mystery (solved or not).", Icon = "<i class='bi bi-hammer'></i>", Category = "Activity", Criteria = "Over100AttemptsOneMystery", PointsValue = 50 },
+        new Achievement { Name = "Category Connoisseur", Description = "Solve at least one mystery in every category.", Icon = "<i class='bi bi-tags'></i>", Category = "Progress", Criteria = "SolveEachCategory", PointsValue = 75 },
+        new Achievement { Name = "Difficulty Dominator", Description = "Solve at least one mystery in every difficulty level.", Icon = "<i class='bi bi-distribute-vertical'></i>", Category = "Progress", Criteria = "SolveEachDifficulty", PointsValue = 75 },
+
     };
 
     context.Achievements.AddRange(achievements);
