@@ -193,7 +193,7 @@
                                         <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="ORDER BY ">ORDER BY</button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary template-btn" data-template="LIMIT ">LIMIT</button>
                                     </div>
-                                    <textarea asp-for="UserQuery" class="form-control rounded-0 rounded-bottom"
+                                    <textarea asp-for="UserQuery" class="form-control rounded-0 rounded-bottom auto-resize"
                                         id="sqlQueryArea" rows="8"
                                         placeholder="-- Enter your SQL query here...
 SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '2023-01-01';"
@@ -334,8 +334,22 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
         .saved-indicator.visible { opacity: 1; }
 
         /* Editor styling */
-        #sqlQueryArea { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.95rem; tab-size: 4; min-height: 150px; resize: vertical; }
-        .editor-toolbar { border-bottom: none; }
+        #sqlQueryArea { 
+            font-family: 'Consolas', 'Courier New', monospace; 
+            font-size: 0.95rem; 
+            tab-size: 4; 
+            min-height: 150px; 
+            max-height: 500px; /* Add maximum height */
+            resize: vertical; 
+            overflow-y: hidden; /* Hide scrollbar during auto-resize */
+            transition: height 0.2s ease; /* Smooth height transition */
+        }
+        
+        /* Auto-resize textarea styles */
+        .auto-resize {
+            height: auto;
+            overflow-y: hidden;
+        }
 
         /* Results table styling */
         .query-results-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05); font-size: 0.9rem; }
@@ -1492,7 +1506,65 @@ function formatResultsAsTable() {
         function initEditorFeatures() {
             const sqlQueryArea = document.getElementById('sqlQueryArea');
             const autoFormatCheck = document.getElementById('autoFormatCheck');
-
+            
+            // Auto-resize textarea function
+            function autoResizeTextarea() {
+                if (!sqlQueryArea) return;
+                
+                // Reset height to calculate proper scrollHeight
+                sqlQueryArea.style.height = 'auto';
+                
+                // Calculate new height (with 10px padding for comfort)
+                const newHeight = Math.min(500, Math.max(150, sqlQueryArea.scrollHeight + 10));
+                
+                // Set new height
+                sqlQueryArea.style.height = newHeight + 'px';
+            }
+            
+            // Initialize auto-resize and attach to input events
+            if (sqlQueryArea) {
+                // Initial resize
+                autoResizeTextarea();
+                
+                // Auto-resize on input
+                sqlQueryArea.addEventListener('input', autoResizeTextarea);
+                
+                // Also resize when template buttons are clicked
+                document.querySelectorAll('.template-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        setTimeout(autoResizeTextarea, 0);
+                    });
+                });
+                
+                // Resize on window resize (in case width changes affect wrapping)
+                window.addEventListener('resize', autoResizeTextarea);
+            }
+            
+            // Add event listeners for template buttons
+            document.querySelectorAll('.template-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const template = this.getAttribute('data-template');
+                    if (template && sqlQueryArea) {
+                        // Get current cursor position
+                        const startPos = sqlQueryArea.selectionStart;
+                        const endPos = sqlQueryArea.selectionEnd;
+                        
+                        // Insert template at cursor or replace selected text
+                        const currentValue = sqlQueryArea.value;
+                        const newValue = currentValue.substring(0, startPos) + template + 
+                                        currentValue.substring(endPos);
+                        
+                        // Update textarea value
+                        sqlQueryArea.value = newValue;
+                        
+                        // Move cursor after inserted template
+                        const newCursorPos = startPos + template.length;
+                        sqlQueryArea.focus();
+                        sqlQueryArea.setSelectionRange(newCursorPos, newCursorPos);
+                    }
+                });
+            });
+        
             if (autoFormatCheck) {
                 autoFormatCheck.addEventListener('change', function() {
                     if (this.checked) {
@@ -1502,7 +1574,7 @@ function formatResultsAsTable() {
                     }
                 });
             }
-
+        
             // Fullscreen toggle
             document.getElementById('toggle-fullscreen').addEventListener('click', function() {
                 document.body.classList.toggle('editor-fullscreen-mode');
