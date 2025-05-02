@@ -4,59 +4,97 @@
     ViewData["Title"] = "Your Dashboard";
 }
 
+<!-- Modernized Hero Section with Animation -->
 <div class="hero-section dashboard-hero">
     <div class="hero-content">
-        <h1 class="display-5 fw-bold">Welcome, @User.Identity?.Name!</h1>
-        <p class="lead">Ready to solve some SQL mysteries?</p>
+        <div class="wave-animation">
+            <h1 class="display-5 fw-bold">Hello, <span class="text-gradient">@User.Identity?.Name</span>! <span class="wave-emoji">👋</span></h1>
+            <p class="lead">Ready to solve some SQL mysteries today?</p>
+        </div>
+    </div>
+    <div class="hero-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
     </div>
 </div>
 
-<div class="container my-5">
+<!-- Quick Action Cards -->
+<div class="container quick-actions-container">
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <a href="/mysteries" class="quick-action-card">
+                <div class="card-icon"><i class="bi bi-search"></i></div>
+                <div class="card-label">Find Mysteries</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/learn" class="quick-action-card">
+                <div class="card-icon"><i class="bi bi-book"></i></div>
+                <div class="card-label">Learn SQL</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/achievements" class="quick-action-card">
+                <div class="card-icon"><i class="bi bi-award"></i></div>
+                <div class="card-label">Achievements</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/leaderboard" class="quick-action-card">
+                <div class="card-icon"><i class="bi bi-trophy"></i></div>
+                <div class="card-label">Leaderboard</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container my-4">
     <div class="row">
         <div class="col-md-8">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-gradient-primary text-white py-3">
+            <!-- Modernized Stats Card -->
+            <div class="card shadow-soft mb-4 border-0 rounded-4">
+                <div class="card-header bg-gradient text-white py-3 rounded-top-4">
                     <h5 class="mb-0"><i class="bi bi-lightning-charge-fill me-2"></i> Your Progress</h5>
                 </div>
-                <div class="card-body">
-                    <div class="row stats-row text-center">
-                        <div class="col-md-4 mb-3 mb-md-0">
+                <div class="card-body p-4">
+                    <div class="row stats-row text-center g-4">
+                        <div class="col-md-4">
                             <div class="stat-item">
-                                <div class="stat-number">@Model.MysteriesSolved</div>
+                                <div class="stat-icon"><i class="bi bi-check2-all"></i></div>
+                                <div class="stat-number count-up">@Model.MysteriesSolved</div>
                                 <div class="stat-label">Mysteries Solved</div>
                             </div>
                         </div>
-                        <div class="col-md-4 mb-3 mb-md-0">
+                        <div class="col-md-4">
                             <div class="stat-item">
-                                <div class="stat-number">@Model.TotalQueriesWritten</div>
+                                <div class="stat-icon"><i class="bi bi-code-square"></i></div>
+                                <div class="stat-number count-up">@Model.TotalQueriesWritten</div>
                                 <div class="stat-label">SQL Queries Written</div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="stat-item">
-                                <div class="stat-number">@Model.TotalBadges</div>
+                                <div class="stat-icon"><i class="bi bi-stars"></i></div>
+                                <div class="stat-number count-up">@Model.TotalBadges</div>
                                 <div class="stat-label">Badges Earned</div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="progress-section mt-4">
-                        <label class="form-label d-flex justify-content-between">
-                            <span>Overall Progress</span>
-                            <span>@Model.ProgressPercentage%</span>
-                        </label>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-gradient-primary" role="progressbar" style="width: @Model.ProgressPercentage%" aria-valuenow="@Model.ProgressPercentage" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow mb-4">
-                <div class="card-header bg-gradient-primary text-white py-3">
-                    <h5 class="mb-0"><i class="bi bi-trophy-fill me-2"></i> Recent Achievements</h5>
+            <!-- Achievements Card -->
+            <div class="card shadow-soft mb-4 border-0 rounded-4">
+                <div class="card-header bg-gradient text-white py-3 rounded-top-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-trophy-fill me-2"></i> Recent Achievements</h5>
+                        <a href="/achievements" class="text-white text-decoration-none">
+                            <small>View All <i class="bi bi-chevron-right"></i></small>
+                        </a>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     @if (Model.RecentAchievements.Any())
                     {
                         <div class="achievement-list">
@@ -65,10 +103,15 @@
                                 <div class="achievement-item">
                                     <div class="achievement-icon">@Html.Raw(achievement.Icon)</div>
                                     <div class="achievement-content">
-                                        <h5 class="achievement-title">@achievement.Name</h5>
-                                        <p class="achievement-desc">@achievement.Description</p>
+                                        <div class="achievement-title">@achievement.Name</div>
+                                        <div class="achievement-desc">@achievement.Description</div>
+                                        <div class="achievement-date text-muted">
+                                            <i class="bi bi-clock me-1"></i> Earned @achievement.FormattedTimeAgo
+                                        </div>
                                     </div>
-                                    <div class="achievement-date">@achievement.TimeAgoDisplay</div>
+                                    <div class="achievement-points">
+                                        <div class="badge bg-pastel">+@achievement.Points</div>
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -76,9 +119,12 @@
                     else
                     {
                         <div class="text-center py-4">
-                            <i class="bi bi-award text-muted" style="font-size: 2.5rem;"></i>
-                            <p class="mb-0 mt-3">No achievements yet. Start solving mysteries to earn badges!</p>
-                            <a href="/mysteries" class="btn btn-primary btn-sm mt-3">Find Mysteries to Solve</a>
+                            <div class="empty-state">
+                                <i class="bi bi-award-fill"></i>
+                                <p>No achievements yet.</p>
+                                <p class="text-muted small mb-3">Solve mysteries to earn badges!</p>
+                                <a href="/mysteries" class="btn btn-gradient btn-sm">Find Mysteries</a>
+                            </div>
                         </div>
                     }
                 </div>
@@ -86,13 +132,25 @@
         </div>
 
         <div class="col-md-4">
+            <!-- User Card -->
+            <div class="card shadow-soft mb-4 border-0 rounded-4">
+                <div class="card-body p-4 text-center">
+                    <h5 class="mt-3">@User.Identity?.Name</h5>
+                    <div class="user-rank mb-3">
+                        <span class="badge bg-rank">Rank #@Model.UserRank</span>
+                        <span class="badge bg-points ms-2">@Model.UserScore pts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Mystery Card -->
             @if (Model.FeaturedMystery != null)
             {
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-gradient-primary text-white py-3">
-                        <h5 class="mb-0"><i class="bi bi-star-fill me-2"></i> Featured Mystery</h5>
+                <div class="card shadow-soft mb-4 border-0 rounded-4">
+                    <div class="card-header bg-gradient text-white py-3 rounded-top-4">
+                        <h5 class="mb-0"><i class="bi bi-stars me-2"></i> Featured Mystery</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <div class="featured-mystery">
                             <div class="mystery-difficulty">
                                 <span class="badge @(Model.FeaturedMystery.DifficultyClass ?? $"difficulty-{Model.FeaturedMystery.Difficulty?.ToLower() ?? "beginner"}")">
@@ -101,34 +159,58 @@
                             </div>
                             <h4 class="mystery-title">@Model.FeaturedMystery.Title</h4>
                             <p class="mystery-desc">@Model.FeaturedMystery.Description</p>
-                            <div class="d-grid">
-                                <a href="/Mysteries/Details/@Model.FeaturedMystery.Id" class="btn btn-primary">Solve This Mystery</a>
+                            <div class="mystery-decoration">
+                                <img src="/images/mystery.svg" alt="" class="mystery-image" onerror="this.style.display='none'">
+                            </div>
+                            <div class="d-grid mt-3">
+                                <a href="/Mysteries/Details/@Model.FeaturedMystery.Id" class="btn btn-gradient btn-lg">Solve This Mystery</a>
                             </div>
                         </div>
                     </div>
                 </div>
             }
 
-            <div class="card shadow">
-                <div class="card-header bg-gradient-primary text-white py-3">
-                    <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i> Leaderboard</h5>
+            <!-- Leaderboard Card -->
+            <div class="card shadow-soft border-0 rounded-4">
+                <div class="card-header bg-gradient text-white py-3 rounded-top-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i> Leaderboard</h5>
+                        <a href="/leaderboard" class="text-white text-decoration-none">
+                            <small>View All <i class="bi bi-chevron-right"></i></small>
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
+                    <ul class="list-group list-group-flush rounded-bottom-4">
                         @foreach (var entry in Model.TopLeaderboard)
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center @(entry.IsCurrentUser ? "active" : "")">
                                 <div class="d-flex align-items-center">
-                                    <div class="rank me-3">@entry.Rank</div>
-                                    <div>@entry.UserName</div>
+                                    <div class="rank-badge @(entry.Rank <= 3 ? $"rank-{entry.Rank}" : "")">
+                                        @if (entry.Rank == 1)
+                                        {
+                                            <i class="bi bi-trophy-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            @entry.Rank
+                                        }
+                                    </div>
+                                    <div class="ms-2">
+                                        @entry.UserName
+                                        @if (entry.IsCurrentUser)
+                                        {
+                                            <span class="badge bg-user ms-1">You</span>
+                                        }
+                                    </div>
                                 </div>
-                                <span class="badge @(entry.IsCurrentUser ? "bg-white text-primary" : "bg-primary") rounded-pill">@entry.Score</span>
+                                <div>
+                                    <span class="badge bg-light text-dark rounded-pill">@entry.SolvedMysteries <i class="bi bi-check-circle-fill ms-1 text-success"></i></span>
+                                    <span class="badge bg-score rounded-pill ms-1">@entry.Score pts</span>
+                                </div>
                             </li>
                         }
                     </ul>
-                    <div class="card-footer text-center">
-                        <a href="/leaderboard" class="text-decoration-none">View full leaderboard</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -137,40 +219,252 @@
 
 @section Styles {
     <style>
-        .dashboard-hero {
-            background: linear-gradient(135deg, #6259ca, #4e36e2);
-            color: white;
-            padding: 3rem 0;
-            text-align: center;
+        /* Modern Color Scheme */
+        :root {
+            --primary: #6259ca;
+            --primary-light: #9c96e4;
+            --primary-lighter: #efeefe;
+            --secondary: #fe7f9c;
+            --accent: #ffc107;
+            --dark: #38383a;
+            --light: #f5f6fa;
+            --success: #3ac47d;
         }
         
+        body {
+            background-color: var(--light);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Modern Hero Section */
+        .dashboard-hero {
+            background: linear-gradient(135deg, var(--primary), #4e36e2);
+            color: white;
+            padding: 3.5rem 0;
+            text-align: center;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wave-animation {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .wave-emoji {
+            display: inline-block;
+            animation: wave 1.5s infinite;
+            transform-origin: 70% 70%;
+        }
+        
+        @@keyframes wave {
+            0% { transform: rotate(0deg); }
+            10% { transform: rotate(14deg); }
+            20% { transform: rotate(-8deg); }
+            30% { transform: rotate(14deg); }
+            40% { transform: rotate(-4deg); }
+            50% { transform: rotate(10deg); }
+            60% { transform: rotate(0deg); }
+            100% { transform: rotate(0deg); }
+        }
+        
+        @@keyframes fadeInUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .shape-1 {
+            width: 150px;
+            height: 150px;
+            top: -20px;
+            left: 10%;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .shape-2 {
+            width: 80px;
+            height: 80px;
+            bottom: 10%;
+            right: 10%;
+            animation: float 6s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+        
+        .shape-3 {
+            width: 120px;
+            height: 120px;
+            bottom: 30%;
+            left: 20%;
+            animation: float 7s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+        
+        @@keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        
+        .text-gradient {
+            background: linear-gradient(45deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Quick Action Cards */
+        .quick-actions-container {
+            margin-top: -25px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .quick-action-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 1.25rem 0.75rem;
+            text-align: center;
+            color: var(--primary);
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(135deg, var(--primary), #4e36e2);
+            color: white;
+        }
+        
+        .card-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        /* Card Styling */
+        .shadow-soft {
+            box-shadow: 0 0.3rem 1.525rem -0.375rem rgba(98, 89, 202, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .shadow-soft:hover {
+            box-shadow: 0 0.5rem 2rem -0.375rem rgba(98, 89, 202, 0.15);
+        }
+        
+        .rounded-4 {
+            border-radius: 15px !important;
+        }
+        
+        .rounded-top-4 {
+            border-top-left-radius: 15px !important;
+            border-top-right-radius: 15px !important;
+        }
+        
+        .rounded-bottom-4 {
+            border-bottom-left-radius: 15px !important;
+            border-bottom-right-radius: 15px !important;
+        }
+        
+        .bg-gradient {
+            background: linear-gradient(135deg, var(--primary), #4e36e2);
+        }
+        
+        .border-0 {
+            border: none !important;
+        }
+        
+        /* Stats Card */
         .stat-item {
-            padding: 1rem 0;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+        
+        .stat-item:hover {
+            background-color: var(--primary-lighter);
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
         }
         
         .stat-number {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #6259ca;
+            color: var(--primary);
             line-height: 1.2;
+            margin-bottom: 0.5rem;
         }
         
         .stat-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: var(--dark);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        /* Animation for counting up */
+        .count-up {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+            animation-delay: 0.3s;
+        }
+        
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Achievement List */
+        .achievement-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
         
         .achievement-item {
             display: flex;
             align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid #e9ecef;
+            padding: 1rem;
+            border-radius: 12px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
         
-        .achievement-item:last-child {
-            border-bottom: none;
+        .achievement-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transform: translateY(-3px);
+            background-color: var(--primary-lighter);
         }
         
         .achievement-icon {
@@ -181,7 +475,10 @@
             justify-content: center;
             font-size: 1.5rem;
             margin-right: 1rem;
-            color: #6259ca;
+            color: var(--primary);
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
         }
         
         .achievement-content {
@@ -189,62 +486,257 @@
         }
         
         .achievement-title {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 600;
             margin-bottom: 0.25rem;
+            color: var(--dark);
         }
         
         .achievement-desc {
             font-size: 0.875rem;
             color: #6c757d;
-            margin-bottom: 0;
+            margin-bottom: 0.25rem;
         }
         
         .achievement-date {
             font-size: 0.75rem;
-            color: #adb5bd;
         }
         
+        .achievement-points {
+            padding-left: 10px;
+        }
+        
+        .bg-pastel {
+            background-color: #ffe8b3;
+            color: #664d03;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            padding: 2rem 1rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #d8d8d8;
+        }
+        
+        /* User Card */
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            background-color: var(--primary-lighter);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--primary);
+        }
+        
+        .user-rank {
+            margin-top: 0.5rem;
+        }
+        
+        .bg-rank {
+            background-color: #e7eff9;
+            color: #2c76dc;
+        }
+        
+        .bg-points {
+            background-color: #fef5e5;
+            color: #fd7e14;
+        }
+        
+        .bg-user {
+            background-color: #e4fcf0;
+            color: #20c997;
+        }
+        
+        .bg-score {
+            background-color: #efeefe;
+            color: var(--primary);
+        }
+        
+        /* Featured Mystery */
         .featured-mystery {
-            padding: 0.5rem 0;
+            position: relative;
+        }
+        
+        .mystery-difficulty {
+            margin-bottom: 1rem;
         }
         
         .mystery-title {
-            font-size: 1.25rem;
-            margin-top: 0.75rem;
+            font-size: 1.3rem;
             margin-bottom: 0.75rem;
+            color: var(--dark);
         }
         
         .mystery-desc {
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: #6c757d;
             margin-bottom: 1.25rem;
         }
         
-        .rank {
-            font-weight: 700;
-            width: 24px;
-            height: 24px;
+        .mystery-decoration {
+            margin-bottom: 1rem;
+            text-align: center;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f1f3f9;
+            overflow: hidden;
+        }
+        
+        .mystery-image {
+            max-width: 100%;
+            max-height: 100px;
+            transition: all 0.3s ease;
+        }
+        
+        .featured-mystery:hover .mystery-image {
+            transform: scale(1.1);
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--primary), #4e36e2);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(98, 89, 202, 0.3);
+            color: white;
+        }
+        
+        /* Leaderboard */
+        .rank-badge {
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
+            background-color: #f1f3f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .rank-1 {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+        }
+        
+        .rank-2 {
+            background: linear-gradient(135deg, #C0C0C0, #A9A9A9);
+            color: white;
+        }
+        
+        .rank-3 {
+            background: linear-gradient(135deg, #CD7F32, #8B4513);
+            color: white;
+        }
+        
+        .list-group-item {
+            padding: 1rem 1.25rem;
+            transition: all 0.2s ease;
+            border-left: none;
+            border-right: none;
+        }
+        
+        .list-group-item:first-child {
+            border-top: none;
+        }
+        
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+        
+        .list-group-item:hover {
+            background-color: #f8f9fd;
         }
         
         .list-group-item.active {
-            background-color: #eef2ff;
-            border-color: #e5e9f2;
-            color: #4e36e2;
+            background-color: var(--primary-lighter);
+            border-color: var(--primary-lighter);
+            color: var(--primary);
         }
         
-        .list-group-item.active .rank {
-            background-color: rgba(78, 54, 226, 0.1);
+        /* Difficulty badges */
+        .difficulty-beginner {
+            background: linear-gradient(135deg, #198754, #20c997);
+            color: white;
         }
-
-        .difficulty-beginner { background-color: #198754; color: white; }
-        .difficulty-intermediate { background-color: #ffc107; color: black; }
-        .difficulty-advanced { background-color: #fd7e14; color: white; }
-        .difficulty-expert { background-color: #dc3545; color: white; }
+        
+        .difficulty-intermediate {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: #212529;
+        }
+        
+        .difficulty-advanced {
+            background: linear-gradient(135deg, #fd7e14, #dc3545);
+            color: white;
+        }
+        
+        .difficulty-expert {
+            background: linear-gradient(135deg, #dc3545, #6f42c1);
+            color: white;
+        }
+        
+        /* Mobile responsiveness */
+        @@media (max-width: 768px) {
+            .dashboard-hero {
+                padding: 2.5rem 0;
+                border-radius: 0 0 20px 20px;
+            }
+            
+            .quick-actions-container {
+                margin-top: -15px;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .stat-icon {
+                font-size: 2rem;
+            }
+        }
     </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation for counting up numbers
+            const countElements = document.querySelectorAll('.count-up');
+            
+            countElements.forEach(element => {
+                const target = parseInt(element.innerText);
+                element.innerText = '0';
+                element.style.opacity = '1';
+                
+                let count = 0;
+                const duration = 1500; // ms
+                const interval = 30;
+                const steps = Math.floor(duration / interval);
+                const increment = target / steps;
+                
+                const counter = setInterval(() => {
+                    count += increment;
+                    
+                    if (count >= target) {
+                        element.innerText = target;
+                        clearInterval(counter);
+                    } else {
+                        element.innerText = Math.floor(count);
+                    }
+                }, interval);
+            });
+        });
+    </script>
 }

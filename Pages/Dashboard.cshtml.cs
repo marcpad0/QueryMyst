@@ -45,18 +45,23 @@ namespace QueryMyst.Pages
             public string Name { get; set; }
             public string Description { get; set; }
             public string Icon { get; set; }
+            public int Points { get; set; }
             public DateTime EarnedOn { get; set; }
             public TimeSpan TimeAgo => DateTime.Now - EarnedOn;
-            public string TimeAgoDisplay 
+            public string FormattedTimeAgo 
             {
                 get
                 {
+                    if (TimeAgo.TotalDays > 365)
+                        return $"{(int)(TimeAgo.TotalDays / 365)} year{((int)(TimeAgo.TotalDays / 365) != 1 ? "s" : "")} ago";
                     if (TimeAgo.TotalDays > 30)
-                        return $"{(int)(TimeAgo.TotalDays / 30)} months ago";
-                    if (TimeAgo.TotalDays > 1)
-                        return $"{(int)TimeAgo.TotalDays} days ago";
-                    if (TimeAgo.TotalHours > 1)
-                        return $"{(int)TimeAgo.TotalHours} hours ago";
+                        return $"{(int)(TimeAgo.TotalDays / 30)} month{((int)(TimeAgo.TotalDays / 30) != 1 ? "s" : "")} ago";
+                    if (TimeAgo.TotalDays >= 1)
+                        return $"{(int)TimeAgo.TotalDays} day{((int)TimeAgo.TotalDays != 1 ? "s" : "")} ago";
+                    if (TimeAgo.TotalHours >= 1)
+                        return $"{(int)TimeAgo.TotalHours} hour{((int)TimeAgo.TotalHours != 1 ? "s" : "")} ago";
+                    if (TimeAgo.TotalMinutes >= 1)
+                        return $"{(int)TimeAgo.TotalMinutes} minute{((int)TimeAgo.TotalMinutes != 1 ? "s" : "")} ago";
                     return "just now";
                 } 
             }
@@ -67,6 +72,7 @@ namespace QueryMyst.Pages
             public int Rank { get; set; }
             public string UserName { get; set; }
             public int Score { get; set; }
+            public int SolvedMysteries { get; set; }
             public bool IsCurrentUser { get; set; }
         }
 
@@ -110,6 +116,7 @@ namespace QueryMyst.Pages
                     Name = ua.Achievement.Name,
                     Description = ua.Achievement.Description,
                     Icon = ua.Achievement.Icon,
+                    Points = ua.Achievement.PointsValue,
                     EarnedOn = ua.EarnedOn
                 })
                 .ToList();
@@ -140,7 +147,7 @@ namespace QueryMyst.Pages
             }
 
             // Get leaderboard
-            // First, calculate scores (solved mysteries count * 100 + total achievements * 10)
+            // Calculate scores (solved mysteries count * 100 + total achievements * 10)
             var userScores = await _context.Users
                 .Select(u => new
                 {
@@ -159,6 +166,7 @@ namespace QueryMyst.Pages
                 {
                     u.UserId,
                     u.UserName,
+                    u.SolvedCount,
                     Score = (u.SolvedCount * 100) + (u.AchievementsCount * 10)
                 })
                 .OrderByDescending(u => u.Score)
@@ -169,14 +177,15 @@ namespace QueryMyst.Pages
             UserRank = scoredUsers.FindIndex(u => u.UserId == user.Id) + 1;
             UserScore = currentUserEntry?.Score ?? 0;
 
-            // Take top 2 users and the user themselves for the leaderboard
+            // Take top 5 users and the user themselves for the leaderboard
             TopLeaderboard = scoredUsers
-                .Take(2)  // Top 2 users
+                .Take(5)  // Top 5 users instead of 2
                 .Select((u, index) => new LeaderboardEntryViewModel
                 {
                     Rank = index + 1,
                     UserName = u.UserName,
                     Score = u.Score,
+                    SolvedMysteries = u.SolvedCount,
                     IsCurrentUser = u.UserId == user.Id
                 })
                 .ToList();
@@ -187,8 +196,9 @@ namespace QueryMyst.Pages
                 TopLeaderboard.Add(new LeaderboardEntryViewModel
                 {
                     Rank = UserRank,
-                    UserName = currentUserEntry.UserName, // Use actual username instead of "You"
+                    UserName = currentUserEntry.UserName,
                     Score = UserScore,
+                    SolvedMysteries = currentUserEntry.SolvedCount,
                     IsCurrentUser = true
                 });
             }
