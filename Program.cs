@@ -86,7 +86,7 @@ static void SeedDatabase(ApplicationDbContext context)
     // First, ensure we have a default user to use as the creator
     string systemUserId;
     var systemUser = context.Users.FirstOrDefault();
-    
+
     if (systemUser == null)
     {
         // Create a default system user if none exists
@@ -99,15 +99,15 @@ static void SeedDatabase(ApplicationDbContext context)
             EmailConfirmed = true,
             SecurityStamp = Guid.NewGuid().ToString()
         };
-        
+
         // Set a password for the system user
         var passwordHasher = new PasswordHasher<IdentityUser>();
         systemUser.PasswordHash = passwordHasher.HashPassword(systemUser, "SystemP@ss123!");
-        
+
         context.Users.Add(systemUser);
         context.SaveChanges();
     }
-    
+
     systemUserId = systemUser.Id;
 
     var mysteries = new List<Mystery>
@@ -185,6 +185,156 @@ INSERT INTO Products (ProductID, Name, Category, Price) VALUES
                 SolutionQuery = "SELECT Name, Price FROM Products ORDER BY Price DESC LIMIT 1;",
                 HintText = "How can you sort the products based on their price? Once sorted, how do you select only the top one?",
                 FalseClues = "Perhaps the most expensive item is in a specific 'Category'? Does the 'ProductID' give a clue about the price?"
+            }
+        },
+        // --- Intermediate Mystery ---
+        new Mystery
+        {
+            Title = "Departmental Spending",
+            Description = "Calculate the total spending for each department based on employee expenses.",
+            Difficulty = "Intermediate",
+            DifficultyClass = "difficulty-intermediate",
+            Category = "Data Recovery", // Different Category
+            Icon = "<i class='bi bi-calculator fs-1 text-warning'></i>",
+            RequiredSkills = new List<string> { "SELECT", "JOIN", "GROUP BY", "SUM" },
+            CreatorId = systemUserId,
+            Details = new MysteryDetails
+            {
+                FullDescription = "The company tracks employee expenses in the 'Expenses' table, linked to the 'Employees' table which contains department information. Calculate the total amount spent by employees in each department.",
+                DatabaseSchema = @"
+CREATE TABLE Employees (
+    EmployeeID INTEGER PRIMARY KEY,
+    Name TEXT NOT NULL,
+    Department TEXT NOT NULL
+);
+CREATE TABLE Expenses (
+    ExpenseID INTEGER PRIMARY KEY,
+    EmployeeID INTEGER,
+    Amount REAL,
+    ExpenseDate DATE,
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+);",
+                SampleData = @"
+INSERT INTO Employees (EmployeeID, Name, Department) VALUES
+(1, 'Alice Smith', 'Sales'),
+(2, 'Bob Johnson', 'IT'),
+(3, 'Charlie Brown', 'Sales'),
+(4, 'David Lee', 'IT');
+
+INSERT INTO Expenses (ExpenseID, EmployeeID, Amount, ExpenseDate) VALUES
+(1, 1, 50.00, '2025-03-10'),
+(2, 2, 120.50, '2025-03-11'),
+(3, 1, 75.25, '2025-03-15'),
+(4, 3, 30.00, '2025-03-18'),
+(5, 2, 85.00, '2025-03-20');",
+                SolutionQuery = "SELECT e.Department, SUM(ex.Amount) AS TotalSpending FROM Employees e JOIN Expenses ex ON e.EmployeeID = ex.EmployeeID GROUP BY e.Department ORDER BY TotalSpending DESC;",
+                HintText = "You'll need to combine information from both tables. How can you group the results by department and calculate the sum of expenses for each group?",
+                FalseClues = "Are there employees with no expenses? Does the date matter for this calculation?"
+            }
+        },
+        // --- Advanced Mystery ---
+        new Mystery
+        {
+            Title = "Consecutive Login Days",
+            Description = "Find users who logged in for 3 or more consecutive days.",
+            Difficulty = "Advanced",
+            DifficultyClass = "difficulty-advanced",
+            Category = "Security Audit", // Different Category
+            Icon = "<i class='bi bi-calendar-check fs-1 text-danger'></i>",
+            RequiredSkills = new List<string> { "SELECT", "Window Functions", "LAG/LEAD", "Date Functions", "Subquery/CTE" },
+            CreatorId = systemUserId,
+            Details = new MysteryDetails
+            {
+                FullDescription = "The 'UserLogins' table records each time a user logs into the system. Identify the usernames of users who have logged in on at least three consecutive days.",
+                DatabaseSchema = @"
+CREATE TABLE Users (
+    UserID INTEGER PRIMARY KEY,
+    Username TEXT NOT NULL UNIQUE
+);
+CREATE TABLE UserLogins (
+    LoginID INTEGER PRIMARY KEY,
+    UserID INTEGER,
+    LoginDate DATE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);",
+                SampleData = @"
+INSERT INTO Users (UserID, Username) VALUES (1, 'jdoe'), (2, 'asmith'), (3, 'bwilliams');
+INSERT INTO UserLogins (LoginID, UserID, LoginDate) VALUES
+(1, 1, '2025-04-01'), (2, 1, '2025-04-02'), (3, 1, '2025-04-03'), -- jdoe 3 consecutive
+(4, 2, '2025-04-01'), (5, 2, '2025-04-03'), (6, 2, '2025-04-04'), -- asmith not consecutive
+(7, 3, '2025-04-05'), (8, 3, '2025-04-06'), (9, 1, '2025-04-06'), -- bwilliams 2 consecutive, jdoe breaks streak
+(10, 3, '2025-04-07'), (11, 3, '2025-04-08'); -- bwilliams 4 consecutive",
+                SolutionQuery = @"
+WITH LoginGaps AS (
+    SELECT
+        UserID,
+        LoginDate,
+        DATE(LoginDate, '-' || ROW_NUMBER() OVER (PARTITION BY UserID ORDER BY LoginDate) || ' days') AS GroupDate
+    FROM (SELECT DISTINCT UserID, LoginDate FROM UserLogins) -- Ensure unique login dates per user
+),
+ConsecutiveGroups AS (
+    SELECT UserID, GroupDate, COUNT(*) AS ConsecutiveDays
+    FROM LoginGaps
+    GROUP BY UserID, GroupDate
+)
+SELECT DISTINCT u.Username
+FROM ConsecutiveGroups cg
+JOIN Users u ON cg.UserID = u.UserID
+WHERE cg.ConsecutiveDays >= 3;",
+                HintText = "Think about how to identify sequences. Window functions like ROW_NUMBER() can help create groups. Subtracting a row number (within a user's ordered logins) from the date can create a constant value for consecutive days.",
+                FalseClues = "Simply counting logins per user won't work. Using LAG might be complex to track streaks longer than 2 days directly."
+            }
+        },
+        // --- Expert Mystery ---
+        new Mystery
+        {
+            Title = "Organizational Hierarchy Path",
+            Description = "For a given employee, find their full management chain up to the CEO.",
+            Difficulty = "Expert",
+            DifficultyClass = "difficulty-expert",
+            Category = "Algorithm Challenge", // Different Category
+            Icon = "<i class='bi bi-diagram-3 fs-1 text-primary'></i>",
+            RequiredSkills = new List<string> { "Recursive CTE", "SELECT", "JOIN", "String Aggregation" },
+            CreatorId = systemUserId,
+            Details = new MysteryDetails
+            {
+                FullDescription = "The 'Employees' table stores employee information, including their manager (ManagerID). The CEO has a NULL ManagerID. For employee 'Charlie', find the full path of their management hierarchy, starting from Charlie up to the CEO, displayed as 'Charlie -> Bob -> Alice -> CEO'.",
+                DatabaseSchema = @"
+CREATE TABLE Employees (
+    EmployeeID INTEGER PRIMARY KEY,
+    Name TEXT NOT NULL,
+    ManagerID INTEGER, -- NULL for CEO
+    FOREIGN KEY (ManagerID) REFERENCES Employees(EmployeeID)
+);",
+                SampleData = @"
+INSERT INTO Employees (EmployeeID, Name, ManagerID) VALUES
+(1, 'Alice (CEO)', NULL),
+(2, 'Bob', 1),
+(3, 'Charlie', 2),
+(4, 'David', 1),
+(5, 'Eve', 2);",
+                SolutionQuery = @"
+WITH RECURSIVE ManagementChain AS (
+    -- Anchor member: Start with the employee 'Charlie'
+    SELECT EmployeeID, Name, ManagerID, Name AS Path
+    FROM Employees
+    WHERE Name = 'Charlie'
+
+    UNION ALL
+
+    -- Recursive member: Join with the manager
+    SELECT e.EmployeeID, e.Name, e.ManagerID, mc.Path || ' -> ' || e.Name
+    FROM Employees e
+    JOIN ManagementChain mc ON e.EmployeeID = mc.ManagerID
+    WHERE e.ManagerID IS NOT NULL -- Stop before the CEO is added again via Path
+)
+-- Select the longest path which includes the CEO implicitly at the end
+SELECT Path || ' -> ' || (SELECT Name FROM Employees WHERE ManagerID IS NULL) AS HierarchyPath
+FROM ManagementChain
+ORDER BY LENGTH(Path) DESC
+LIMIT 1;",
+                HintText = "This requires traversing a hierarchy. Recursive Common Table Expressions (CTEs) are ideal for this. Start with the target employee and recursively join to find their manager until you reach the top (NULL ManagerID).",
+                FalseClues = "Simple joins won't work for an unknown hierarchy depth. Window functions aren't designed for this type of recursive traversal."
             }
         }
     };

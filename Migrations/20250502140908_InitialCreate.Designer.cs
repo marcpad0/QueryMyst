@@ -11,7 +11,7 @@ using QueryMyst.Data;
 namespace QueryMyst.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250429072442_InitialCreate")]
+    [Migration("20250502140908_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

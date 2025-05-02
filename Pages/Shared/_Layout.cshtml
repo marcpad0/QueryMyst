@@ -138,12 +138,6 @@
                                 <a class="nav-link text-dark" asp-area="" asp-page="/Leaderboard"><i class="bi bi-trophy me-1"></i> Leaderboard</a>
                             </li>
                         }
-                        @if (SignInManager.IsSignedIn(User)) // Check if user is logged in
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Achievements"><i class="bi bi-award me-1"></i> Achievements</a>
-                            </li>
-                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/learn"><i class="bi bi-book"></i> Learn</a>
                         </li>
