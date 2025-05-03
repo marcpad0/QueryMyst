@@ -173,7 +173,7 @@
                     <div class="card shadow-sm border-0 rounded-4 mb-4 @(Model.IsPost ? "flex-grow-0" : "flex-grow-1")">
                         <div class="card-header bg-gradient-secondary text-white rounded-top-4">
                             <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0"><i class="bi bi-terminal me-2"></i> SQL Query Editor</h5>
+                                <h5 class="mb-0"><span class="editor-header-sparkle"><i class="bi bi-terminal me-2"></i> SQL Query Editor</span></h5>
                                 <button class="btn btn-sm btn-outline-light" id="toggle-fullscreen" title="Toggle Fullscreen Editor">
                                     <i class="bi bi-arrows-fullscreen"></i>
                                 </button>
@@ -298,6 +298,13 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
 
+    <!-- Add CodeMirror for enhanced SQL editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/mdn-like.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/matchbrackets.min.js"></script>
+
     <style>
         /* Base card styling */
         .card {
@@ -369,7 +376,6 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
         .editor-fullscreen form { flex-grow: 1; display: flex; flex-direction: column; }
         .editor-fullscreen form > div:first-of-type { flex-grow: 1; display: flex; flex-direction: column; } /* Make textarea container grow */
         .editor-fullscreen #sqlQueryArea { flex-grow: 1; height: auto !important; /* Let flex grow determine height */ min-height: 300px; } /* Remove fixed height */
-
 
         /* Code blocks */
         pre code { display: block; padding: 0.75rem 1rem; border-radius: 0.3rem; font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; }
@@ -521,6 +527,126 @@ SELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '202
 
         .relationship-arrow {
             fill: rgba(100, 116, 139, 0.6);
+        }
+
+        /* Cute SQL Editor Theme */
+        .CodeMirror {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            height: auto;
+            min-height: 150px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .CodeMirror:focus-within {
+            box-shadow: 0 2px 12px rgba(98, 89, 202, 0.2);
+            border-color: #9c96e4;
+        }
+
+        .CodeMirror-wrap {
+            padding: 4px 0;
+        }
+
+        /* Customized SQL keyword colors */
+        .cm-s-cute-sql .cm-keyword {
+            color: #ff79c6; /* Pink for keywords */
+            font-weight: 700;
+        }
+        
+        .cm-s-cute-sql .cm-operator {
+            color: #50fa7b; /* Green for operators */
+        }
+        
+        .cm-s-cute-sql .cm-number {
+            color: #bd93f9; /* Purple for numbers */
+        }
+        
+        .cm-s-cute-sql .cm-string {
+            color: #f1fa8c; /* Yellow for strings */
+        }
+        
+        .cm-s-cute-sql .cm-comment {
+            color: #6272a4; /* Blue-gray for comments */
+            font-style: italic;
+        }
+
+        .cm-s-cute-sql .cm-def {
+            color: #50fa7b; /* Green for definitions */
+        }
+
+        .cm-s-cute-sql .cm-variable {
+            color: #f8f8f2; /* White-ish for variables */
+        }
+
+        .cm-s-cute-sql .cm-builtin {
+            color: #ff79c6; /* Pink for built-in functions */
+            font-weight: bold;
+        }
+
+        .cm-s-cute-sql .cm-atom {
+            color: #bd93f9; /* Purple for atoms/constants */
+        }
+
+        /* Custom background and text */
+        .cm-s-cute-sql.CodeMirror {
+            background-color: #282a36; /* Dark background */
+            color: #f8f8f2; /* Light text */
+        }
+
+        .cm-s-cute-sql .CodeMirror-cursor {
+            border-left: 2px solid #f8f8f2; /* Cursor color */
+        }
+
+        .cm-s-cute-sql .CodeMirror-selected {
+            background: rgba(255, 255, 255, 0.1); /* Selection background */
+        }
+        
+        /* Add cute little sparkles to the editor header */
+        .editor-header-sparkle {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .editor-header-sparkle::before,
+        .editor-header-sparkle::after {
+            content: "✨";
+            font-size: 0.8rem;
+            position: absolute;
+        }
+        
+        .editor-header-sparkle::before {
+            top: -0.5rem;
+            left: -0.25rem;
+            animation: sparkle 2s infinite;
+        }
+        
+        .editor-header-sparkle::after {
+            top: -0.5rem;
+            right: -0.25rem;
+            animation: sparkle 2s 1s infinite;
+        }
+        
+        @@keyframes sparkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* Template buttons styling */
+        .template-btn {
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        
+        .template-btn:hover {
+            background-color: #6259ca; 
+            border-color: #6259ca;
+            color: white;
+            transform: translateY(-2px);
         }
     </style>
 
@@ -1507,80 +1633,87 @@ function formatResultsAsTable() {
             const sqlQueryArea = document.getElementById('sqlQueryArea');
             const autoFormatCheck = document.getElementById('autoFormatCheck');
             
-            // Auto-resize textarea function
-            function autoResizeTextarea() {
-                if (!sqlQueryArea) return;
-                
-                // Reset height to calculate proper scrollHeight
-                sqlQueryArea.style.height = 'auto';
-                
-                // Calculate new height (with 10px padding for comfort)
-                const newHeight = Math.min(500, Math.max(150, sqlQueryArea.scrollHeight + 10));
-                
-                // Set new height
-                sqlQueryArea.style.height = newHeight + 'px';
-            }
+            if (!sqlQueryArea) return;
             
-            // Initialize auto-resize and attach to input events
-            if (sqlQueryArea) {
-                // Initial resize
-                autoResizeTextarea();
-                
-                // Auto-resize on input
-                sqlQueryArea.addEventListener('input', autoResizeTextarea);
-                
-                // Also resize when template buttons are clicked
-                document.querySelectorAll('.template-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        setTimeout(autoResizeTextarea, 0);
-                    });
-                });
-                
-                // Resize on window resize (in case width changes affect wrapping)
-                window.addEventListener('resize', autoResizeTextarea);
-            }
+            // Replace textarea with CodeMirror
+            const editor = CodeMirror.fromTextArea(sqlQueryArea, {
+                mode: 'text/x-sql',
+                theme: 'cute-sql',
+                lineNumbers: true,
+                lineWrapping: true,
+                matchBrackets: true,
+                indentWithTabs: false,
+                tabSize: 2,
+                indentUnit: 2,
+                viewportMargin: Infinity,
+                placeholder: "-- Enter your SQL query here...\nSELECT CustomerID, FirstName, Email FROM Customers WHERE RegistrationDate > '2023-01-01';",
+                extraKeys: {
+                    "Ctrl-Space": "autocomplete"
+                }
+            });
             
-            // Add event listeners for template buttons
+            // Resize editor based on content
+            const updateEditorHeight = () => {
+                const height = Math.max(150, Math.min(500, editor.doc.height + 30));
+                editor.setSize(null, height);
+            };
+            
+            editor.on("change", () => {
+                updateEditorHeight();
+                editor.save(); // Sync with textarea
+            });
+            
+            // Initialize height
+            setTimeout(updateEditorHeight, 100);
+            
+            // Add handler for template buttons
             document.querySelectorAll('.template-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const template = this.getAttribute('data-template');
-                    if (template && sqlQueryArea) {
-                        // Get current cursor position
-                        const startPos = sqlQueryArea.selectionStart;
-                        const endPos = sqlQueryArea.selectionEnd;
-                        
-                        // Insert template at cursor or replace selected text
-                        const currentValue = sqlQueryArea.value;
-                        const newValue = currentValue.substring(0, startPos) + template + 
-                                        currentValue.substring(endPos);
-                        
-                        // Update textarea value
-                        sqlQueryArea.value = newValue;
-                        
-                        // Move cursor after inserted template
-                        const newCursorPos = startPos + template.length;
-                        sqlQueryArea.focus();
-                        sqlQueryArea.setSelectionRange(newCursorPos, newCursorPos);
+                    if (template) {
+                        const cursor = editor.getCursor();
+                        editor.replaceRange(template, cursor);
+                        editor.focus();
                     }
                 });
             });
-        
-            if (autoFormatCheck) {
-                autoFormatCheck.addEventListener('change', function() {
-                    if (this.checked) {
-                        sqlQueryArea.classList.add('auto-format');
-                    } else {
-                        sqlQueryArea.classList.remove('auto-format');
-                    }
-                });
-            }
-        
+            
             // Fullscreen toggle
             document.getElementById('toggle-fullscreen').addEventListener('click', function() {
                 document.body.classList.toggle('editor-fullscreen-mode');
                 const card = this.closest('.card');
                 if (card) card.classList.toggle('editor-fullscreen');
+                setTimeout(() => {
+                    editor.refresh();
+                    updateEditorHeight();
+                }, 100);
             });
         }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize syntax highlighting for SQL blocks
+            document.querySelectorAll('pre code.language-sql').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+            
+            // Format result data as HTML table if available
+            formatResultsAsTable();
+            
+            // Initialize notes functionality
+            initNotesFeature();
+            
+            // Enhanced schema visualization
+            visualizeSchema();
+            
+            // Initialize editor with syntax highlighting
+            initEditorFeatures();
+            
+            // Adjust right column layout if results are present
+            const rightColumn = document.querySelector('.col-lg-7 > .d-flex');
+            if (rightColumn && document.querySelector('.result-container, .alert-danger')) {
+                const editorCard = rightColumn.querySelector('.card:first-child');
+                if(editorCard) editorCard.classList.replace('flex-grow-1', 'flex-grow-0');
+            }
+        });
     </script>
 }
