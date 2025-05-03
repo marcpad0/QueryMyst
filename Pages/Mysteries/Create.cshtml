@@ -13,6 +13,25 @@
         <div class="col-lg-10 col-xl-8">
             <h1 class="mb-4 text-center"><i class="bi bi-plus-square-dotted me-2"></i> Create New Mystery</h1>
 
+            @* --- Gemini Generation Section --- *@
+            <div class="card shadow-sm mb-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-magic me-2"></i> Generate with AI</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">Enter a topic, and the AI will attempt to generate the mystery details for you. Review and edit the generated content carefully.</p>
+                    <div class="input-group mb-3">
+                        <input type="text" id="geminiTopicInput" class="form-control" placeholder="Enter a topic (e.g., 'Tracking library book loans', 'Analyzing website user sessions')">
+                        <button class="btn btn-info" type="button" id="generateMysteryBtn">
+                            <span id="generateBtnSpinner" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" style="display: none;"></span>
+                            Generate
+                        </button>
+                    </div>
+                    <div id="geminiMessage" class="text-danger small mt-2"></div>
+                </div>
+            </div>
+            @* --- End Gemini Generation Section --- *@
+
             <!-- Mystery Creation Guide (Collapsible) -->
             <div class="card shadow-sm mb-4 border-primary">
                 <div class="card-header bg-primary text-white">
@@ -340,6 +359,8 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
         #mysteryGuide .alert-info { background-color: #e7f1ff; border-color: #b9d9ff; color: #0c63e4; }
         #mysteryGuide .badge { vertical-align: middle; }
 
+        /* Gemini Section Styling */
+        .bg-info { background-color: #0dcaf0 !important; } /* Ensure Bootstrap info color is used */
     </style>
 
     <script>
@@ -638,6 +659,88 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                         setTimeout(() => { submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creating...'; }, 10);
                     }
                 }, false);
+            }
+
+            // --- NEW: Gemini Generation Logic ---
+            const generateBtn = document.getElementById('generateMysteryBtn');
+            const topicInput = document.getElementById('geminiTopicInput');
+            const geminiMessage = document.getElementById('geminiMessage');
+            const generateBtnSpinner = document.getElementById('generateBtnSpinner');
+
+            if (generateBtn && topicInput && geminiMessage && token) {
+                generateBtn.addEventListener('click', async () => {
+                    const topic = topicInput.value.trim();
+                    if (!topic) {
+                        geminiMessage.textContent = 'Please enter a topic.';
+                        return;
+                    }
+
+                    geminiMessage.textContent = '';
+                    generateBtn.disabled = true;
+                    generateBtnSpinner.style.display = 'inline-block';
+
+                    try {
+                        const response = await fetch('?handler=GenerateMystery', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({ topic: topic })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`AI generation failed with status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+
+                        if (result.success && result.mystery) {
+                            // Populate form fields
+                            document.getElementById('Input_Title').value = result.mystery.title || '';
+                            document.getElementById('Input_Description').value = result.mystery.description || '';
+                            document.getElementById('Input_FullDescription').value = result.mystery.fullDescription || '';
+                            document.getElementById('Input_Difficulty').value = result.mystery.difficulty || 'Beginner';
+                            document.getElementById('Input_Category').value = result.mystery.category || '';
+                            document.getElementById('Input_Icon').value = result.mystery.icon || '';
+                            document.getElementById('Input_RequiredSkillsInput').value = result.mystery.requiredSkills || '';
+                            document.getElementById('Input_HintText').value = result.mystery.hintText || '';
+                            document.getElementById('Input_FalseClues').value = result.mystery.falseClues || '';
+
+                            // Update CodeMirror instances
+                            if (codeMirrorInstances.databaseSchema) {
+                                codeMirrorInstances.databaseSchema.setValue(result.mystery.databaseSchema || '');
+                                CodeMirror.signal(codeMirrorInstances.databaseSchema, 'change', codeMirrorInstances.databaseSchema); // Trigger validation
+                            }
+                            if (codeMirrorInstances.sampleData) {
+                                codeMirrorInstances.sampleData.setValue(result.mystery.sampleData || '');
+                                 CodeMirror.signal(codeMirrorInstances.sampleData, 'change', codeMirrorInstances.sampleData); // Trigger validation
+                            }
+                            if (codeMirrorInstances.solutionQuery) {
+                                codeMirrorInstances.solutionQuery.setValue(result.mystery.solutionQuery || '');
+                                 CodeMirror.signal(codeMirrorInstances.solutionQuery, 'change', codeMirrorInstances.solutionQuery); // Trigger validation & height adjust
+                            }
+
+                            geminiMessage.textContent = 'Mystery generated successfully! Please review and edit.';
+                            geminiMessage.classList.remove('text-danger');
+                            geminiMessage.classList.add('text-success');
+
+                        } else {
+                            throw new Error(result.message || 'Failed to generate mystery content.');
+                        }
+
+                    } catch (error) {
+                        console.error('Error generating mystery:', error);
+                        geminiMessage.textContent = `Error: ${error.message}`;
+                        geminiMessage.classList.remove('text-success');
+                        geminiMessage.classList.add('text-danger');
+                    } finally {
+                        generateBtn.disabled = false;
+                        generateBtnSpinner.style.display = 'none';
+                    }
+                });
+            } else {
+                console.error("Could not find all elements required for AI generation.");
             }
 
         })();

@@ -30,6 +30,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 // Add services to the container
 builder.Services.AddRazorPages();
 builder.Services.AddControllers(); // Add this line
+builder.Services.AddHttpClient(); 
 
 // Register Achievement Service
 builder.Services.AddScoped<AchievementService>();
