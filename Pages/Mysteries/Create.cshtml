@@ -689,36 +689,68 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                             body: JSON.stringify({ topic: topic })
                         });
 
+                        // Improved error handling for non-JSON responses or network issues
                         if (!response.ok) {
-                            throw new Error(`AI generation failed with status: ${response.status}`);
+                            let errorMsg = `AI generation failed with status: ${response.status}`;
+                            try {
+                                // Try to get more details if the response is JSON
+                                const errorResult = await response.json();
+                                errorMsg = errorResult.message || errorMsg;
+                            } catch (e) {
+                                // If response wasn't JSON, use the status text
+                                errorMsg = `${errorMsg} (${response.statusText})`;
+                            }
+                            throw new Error(errorMsg);
                         }
 
                         const result = await response.json();
 
+                        // --- DEBUGGING ---
+                        console.log("AI Generation Result:", result);
                         if (result.success && result.mystery) {
-                            // Populate form fields
-                            document.getElementById('Input_Title').value = result.mystery.title || '';
-                            document.getElementById('Input_Description').value = result.mystery.description || '';
-                            document.getElementById('Input_FullDescription').value = result.mystery.fullDescription || '';
-                            document.getElementById('Input_Difficulty').value = result.mystery.difficulty || 'Beginner';
-                            document.getElementById('Input_Category').value = result.mystery.category || '';
-                            document.getElementById('Input_Icon').value = result.mystery.icon || '';
-                            document.getElementById('Input_RequiredSkillsInput').value = result.mystery.requiredSkills || '';
-                            document.getElementById('Input_HintText').value = result.mystery.hintText || '';
-                            document.getElementById('Input_FalseClues').value = result.mystery.falseClues || '';
+                             console.log("Mystery Data:", result.mystery);
+                             console.log("Schema:", result.mystery.databaseSchema);
+                             console.log("Data:", result.mystery.sampleData);
+                             console.log("Query:", result.mystery.solutionQuery);
+                        }
+                        // --- END DEBUGGING ---
 
-                            // Update CodeMirror instances
-                            if (codeMirrorInstances.databaseSchema) {
-                                codeMirrorInstances.databaseSchema.setValue(result.mystery.databaseSchema || '');
-                                CodeMirror.signal(codeMirrorInstances.databaseSchema, 'change', codeMirrorInstances.databaseSchema); // Trigger validation
+
+                        if (result.success && result.mystery) {
+                            const mysteryData = result.mystery; // Use a shorter variable
+
+                            // Populate standard form fields
+                            document.getElementById('Input_Title').value = mysteryData.title || '';
+                            document.getElementById('Input_Description').value = mysteryData.description || '';
+                            document.getElementById('Input_FullDescription').value = mysteryData.fullDescription || '';
+                            document.getElementById('Input_Difficulty').value = mysteryData.difficulty || 'Beginner';
+                            document.getElementById('Input_Category').value = mysteryData.category || '';
+                            document.getElementById('Input_Icon').value = mysteryData.icon || '';
+                            document.getElementById('Input_RequiredSkillsInput').value = mysteryData.requiredSkills || '';
+                            document.getElementById('Input_HintText').value = mysteryData.hintText || '';
+                            document.getElementById('Input_FalseClues').value = mysteryData.falseClues || '';
+
+                            // Update CodeMirror instances - Use correct C# property names
+                            if (codeMirrorInstances.schema) {
+                                const schemaValue = mysteryData.databaseSchema || '';
+                                codeMirrorInstances.schema.setValue(schemaValue);
+                                // Trigger validation after setting value
+                                setTimeout(() => validateSchema(), 100); // Use timeout to ensure CM updates DOM
                             }
-                            if (codeMirrorInstances.sampleData) {
-                                codeMirrorInstances.sampleData.setValue(result.mystery.sampleData || '');
-                                 CodeMirror.signal(codeMirrorInstances.sampleData, 'change', codeMirrorInstances.sampleData); // Trigger validation
+                            if (codeMirrorInstances.data) {
+                                const dataValue = mysteryData.sampleData || '';
+                                codeMirrorInstances.data.setValue(dataValue);
+                                // Trigger validation after setting value
+                                setTimeout(() => validateData(), 100); // Use timeout
                             }
-                            if (codeMirrorInstances.solutionQuery) {
-                                codeMirrorInstances.solutionQuery.setValue(result.mystery.solutionQuery || '');
-                                 CodeMirror.signal(codeMirrorInstances.solutionQuery, 'change', codeMirrorInstances.solutionQuery); // Trigger validation & height adjust
+                            if (codeMirrorInstances.query) {
+                                const queryValue = mysteryData.solutionQuery || '';
+                                codeMirrorInstances.query.setValue(queryValue);
+                                // Trigger validation and height adjustment after setting value
+                                setTimeout(() => {
+                                    validateQuery();
+                                    adjustQueryEditorHeight(codeMirrorInstances.query);
+                                }, 100); // Use timeout
                             }
 
                             geminiMessage.textContent = 'Mystery generated successfully! Please review and edit.';
@@ -726,7 +758,7 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                             geminiMessage.classList.add('text-success');
 
                         } else {
-                            throw new Error(result.message || 'Failed to generate mystery content.');
+                            throw new Error(result.message || 'Failed to generate mystery content or missing mystery data in response.');
                         }
 
                     } catch (error) {
@@ -740,6 +772,11 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                     }
                 });
             } else {
+                // Log which specific element might be missing
+                if (!generateBtn) console.error("Generate button not found.");
+                if (!topicInput) console.error("Topic input not found.");
+                if (!geminiMessage) console.error("Gemini message area not found.");
+                if (!token) console.error("Antiforgery token not found for AI generation.");
                 console.error("Could not find all elements required for AI generation.");
             }
 

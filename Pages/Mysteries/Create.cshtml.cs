@@ -558,8 +558,6 @@ Populate all fields according to the provided JSON schema.";
                     // ["temperature"] = 0.7,
                     // ["maxOutputTokens"] = 4096
                 }
-                // Optional: Add safetySettings if needed
-                // ["safetySettings"] = new JsonArray(...)
             };
 
             string responseBody = null;
