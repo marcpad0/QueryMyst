@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // Ensure this is present
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QueryMyst.Data;
@@ -19,9 +19,9 @@ if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' not found in configuration.");
 }
 
-// Add database context with SQLite
+// Add database context with SQL Server <--- CHANGE HERE
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlServer(connectionString)); // Use UseSqlServer instead of UseSqlite
 
 // Add Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -30,7 +30,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 // Add services to the container
 builder.Services.AddRazorPages();
 builder.Services.AddControllers(); // Add this line
-builder.Services.AddHttpClient(); 
+builder.Services.AddHttpClient();
 
 // Register Achievement Service
 builder.Services.AddScoped<AchievementService>();

@@ -518,7 +518,7 @@ namespace QueryMyst.Pages.Mysteries
                     ["databaseSchema"] = new JsonObject { ["type"] = "STRING", ["description"] = "Valid SQLite 'CREATE TABLE' statements." },
                     ["sampleData"] = new JsonObject { ["type"] = "STRING", ["description"] = "Valid SQLite 'INSERT INTO' statements." },
                     ["solutionQuery"] = new JsonObject { ["type"] = "STRING", ["description"] = "A single, valid SQLite 'SELECT' statement." },
-                    ["hintText"] = new JsonObject { ["type"] = "STRING", ["description"] = "Optional hint." },
+                    ["hintText"] = new JsonObject { ["type"] = "STRING", ["description"] = "Obligatory hint." },
                     ["falseClues"] = new JsonObject { ["type"] = "STRING", ["description"] = "Optional misleading information." }
                 },
                 // Define required fields if necessary (optional)
