@@ -14,9 +14,6 @@ namespace QueryMyst.Models
         public string FullDescription { get; set; }
         
         [Column(TypeName = "text")]
-        public string FalseClues { get; set; }
-        
-        [Column(TypeName = "text")]
         public string SolutionQuery { get; set; }
         
         [Column(TypeName = "text")]
@@ -28,6 +25,11 @@ namespace QueryMyst.Models
         
         [Column(TypeName = "text")]
         public string SampleData { get; set; }
+
+        // New property for expected output columns
+        [Display(Name = "Expected Output Columns")]
+        [Column(TypeName = "text")]
+        public string ExpectedOutputColumns { get; set; }
         
         // Navigation property back to Mystery
         public Mystery Mystery { get; set; }

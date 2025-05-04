@@ -217,7 +217,7 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                             </div>
                         </fieldset>
 
-                        @* Section 3: Hints & Distractors*@
+                        @* Section 3: Hints & ExpectedOutputColumns*@
                         <fieldset class="mt-4">
                              <legend class="h5 mb-3 border-bottom pb-2"><i class="bi bi-lightbulb me-2"></i>Hints & Distractors</legend>
                              <div class="mb-3">
@@ -226,11 +226,11 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                                 <textarea asp-for="Input.HintText" class="form-control" rows="3" placeholder="Provide a subtle hint if users get stuck..." value="No hint provided."></textarea>
                                 <span asp-validation-for="Input.HintText" class="text-danger small"></span>
                             </div>
-                             <div class="mb-3">
-                                <label asp-for="Input.FalseClues" class="form-label fw-bold"></label>
-                                <!-- Remove value="" attribute -->
-                                <textarea asp-for="Input.FalseClues" class="form-control" rows="3" placeholder="Add misleading information or common pitfalls to watch out for..." value="No hint provided."></textarea>
-                                <span asp-validation-for="Input.FalseClues" class="text-danger small"></span>
+                            <div class="mb-3">
+                                <label asp-for="Input.ExpectedOutputColumns" class="form-label fw-bold"></label>
+                                <input asp-for="Input.ExpectedOutputColumns" class="form-control" placeholder="e.g., id, first_name, last_name, email" />
+                                <div class="form-text small">Enter the exact column names expected in the result, separated by commas, in the correct order.</div>
+                                <span asp-validation-for="Input.ExpectedOutputColumns" class="text-danger small"></span>
                             </div>
                         </fieldset>
 
@@ -728,7 +728,7 @@ INSERT INTO AnotherTable (...) VALUES (...);" required></textarea>
                             document.getElementById('Input_Icon').value = mysteryData.icon || '';
                             document.getElementById('Input_RequiredSkillsInput').value = mysteryData.requiredSkills || '';
                             document.getElementById('Input_HintText').value = mysteryData.hintText || '';
-                            document.getElementById('Input_FalseClues').value = mysteryData.falseClues || '';
+                            document.getElementById('Input_ExpectedOutputColumns').value = mysteryData.expectedOutputColumns || '';
 
                             // Update CodeMirror instances - Use correct C# property names
                             if (codeMirrorInstances.schema) {

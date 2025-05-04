@@ -153,7 +153,7 @@ INSERT INTO AccessLogs (LogID, EmployeeID, AccessTime) VALUES
 -- Note: Employee 3 (Charlie Brown) has no access logs.",
                 SolutionQuery = "SELECT Name FROM Employees WHERE EmployeeID NOT IN (SELECT DISTINCT EmployeeID FROM AccessLogs WHERE EmployeeID IS NOT NULL); -- Alternative: SELECT e.Name FROM Employees e LEFT JOIN AccessLogs al ON e.EmployeeID = al.EmployeeID WHERE al.LogID IS NULL;",
                 HintText = "You need to find an employee present in one table but absent from another. Think about using subqueries with NOT IN or using a LEFT JOIN and checking for NULL values.",
-                FalseClues = "Maybe the employee works remotely? Check the 'Department' column. Is there a missing LogID sequence?"
+                ExpectedOutputColumns = "Name",
             }
         },
         new Mystery
@@ -185,7 +185,7 @@ INSERT INTO Products (ProductID, Name, Category, Price) VALUES
 (5, 'Gaming Chair', 'Furniture', 299.99);",
                 SolutionQuery = "SELECT Name, Price FROM Products ORDER BY Price DESC LIMIT 1;",
                 HintText = "How can you sort the products based on their price? Once sorted, how do you select only the top one?",
-                FalseClues = "Perhaps the most expensive item is in a specific 'Category'? Does the 'ProductID' give a clue about the price?"
+                ExpectedOutputColumns = "Name, Price",
             }
         },
         // --- Intermediate Mystery ---
@@ -230,7 +230,7 @@ INSERT INTO Expenses (ExpenseID, EmployeeID, Amount, ExpenseDate) VALUES
 (5, 2, 85.00, '2025-03-20');",
                 SolutionQuery = "SELECT e.Department, SUM(ex.Amount) AS TotalSpending FROM Employees e JOIN Expenses ex ON e.EmployeeID = ex.EmployeeID GROUP BY e.Department ORDER BY TotalSpending DESC;",
                 HintText = "You'll need to combine information from both tables. How can you group the results by department and calculate the sum of expenses for each group?",
-                FalseClues = "Are there employees with no expenses? Does the date matter for this calculation?"
+                ExpectedOutputColumns = "Department, TotalSpending",
             }
         },
         // --- Advanced Mystery ---
@@ -283,7 +283,7 @@ FROM ConsecutiveGroups cg
 JOIN Users u ON cg.UserID = u.UserID
 WHERE cg.ConsecutiveDays >= 3;",
                 HintText = "Think about how to identify sequences. Window functions like ROW_NUMBER() can help create groups. Subtracting a row number (within a user's ordered logins) from the date can create a constant value for consecutive days.",
-                FalseClues = "Simply counting logins per user won't work. Using LAG might be complex to track streaks longer than 2 days directly."
+                ExpectedOutputColumns = "Username",
             }
         },
         // --- Expert Mystery ---
@@ -335,7 +335,7 @@ FROM ManagementChain
 ORDER BY LENGTH(Path) DESC
 LIMIT 1;",
                 HintText = "This requires traversing a hierarchy. Recursive Common Table Expressions (CTEs) are ideal for this. Start with the target employee and recursively join to find their manager until you reach the top (NULL ManagerID).",
-                FalseClues = "Simple joins won't work for an unknown hierarchy depth. Window functions aren't designed for this type of recursive traversal."
+                ExpectedOutputColumns = "HierarchyPath",
             }
         }
     };

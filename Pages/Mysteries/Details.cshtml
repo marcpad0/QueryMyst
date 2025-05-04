@@ -68,27 +68,15 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="accordion-item border-0 shadow-sm rounded-3">
-                                <h2 class="accordion-header" id="cluesHeading">
-                                    <button class="accordion-button collapsed rounded-3" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapseClues" aria-expanded="false"
-                                        aria-controls="collapseClues">
-                                        <i class="bi bi-signpost-split me-2 text-info"></i> False Clues
-                                    </button>
-                                </h2>
-                                <div id="collapseClues" class="accordion-collapse collapse" aria-labelledby="cluesHeading">
-                                    <div class="accordion-body">
-                                        @if (!string.IsNullOrWhiteSpace(Model.Mystery.Details.FalseClues))
-                                        {
-                                            <p class="clue-text">@Model.Mystery.Details.FalseClues</p>
-                                        }
-                                        else
-                                        {
-                                            <p class="text-muted">No false clues listed for this mystery.</p>
-                                        }
-                                    </div>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Mystery.Details.ExpectedOutputColumns))
+                            {
+                                <div class="mt-3 mb-3 p-3 bg-light border rounded-3">
+                                    <h6 class="text-primary mb-2"><i class="bi bi-table me-2"></i>Expected Output Columns</h6>
+                                    <p class="small mb-1">Your query should produce results with the following columns, in this order:</p>
+                                    <code class="d-block bg-white p-2 rounded small">@Model.Mystery.Details.ExpectedOutputColumns.Replace(",", ", ")</code>
                                 </div>
-                            </div>
+                            }
                         </div>
 
                         <!-- Database Schema Visualization -->

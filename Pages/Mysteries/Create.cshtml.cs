@@ -97,13 +97,14 @@ namespace QueryMyst.Pages.Mysteries
             [DataType(DataType.MultilineText)]
             public string SolutionQuery { get; set; }
 
+            [Display(Name = "Expected Output Columns (comma-separated)")]
+            [MaxLength(500, ErrorMessage = "Expected columns cannot exceed 500 characters.")]
+            [DataType(DataType.Text)]
+            public string ExpectedOutputColumns { get; set; }
+
             [Display(Name = "Hint Text")]
             [DataType(DataType.MultilineText)]
             public string HintText { get; set; }
-
-            [Display(Name = "False Clues / Distractors")]
-            [DataType(DataType.MultilineText)]
-            public string FalseClues { get; set; }
         }
 
         public List<string> DifficultyOptions { get; } = new List<string> { "Beginner", "Intermediate", "Advanced", "Expert" };
@@ -165,7 +166,7 @@ namespace QueryMyst.Pages.Mysteries
                 SampleData = Input.SampleData.Trim(),
                 SolutionQuery = Input.SolutionQuery.Trim(),
                 HintText = Input.HintText?.Trim(),
-                FalseClues = Input.FalseClues?.Trim(),
+                ExpectedOutputColumns = Input.ExpectedOutputColumns,
                 Mystery = mystery
             };
 
@@ -469,8 +470,8 @@ namespace QueryMyst.Pages.Mysteries
             public string SolutionQuery { get; set; }
             [JsonPropertyName("hintText")]
             public string HintText { get; set; }
-            [JsonPropertyName("falseClues")]
-            public string FalseClues { get; set; }
+            [JsonPropertyName("expectedOutputColumns")]
+            public string ExpectedOutputColumns { get; set; }
         }
 
         // --- NEW: Handler for Gemini Generation (Using Structured Output Schema) ---
@@ -518,8 +519,9 @@ namespace QueryMyst.Pages.Mysteries
                     ["databaseSchema"] = new JsonObject { ["type"] = "STRING", ["description"] = "Valid SQLite 'CREATE TABLE' statements." },
                     ["sampleData"] = new JsonObject { ["type"] = "STRING", ["description"] = "Valid SQLite 'INSERT INTO' statements." },
                     ["solutionQuery"] = new JsonObject { ["type"] = "STRING", ["description"] = "A single, valid SQLite 'SELECT' statement." },
+                    ["expectedOutputColumns"] = new JsonObject { ["type"] = "STRING", ["description"] = "Comma-separated list of the exact column names expected in the solution query's output, in order." },
                     ["hintText"] = new JsonObject { ["type"] = "STRING", ["description"] = "Obligatory hint." },
-                    ["falseClues"] = new JsonObject { ["type"] = "STRING", ["description"] = "Optional misleading information." }
+                    
                 },
                 // Define required fields if necessary (optional)
                 ["required"] = new JsonArray(
