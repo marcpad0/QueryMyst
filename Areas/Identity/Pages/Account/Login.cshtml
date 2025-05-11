@@ -1,42 +1,54 @@
 ﻿@page
 @model QueryMyst.Areas.Identity.Pages.Account.LoginModel
 @{
-    ViewData["Title"] = "Sign in to QueryMyst";
+    ViewData["Title"] = "Detective Authentication";
 }
 
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow auth-card">
-                <div class="card-body p-5">
+            <div class="card shadow auth-card border-dark">
+                <div class="card-header bg-dark text-light py-2">
+                    <code class="fs-5">-- Detective Authentication System</code>
+                </div>
+                <div class="card-body p-4 bg-light">
                     <div class="text-center mb-4">
                         <span class="auth-icon">🔍</span>
-                        <h1 class="h3">Welcome back!</h1>
-                        <p class="text-muted">Sign in to continue solving SQL mysteries</p>
+                        <h1 class="h3 code-font text-primary">SELECT * FROM Detectives</h1>
+                        <p class="text-muted"><code>/* Authenticate to access the case files */</code></p>
                     </div>
 
                     <form id="account" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-center" role="alert"></div>
 
-                        <!-- Username Input -->
-                        <div class="form-floating mb-3">
-                            <input asp-for="Input.Username" class="form-control rounded-pill" autocomplete="username" placeholder="Your Username" />
-                            <label asp-for="Input.Username">Username</label>
-                            <span asp-validation-for="Input.Username" class="text-danger"></span>
-                        </div>
+                        <div class="sql-statement-container p-3 border border-secondary rounded mb-4">
+                            <code class="d-block mb-3">SELECT * FROM Detectives</code>
+                            <code class="d-block mb-2 ps-4">WHERE</code>
+                            
+                            <!-- Username Input -->
+                            <div class="form-group mb-3 ps-5">
+                                <label class="sql-label mb-1" asp-for="Input.Username"><code>code_name =</code></label>
+                                <input asp-for="Input.Username" class="form-control sql-input" autocomplete="username" placeholder="Your Username" />
+                                <span asp-validation-for="Input.Username" class="text-danger"></span>
+                            </div>
 
-                        <!-- Password Input -->
-                        <div class="form-floating mb-3">
-                            <input asp-for="Input.Password" class="form-control rounded-pill" autocomplete="current-password" placeholder="password" />
-                            <label asp-for="Input.Password">Password</label>
-                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            <code class="d-block mb-2 ps-4">AND</code>
+                            
+                            <!-- Password Input -->
+                            <div class="form-group mb-3 ps-5">
+                                <label class="sql-label mb-1" asp-for="Input.Password"><code>access_key =</code></label>
+                                <input asp-for="Input.Password" class="form-control sql-input" autocomplete="current-password" placeholder="password" />
+                                <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            </div>
+                            
+                            <code class="d-block">LIMIT 1;</code>
                         </div>
 
                         <!-- Remember Me Checkbox -->
-                        <div class="checkbox mb-3">
+                        <div class="checkbox mb-3 ms-2">
                             <label asp-for="Input.RememberMe" class="form-label">
                                 <input class="form-check-input" asp-for="Input.RememberMe" />
-                                Remember me
+                                <code>-- CREATE SESSION COOKIE</code>
                             </label>
                         </div>
 
@@ -45,16 +57,16 @@
 
                         <!-- Submit Button -->
                         <div class="d-grid gap-2 mb-3">
-                            <button id="login-submit" type="submit" class="btn btn-primary btn-lg rounded-pill">Sign in</button>
+                            <button id="login-submit" type="submit" class="btn btn-success btn-lg">EXECUTE QUERY</button>
                         </div>
 
                         <!-- Links -->
                         <div class="text-center">
                             <p>
-                                <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+                                <code>-- <a id="forgot-password" asp-page="./ForgotPassword">FORGOT access_key?</a></code>
                             </p>
                             <p>
-                                Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Sign up</a>
+                                <code>-- Need new credentials? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">CREATE ACCOUNT</a></code>
                             </p>
                         </div>
                     </form>
@@ -67,3 +79,32 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    .code-font {
+        font-family: 'Consolas', 'Courier New', monospace;
+    }
+    
+    code {
+        color: #0d6efd;
+    }
+    
+    .sql-input {
+        border-color: #6c757d;
+        font-family: 'Consolas', 'Courier New', monospace;
+    }
+    
+    .sql-label {
+        display: block;
+        font-family: 'Consolas', 'Courier New', monospace;
+    }
+    
+    .sql-statement-container {
+        background-color: #f8f9fa;
+        font-family: 'Consolas', 'Courier New', monospace;
+    }
+    
+    .auth-icon {
+        font-size: 2rem;
+    }
+</style>
