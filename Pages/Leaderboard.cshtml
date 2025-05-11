@@ -24,10 +24,19 @@
                             <div class="podium-item second-place">
                                 <div class="position-number silver">2</div>
                                 <div class="podium-block second">
-                                    <div class="user-info">                          
-                                        <div class="username">@Model.Leaderboard[1].UserName</div>
-                                        <div class="solved-count">@Model.Leaderboard[1].SolvedCount solved</div>
-                                    </div>
+                                    @if (Model.Leaderboard.Count >= 2)
+                                    {
+                                        <div class="user-info">                          
+                                            <div class="username">@Model.Leaderboard[1].UserName</div>
+                                            <div class="solved-count">@Model.Leaderboard[1].SolvedCount solved</div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="user-info">
+                                            <div class="username empty">-</div>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                             
@@ -46,10 +55,19 @@
                             <div class="podium-item third-place">
                                 <div class="position-number bronze">3</div>
                                 <div class="podium-block third">
-                                    <div class="user-info">                                       
-                                        <div class="username">@Model.Leaderboard[2].UserName</div>
-                                        <div class="solved-count">@Model.Leaderboard[2].SolvedCount solved</div>
-                                    </div>
+                                    @if (Model.Leaderboard.Count >= 3)
+                                    {
+                                        <div class="user-info">                                       
+                                            <div class="username">@Model.Leaderboard[2].UserName</div>
+                                            <div class="solved-count">@Model.Leaderboard[2].SolvedCount solved</div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="user-info">
+                                            <div class="username empty">-</div>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -181,6 +199,11 @@
         .bronze {
             background-color: #cd7f32;
             box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+        }
+
+        .username.empty {
+            color: #ccc;
+            font-style: italic;
         }
 
         .podium-block {
