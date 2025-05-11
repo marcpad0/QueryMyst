@@ -537,8 +537,48 @@ namespace QueryMyst.Pages.Mysteries
             // --- Simplified Prompt ---
             // Focus on the task, less on the format details as the schema handles that.
             string prompt = $@"Generate a complete SQL mystery for a platform called QueryMyst, based on the topic: '{data.Topic}'.
-The mystery should be solvable using standard SQLite syntax.
-Populate all fields according to the provided JSON schema.";
+
+            Follow these specific requirements:
+
+            1. DATABASE STRUCTURE:
+            - Create tables based on the difficulty level and category and if user required it
+            - Include foreign key constraints between related tables
+            - Use appropriate primary keys and indexes
+            - Incorporate a variety of data types (TEXT, INTEGER, REAL, TIMESTAMP, etc.)
+            - Design a normalized database schema following best practices
+
+            2. QUERY COMPLEXITY:
+            - The solution should require multiple JOIN operations if tables are present
+            - Avoid solution queries that not use JOINs if a lot of tables are present
+            - Use appropriate WHERE clauses for filtering
+            - Incorporate ORDER BY for meaningful result sorting
+            - Consider using subqueries, CTEs, or window functions for Advanced/Expert levels
+
+            3. DIFFICULTY MATCHING:
+            - Beginner: Simple joins between 1-3 tables, basic filtering
+            - Intermediate: Multi-table joins, aggregations, grouping
+            - Advanced: Complex joins, subqueries, multiple conditions
+            - Expert: Advanced SQL features, optimization challenges, complex problem-solving
+
+            4. NARRATIVE QUALITY:
+            - Create an engaging storyline that provides context for the database
+            - Make the mystery scenario realistic and professionally relevant
+            - Ensure the scenario matches the selected category (Business Analytics, Security Audit, etc.)
+            - Clearly define what the user needs to discover through SQL
+
+            5. EDUCATIONAL VALUE:
+            - Design the mystery to teach specific SQL concepts
+            - Include hints that guide users toward the right approach
+            - Ensure the expected output columns accurately reflect the solution
+            
+            6. JSON SCHEMA:
+            - The output must be a valid JSON object matching the provided schema.
+            - Include all required fields and their descriptions
+            - Ensure the JSON is well-formed and valid according to the schema.
+            - Always provide a icon HTML string for the mystery
+            
+
+            Populate all fields according to the provided JSON schema, ensuring all SQL is valid for SQLite.";
 
 
             // --- Prepare API Request with Schema ---

@@ -15,8 +15,12 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card shadow-sm">
-                <div class="card-header bg-gradient-primary text-white">
-                    <h5 class="mb-0">Top Solvers</h5>
+                <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Top 100 Solvers</h5>
+                    @if (!Model.CurrentUserInTop100)
+                    {
+                        <span class="badge bg-light text-primary">Your Rank: #@Model.CurrentUserRank</span>
+                    }
                 </div>
                 @if (Model.Leaderboard.Any())
                 {
@@ -33,17 +37,26 @@
                             <tbody>
                                 @foreach (var entry in Model.Leaderboard)
                                 {
-                                    <tr class="@(entry.UserName == User.Identity.Name ? "table-info" : "")">
+                                    <tr class="@(entry.IsCurrentUser ? "table-info" : "")">
                                         <td class="text-center fw-bold">@entry.Rank</td>
                                         <td>
                                             <i class="bi bi-person-circle me-2"></i>
                                             @entry.UserName
-                                            @if (entry.UserName == User.Identity.Name)
+                                            @if (entry.IsCurrentUser)
                                             {
                                                 <span class="badge bg-success ms-2">You</span>
                                             }
                                         </td>
                                         <td class="text-center">@entry.SolvedCount</td>
+                                    </tr>
+                                }
+                                @* If current user is not in top 100, show a separator *@
+                                @if (!Model.CurrentUserInTop100 && Model.Leaderboard.Count > 100)
+                                {
+                                    <tr class="table-secondary">
+                                        <td colspan="3" class="text-center">
+                                            <i class="bi bi-three-dots"></i>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -71,6 +84,9 @@
         }
         .table th {
              white-space: nowrap;
+        }
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #6259ca, #4e36e2);
         }
     </style>
 }

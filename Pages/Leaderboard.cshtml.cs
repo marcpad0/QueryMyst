@@ -31,11 +31,14 @@ namespace QueryMyst.Pages
             public int Rank { get; set; }
             public string UserName { get; set; }
             public int SolvedCount { get; set; }
+            public bool IsCurrentUser { get; set; }
             // Add other metrics like AverageAttempts, FastestCompletion etc. later if needed
         }
 
         public List<LeaderboardEntry> Leaderboard { get; set; } = new List<LeaderboardEntry>();
         public string CurrentUserId { get; set; }
+        public int CurrentUserRank { get; set; }
+        public bool CurrentUserInTop100 { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -65,22 +68,46 @@ namespace QueryMyst.Pages
                     // Add .ThenBy() for tie-breaking if needed (e.g., completion date)
                     .ToListAsync();
 
-                // 2. Get Usernames for the top users (limit to avoid fetching all users)
-                var topUserIds = userScores.Select(u => u.UserId).ToList();
+                // 2. Get Usernames for all users in the leaderboard
+                var userIds = userScores.Select(u => u.UserId).ToList();
                 var users = await _context.Users
-                                          .Where(u => topUserIds.Contains(u.Id))
+                                          .Where(u => userIds.Contains(u.Id))
                                           .ToDictionaryAsync(u => u.Id, u => u.UserName);
 
-                // 3. Combine data and assign ranks
-                int rank = 1;
-                Leaderboard = userScores.Select(score => new LeaderboardEntry
+                // 3. Find current user's position in the full leaderboard
+                var currentUserScore = userScores.FirstOrDefault(u => u.UserId == currentUser.Id);
+                CurrentUserRank = currentUserScore != null 
+                    ? userScores.FindIndex(u => u.UserId == currentUser.Id) + 1 
+                    : userScores.Count + 1; // If user has no solved mysteries, they're last
+
+                // 4. Take only top 100 for display
+                var top100 = userScores.Take(100).ToList();
+                
+                // 5. Check if current user is in top 100
+                CurrentUserInTop100 = top100.Any(u => u.UserId == currentUser.Id);
+
+                // 6. Combine data and assign ranks for top 100
+                Leaderboard = top100.Select((score, index) => new LeaderboardEntry
                 {
-                    Rank = rank++,
+                    Rank = index + 1,
                     UserName = users.TryGetValue(score.UserId, out var userName) ? userName : "Unknown User",
-                    SolvedCount = score.SolvedCount
+                    SolvedCount = score.SolvedCount,
+                    IsCurrentUser = score.UserId == currentUser.Id
                 }).ToList();
 
-                 _logger.LogInformation("Successfully generated leaderboard with {Count} entries.", Leaderboard.Count);
+                // 7. If current user isn't in top 100, add them to the list with their actual rank
+                if (!CurrentUserInTop100 && currentUserScore != null)
+                {
+                    Leaderboard.Add(new LeaderboardEntry
+                    {
+                        Rank = CurrentUserRank,
+                        UserName = currentUser.UserName,
+                        SolvedCount = currentUserScore.SolvedCount,
+                        IsCurrentUser = true
+                    });
+                }
+
+                _logger.LogInformation("Successfully generated leaderboard with top 100 entries. Current user rank: {Rank}", CurrentUserRank);
             }
             catch (Exception ex)
             {
@@ -88,7 +115,6 @@ namespace QueryMyst.Pages
                 // Optionally add an error message to display on the page
                 // TempData["ErrorMessage"] = "Could not load leaderboard data.";
             }
-
 
             return Page();
         }
