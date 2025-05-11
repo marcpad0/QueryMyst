@@ -148,8 +148,10 @@
             --bs-table-striped-bg: #c5d7f2;
             font-weight: bold;
         }
-        .table th {
+        .table th, .table td { /* Added .table td */
              white-space: nowrap;
+             padding: 0.75rem 0.5rem; /* Adjust padding for all screen sizes */
+             font-size: 0.9rem; /* Adjust font size for all screen sizes */
         }
         .bg-gradient-primary {
             background: linear-gradient(135deg, #6259ca, #4e36e2);
@@ -160,29 +162,33 @@
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            padding: 20px;
-            height: 250px;
+            padding: 20px 5px; /* Reduced horizontal padding */
+            height: 250px; /* Maintain height or adjust as needed */
+            flex-wrap: wrap; /* Allow wrapping on very small screens if necessary */
         }
 
         .podium-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0 10px;
+            margin: 0 5px; /* Reduced margin */
             position: relative;
+            flex-basis: 100px; /* Base size, will grow/shrink */
+            flex-grow: 1;     /* Allow items to grow */
+            max-width: 130px; /* Max width to prevent them from becoming too large */
         }
 
         .position-number {
-            width: 40px;
-            height: 40px;
+            width: 35px; /* Slightly smaller */
+            height: 35px; /* Slightly smaller */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px; /* Slightly smaller */
             font-weight: bold;
             color: white;
-            margin-bottom: 10px;
+            margin-bottom: 8px; /* Adjusted margin */
             z-index: 2;
         }
 
@@ -213,26 +219,26 @@
             text-align: center;
             border-top-left-radius: 5px;
             border-top-right-radius: 5px;
-            width: 120px;
-            padding-top: 20px;
+            width: 100%; /* Make block take full width of podium-item */
+            padding-top: 15px; /* Adjusted padding */
             background-color: white;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
 
         .first {
-            height: 180px;
+            height: 160px; /* Adjusted height */
             background-color: rgba(255, 215, 0, 0.1);
             border-top: 4px solid #ffd700;
         }
 
         .second {
-            height: 140px;
+            height: 125px; /* Adjusted height */
             background-color: rgba(192, 192, 192, 0.1);
             border-top: 4px solid #c0c0c0;
         }
 
         .third {
-            height: 100px;
+            height: 90px;  /* Adjusted height */
             background-color: rgba(205, 127, 50, 0.1);
             border-top: 4px solid #cd7f32;
         }
@@ -246,23 +252,90 @@
         }
 
         .user-info i {
-            font-size: 2rem;
-            margin-bottom: 8px;
+            font-size: 1.8rem; /* Slightly smaller */
+            margin-bottom: 6px; /* Adjusted margin */
         }
 
         .username {
             font-weight: bold;
-            margin-bottom: 4px;
-            font-size: 1rem;
-            max-width: 110px;
+            margin-bottom: 3px; /* Adjusted margin */
+            font-size: 0.9rem; /* Slightly smaller */
+            max-width: 100%; /* Allow text to use available space */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .solved-count {
-            font-size: 0.8rem;
+            font-size: 0.75rem; /* Slightly smaller */
             color: #666;
         }
+
+        /* Responsive adjustments for table and podium */
+        @@media (max-width: 768px) {
+            .podium-wrapper {
+                height: auto; /* Allow height to adjust */
+                padding-bottom: 30px; /* Add some bottom padding when stacked */
+            }
+            .podium-item {
+                flex-basis: 80px; /* Smaller base for medium screens */
+                max-width: 110px;
+            }
+            .first { height: 140px; }
+            .second { height: 110px; }
+            .third { height: 80px; }
+
+            .table th, .table td {
+                font-size: 0.85rem; /* Smaller font for table on medium screens */
+                padding: 0.6rem 0.4rem; /* Tighter padding */
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .podium-wrapper {
+                 /* Items might stack if flex-wrap: wrap is active and they don't fit */
+            }
+            .podium-item {
+                flex-basis: 70px; /* Even smaller for small screens */
+                margin: 0 3px;
+                min-width: 60px; /* Prevent from becoming too small */
+            }
+            .position-number {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+            }
+            .user-info i { font-size: 1.5rem; }
+            .username { font-size: 0.8rem; }
+            .solved-count { font-size: 0.7rem; }
+
+            .first { height: 120px; }
+            .second { height: 95px; }
+            .third { height: 70px; }
+            
+            .table th, .table td {
+                font-size: 0.8rem; /* Smaller font for table on small screens */
+                padding: 0.5rem 0.3rem; /* Tighter padding */
+            }
+            /* If you want to force single column for podium on very small screens */
+            /*
+            .podium-wrapper {
+                flex-direction: column;
+                align-items: center;
+                height: auto;
+            }
+            .podium-item {
+                margin-bottom: 15px;
+                width: 80%;
+                max-width: 200px;
+            }
+            .podium-block { height: auto !important; padding-bottom: 15px; }
+            .first, .second, .third { order: 0; } // Reset order if needed
+            .second-place { order: 1; } // Example: if you want specific order when stacked
+            .first-place { order: 0; }
+            .third-place { order: 2; }
+            */
+        }
+
     </style>
 }
