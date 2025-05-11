@@ -25,11 +25,42 @@
     }
     else
     {
-        <li class="nav-item me-2">
-            <a class="btn btn-outline-primary" asp-area="Identity" asp-page="/Account/Login"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
-        </li>
-        <li class="nav-item">
-            <a class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register"><i class="bi bi-person-plus me-1"></i>Sign Up</a>
+        <li class="nav-item auth-buttons">
+            <div class="d-flex flex-column flex-sm-row gap-2">
+                <a class="btn btn-outline-primary auth-btn" asp-area="Identity" asp-page="/Account/Login">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                </a>
+                <a class="btn btn-primary auth-btn" asp-area="Identity" asp-page="/Account/Register">
+                    <i class="bi bi-person-plus me-1"></i>Sign Up
+                </a>
+            </div>
         </li>
     }
 </ul>
+
+<style>
+    /* Ensure buttons have proper spacing on mobile */
+    media (max-width: 576px) {
+        /* Responsive auth buttons styling */
+        .auth-buttons
+        {
+            margin: 0.5rem 0;
+        }
+
+        .auth-btn {
+            width: 100%;
+            border-radius: 20px;
+            padding: 0.5rem 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .auth-buttons .d-flex {
+            gap: 0.75rem !important;
+        }
+    }
+</style>
