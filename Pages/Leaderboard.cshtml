@@ -12,6 +12,54 @@
 </div>
 
 <div class="container my-5">
+    <!-- Top 3 Podium -->
+    @if (Model.Leaderboard.Count >= 1)
+    {
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card shadow-sm">
+                    <div class="card-body py-5">
+                        <div class="podium-wrapper">
+                            <!-- Second Place (Left) -->
+                            <div class="podium-item second-place">
+                                <div class="position-number silver">2</div>
+                                <div class="podium-block second">
+                                    <div class="user-info">                          
+                                        <div class="username">@Model.Leaderboard[1].UserName</div>
+                                        <div class="solved-count">@Model.Leaderboard[1].SolvedCount solved</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- First Place (Middle) -->
+                            <div class="podium-item first-place">
+                                <div class="position-number gold">1</div>
+                                <div class="podium-block first">
+                                    <div class="user-info">                                      
+                                        <div class="username">@Model.Leaderboard[0].UserName</div>
+                                        <div class="solved-count">@Model.Leaderboard[0].SolvedCount solved</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Third Place (Right) -->
+                            <div class="podium-item third-place">
+                                <div class="position-number bronze">3</div>
+                                <div class="podium-block third">
+                                    <div class="user-info">                                       
+                                        <div class="username">@Model.Leaderboard[2].UserName</div>
+                                        <div class="solved-count">@Model.Leaderboard[2].SolvedCount solved</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Leaderboard Table -->
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card shadow-sm">
@@ -87,6 +135,111 @@
         }
         .bg-gradient-primary {
             background: linear-gradient(135deg, #6259ca, #4e36e2);
+        }
+
+        /* Podium Styles */
+        .podium-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 20px;
+            height: 250px;
+        }
+
+        .podium-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .position-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            z-index: 2;
+        }
+
+        .gold {
+            background-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .silver {
+            background-color: #c0c0c0;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+        }
+
+        .bronze {
+            background-color: #cd7f32;
+            box-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+        }
+
+        .podium-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            width: 120px;
+            padding-top: 20px;
+            background-color: white;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .first {
+            height: 180px;
+            background-color: rgba(255, 215, 0, 0.1);
+            border-top: 4px solid #ffd700;
+        }
+
+        .second {
+            height: 140px;
+            background-color: rgba(192, 192, 192, 0.1);
+            border-top: 4px solid #c0c0c0;
+        }
+
+        .third {
+            height: 100px;
+            background-color: rgba(205, 127, 50, 0.1);
+            border-top: 4px solid #cd7f32;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0 5px;
+        }
+
+        .user-info i {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .username {
+            font-weight: bold;
+            margin-bottom: 4px;
+            font-size: 1rem;
+            max-width: 110px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .solved-count {
+            font-size: 0.8rem;
+            color: #666;
         }
     </style>
 }
