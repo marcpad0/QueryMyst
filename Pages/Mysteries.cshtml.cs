@@ -1,5 +1,4 @@
-﻿// filepath: e:\Visual Studio\Progetto\QueryMyst\Pages\Mysteries.cshtml.cs
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +15,7 @@ namespace QueryMyst.Pages
     public class MysteriesModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly ILogger<MysteriesModel> _logger; // Changed logger type
+        private readonly ILogger<MysteriesModel> _logger;
         private readonly ApplicationDbContext _context;
 
         public List<Mystery> Mysteries { get; set; }
@@ -33,6 +32,15 @@ namespace QueryMyst.Pages
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
 
+        // Pagination properties
+        [BindProperty(SupportsGet = true)]
+        public int PageIndex { get; set; } = 1;
+        public int PageSize { get; } = 6;
+        public int TotalPages { get; set; }
+        public int TotalItems { get; set; }
+        public bool HasPreviousPage => PageIndex > 1;
+        public bool HasNextPage => PageIndex < TotalPages;
+
         // Store distinct values for dropdowns (optional, but good practice)
         public List<string> AvailableDifficulties { get; set; } = new();
         public List<string> AvailableCategories { get; set; } = new();
@@ -40,7 +48,7 @@ namespace QueryMyst.Pages
 
         public MysteriesModel(
             UserManager<IdentityUser> userManager,
-            ILogger<MysteriesModel> logger, // Changed logger type
+            ILogger<MysteriesModel> logger,
             ApplicationDbContext context)
         {
             _userManager = userManager;
@@ -58,15 +66,13 @@ namespace QueryMyst.Pages
 
             // Base query - Include Creator and UserMysteries
             var query = _context.Mysteries
-                                .Include(m => m.Creator) // Include the Creator navigation property
+                                .Include(m => m.Creator)
                                 .Include(m => m.UserMysteries)
                                 .AsQueryable();
 
             // Populate filter options before applying filters
-            // Use a separate query for distinct values to avoid potential performance issues with large datasets
             AvailableDifficulties = await _context.Mysteries.Select(m => m.Difficulty).Distinct().OrderBy(d => d).ToListAsync();
             AvailableCategories = await _context.Mysteries.Select(m => m.Category).Distinct().OrderBy(c => c).ToListAsync();
-
 
             // Apply filters
             if (!string.IsNullOrEmpty(SelectedDifficulty) && SelectedDifficulty != "All Difficulties")
@@ -84,10 +90,22 @@ namespace QueryMyst.Pages
                 query = query.Where(m => m.Title.Contains(SearchTerm) || m.Description.Contains(SearchTerm));
             }
 
-            // Execute the filtered query
-            Mysteries = await query.OrderBy(m => m.Title).ToListAsync(); // Example ordering
+            // Get total count for pagination
+            TotalItems = await query.CountAsync();
+            TotalPages = (int)Math.Ceiling(TotalItems / (double)PageSize);
 
-            // Get user's completed mysteries (can be optimized if needed)
+            // Ensure page index is within range
+            if (PageIndex < 1) PageIndex = 1;
+            if (PageIndex > TotalPages && TotalPages > 0) PageIndex = TotalPages;
+
+            // Execute the filtered and paginated query
+            Mysteries = await query
+                .OrderBy(m => m.Title)
+                .Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToListAsync();
+
+            // Get user's completed mysteries
             var userMysteries = await _context.UserMysteries
                 .Where(um => um.UserId == user.Id)
                 .ToDictionaryAsync(um => um.MysteryId, um => um.IsCompleted);
@@ -96,14 +114,13 @@ namespace QueryMyst.Pages
             UserCompletedMysteries = userMysteries;
 
             // Calculate solved counts for the filtered mysteries
-            // UserMysteries are already included, so this calculation is efficient
             MysterySolvedCounts = Mysteries.ToDictionary(
                 m => m.Id,
                 m => m.UserMysteries.Count(um => um.IsCompleted)
             );
 
-            _logger.LogInformation("User {UserName} accessed mysteries page with filters: Difficulty={Difficulty}, Category={Category}, Search={Search}",
-                user.UserName, SelectedDifficulty, SelectedCategory, SearchTerm);
+            _logger.LogInformation("User {UserName} accessed mysteries page. Page {PageIndex} of {TotalPages}. Filters: Difficulty={Difficulty}, Category={Category}, Search={Search}",
+                user.UserName, PageIndex, TotalPages, SelectedDifficulty, SelectedCategory, SearchTerm);
 
             return Page();
         }
