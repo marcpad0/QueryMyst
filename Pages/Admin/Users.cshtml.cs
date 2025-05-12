@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using QueryMyst.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,15 +17,18 @@ namespace QueryMyst.Pages.Admin
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<UsersModel> _logger;
+        private readonly ApplicationDbContext _context; // Added ApplicationDbContext
 
         public UsersModel(
             UserManager<IdentityUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ILogger<UsersModel> logger)
+            ILogger<UsersModel> logger,
+            ApplicationDbContext context) // Added parameter
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _logger = logger;
+            _context = context; // Assigned the context
         }
 
         [BindProperty]
@@ -79,17 +84,33 @@ namespace QueryMyst.Pages.Admin
                 return RedirectToPage();
             }
 
-            // Delete related data
-            var result = await _userManager.DeleteAsync(user);
-            
-            if (result.Succeeded)
+            try
             {
-                _logger.LogInformation("Admin deleted user {Email}", user.Email);
-                StatusMessage = $"User {user.Email} has been deleted.";
+                // First, delete all mysteries created by this user
+                var mysteriesCreatedByUser = await _context.Mysteries
+                    .Where(m => m.CreatorId == UserId)
+                    .ToListAsync();
+                    
+                _context.Mysteries.RemoveRange(mysteriesCreatedByUser);
+                await _context.SaveChangesAsync();
+                
+                // Now delete the user
+                var result = await _userManager.DeleteAsync(user);
+                
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Admin deleted user {Email}", user.Email);
+                    StatusMessage = $"User {user.Email} has been deleted.";
+                }
+                else
+                {
+                    StatusMessage = "Error: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                }
             }
-            else
+            catch (Exception ex)
             {
-                StatusMessage = "Error: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError(ex, "Error deleting user {UserId}", UserId);
+                StatusMessage = $"Error deleting user: {ex.Message}";
             }
 
             return RedirectToPage();
