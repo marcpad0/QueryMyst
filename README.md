@@ -1,7 +1,5 @@
 # QueryMyst
 
-![QueryMyst Logo](wwwroot/images/logo.png)
-
 ## 🔍 Risolvi Misteri con SQL
 
 QueryMyst è una piattaforma educativa interattiva che trasforma l'apprendimento di SQL in un'avventura investigativa. Risolvi misteri e casi utilizzando query SQL, guadagna obiettivi e competi con altri investigatori nella classifica.
