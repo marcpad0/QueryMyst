@@ -25,6 +25,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Add Identity
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>() // Add this line
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // Add services to the container
@@ -72,6 +73,9 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapControllers(); // Add this line
+
+// Initialize admin user
+await InitializeAdminUserAsync(app.Services);
 
 app.Run();
 
@@ -432,4 +436,42 @@ static void SeedAchievements(ApplicationDbContext context)
 
     context.Achievements.AddRange(achievements);
     context.SaveChanges();
+}
+
+// Add this method at the end of the file
+static async Task InitializeAdminUserAsync(IServiceProvider services)
+{
+    using var scope = services.CreateScope();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    // Create Admin role if it doesn't exist
+    string adminRoleName = "Admin";
+    if (!await roleManager.RoleExistsAsync(adminRoleName))
+    {
+        await roleManager.CreateAsync(new IdentityRole(adminRoleName));
+    }
+
+    // Create admin user if they don't exist
+    const string adminEmail = "admin@querymyst.com";
+    const string adminPassword = "Admin123!"; // In production, use a secure password
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    if (adminUser == null)
+    {
+        adminUser = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+
+        await userManager.CreateAsync(adminUser, adminPassword);
+        await userManager.AddToRoleAsync(adminUser, adminRoleName);
+    }
+    else if (!(await userManager.IsInRoleAsync(adminUser, adminRoleName)))
+    {
+        // Ensure the user is in the admin role
+        await userManager.AddToRoleAsync(adminUser, adminRoleName);
+    }
 }

@@ -1,0 +1,241 @@
+@page
+@model QueryMyst.Pages.Admin.UsersModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="hero-section admin-hero">
+    <div class="hero-content">
+        <h1 class="display-5 fw-bold"><i class="bi bi-shield-lock me-2"></i> User Management</h1>
+        <p class="lead">Manage user accounts and roles</p>
+    </div>
+</div>
+
+<div class="container my-4">
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        var statusClass = Model.StatusMessage.StartsWith("Error") ? "danger" : "success";
+        <div class="alert alert-@statusClass alert-dismissible fade show" role="alert">
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i> Users</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>User ID</th>
+                            <th>Roles</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            <tr>
+                                <td>@user.Email</td>
+                                <td><small class="text-muted">@user.Id</small></td>
+                                <td>
+                                    @if (Model.UserRoles.TryGetValue(user.Id, out var roles))
+                                    {
+                                        @foreach (var role in roles)
+                                        {
+                                            <span class="badge bg-info me-1">@role</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary"
+                                                data-bs-toggle="modal" data-bs-target="#editEmailModal"
+                                                data-user-id="@user.Id" data-user-email="@user.Email">
+                                            <i class="bi bi-pencil-square"></i> Email
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary"
+                                                data-bs-toggle="modal" data-bs-target="#editRolesModal"
+                                                data-user-id="@user.Id" data-user-email="@user.Email"
+                                                data-user-roles="@string.Join(",", Model.UserRoles[user.Id])">
+                                            <i class="bi bi-person-badge"></i> Roles
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger"
+                                                data-bs-toggle="modal" data-bs-target="#deleteUserModal"
+                                                data-user-id="@user.Id" data-user-email="@user.Email">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the user <strong id="deleteUserEmail"></strong>?</p>
+                <p class="text-danger"><strong>This action cannot be undone!</strong></p>
+                <p class="small text-muted">Note: This will also delete all related user data including achievements, mysteries solved, etc.</p>
+            </div>
+            <div class="modal-footer">
+                <form method="post" asp-page-handler="Delete">
+                    <input type="hidden" name="UserId" id="deleteUserId" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Email Modal -->
+<div class="modal fade" id="editEmailModal" tabindex="-1" aria-labelledby="editEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editEmailModalLabel">Edit User Email</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" asp-page-handler="EditEmail" id="editEmailForm">
+                    <input type="hidden" name="UserId" id="editEmailUserId" />
+                    <div class="mb-3">
+                        <label for="UserEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="UserEmail" name="UserEmail" required />
+                    </div>
+                    <div class="mb-3 small text-muted">
+                        <p><i class="bi bi-info-circle"></i> Note: Changing the email will also change the username, as they are the same in this application.</p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editEmailForm" class="btn btn-primary">Update Email</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Roles Modal -->
+<div class="modal fade" id="editRolesModal" tabindex="-1" aria-labelledby="editRolesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="editRolesModalLabel">Edit User Roles</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Edit roles for user <strong id="editRolesUserEmail"></strong></p>
+                <form method="post" asp-page-handler="EditRoles" id="editRolesForm">
+                    <input type="hidden" name="UserId" id="editRolesUserId" />
+                    
+                    @foreach (var role in Model.AllRoles)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" value="@role.Name" id="role_@role.Id" name="SelectedRoles">
+                            <label class="form-check-label" for="role_@role.Id">
+                                @role.Name
+                            </label>
+                        </div>
+                    }
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editRolesForm" class="btn btn-primary">Update Roles</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Handle Delete User Modal
+        const deleteUserModal = document.getElementById('deleteUserModal');
+        if (deleteUserModal) {
+            deleteUserModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const userEmail = button.getAttribute('data-user-email');
+                
+                document.getElementById('deleteUserId').value = userId;
+                document.getElementById('deleteUserEmail').textContent = userEmail;
+            });
+        }
+
+        // Handle Edit Email Modal
+        const editEmailModal = document.getElementById('editEmailModal');
+        if (editEmailModal) {
+            editEmailModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const userEmail = button.getAttribute('data-user-email');
+                
+                document.getElementById('editEmailUserId').value = userId;
+                document.getElementById('UserEmail').value = userEmail;
+            });
+        }
+
+        // Handle Edit Roles Modal
+        const editRolesModal = document.getElementById('editRolesModal');
+        if (editRolesModal) {
+            editRolesModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const userEmail = button.getAttribute('data-user-email');
+                const userRoles = button.getAttribute('data-user-roles').split(',');
+                
+                document.getElementById('editRolesUserId').value = userId;
+                document.getElementById('editRolesUserEmail').textContent = userEmail;
+                
+                // Reset all checkboxes
+                document.querySelectorAll('#editRolesForm input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                // Check the roles the user has
+                userRoles.forEach(role => {
+                    if (role) { // Skip empty roles
+                        const checkbox = document.querySelector(`#editRolesForm input[value="${role}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    }
+                });
+            });
+        }
+    </script>
+}
+
+@section Styles {
+    <style>
+        .admin-hero {
+            background: linear-gradient(135deg, #6259ca, #4e36e2);
+            color: black;
+            padding: 2.5rem 0;
+            text-align: center;
+        }
+        
+        #usersTable {
+            font-size: 0.9rem;
+        }
+        
+        .btn-group-sm > .btn {
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+}

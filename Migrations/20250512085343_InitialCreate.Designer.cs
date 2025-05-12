@@ -12,7 +12,7 @@ using QueryMyst.Data;
 namespace QueryMyst.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250504200323_InitialCreate")]
+    [Migration("20250512085343_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -332,7 +332,7 @@ namespace QueryMyst.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FalseClues")
+                    b.Property<string>("ExpectedOutputColumns")
                         .IsRequired()
                         .HasColumnType("text");
 

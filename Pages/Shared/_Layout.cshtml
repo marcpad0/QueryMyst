@@ -144,6 +144,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/About"><i class="bi bi-info-circle me-1"></i> About</a>
                         </li>
+                        <!-- Add Admin link for Admin users -->
+                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Admin/Users"><i class="bi bi-shield-lock me-1"></i> Admin</a>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

@@ -329,7 +329,7 @@ namespace QueryMyst.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FalseClues")
+                    b.Property<string>("ExpectedOutputColumns")
                         .IsRequired()
                         .HasColumnType("text");
 

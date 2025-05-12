@@ -236,11 +236,11 @@ namespace QueryMyst.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MysteryId = table.Column<int>(type: "int", nullable: false),
                     FullDescription = table.Column<string>(type: "text", nullable: false),
-                    FalseClues = table.Column<string>(type: "text", nullable: false),
                     SolutionQuery = table.Column<string>(type: "text", nullable: false),
                     HintText = table.Column<string>(type: "text", nullable: false),
                     DatabaseSchema = table.Column<string>(type: "text", nullable: false),
-                    SampleData = table.Column<string>(type: "text", nullable: false)
+                    SampleData = table.Column<string>(type: "text", nullable: false),
+                    ExpectedOutputColumns = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
