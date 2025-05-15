@@ -17,7 +17,7 @@ QueryMyst è una piattaforma educativa interattiva che trasforma l'apprendimento
 
 - **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
 - **Backend**: ASP.NET Core 6.0, Razor Pages
-- **Database**: Entity Framework Core, SQLite
+- **Database**: Entity Framework Core, SqlServer
 - **Autenticazione**: ASP.NET Identity
 - **Editor SQL**: CodeMirror, Highlight.js
 
